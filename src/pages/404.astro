@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import { NAV_LINKS } from '../consts';
+---
+
+<Base
+  title="Page not found"
+  description="That page does not exist. Find your way back to AMAVI Socials."
+>
+  <section class="section notfound">
+    <div class="container">
+      <p class="label">404</p>
+      <h1 class="display display--lg notfound__title">That page isn’t here.</h1>
+      <p class="lead notfound__lead">
+        It may have moved, or the link may be wrong. Here is everything else.
+      </p>
+
+      <ul class="notfound__links" role="list">
+        <li><a href="/" class="link-action">Home</a></li>
+        {NAV_LINKS.map((link) => (
+          <li><a href={link.href} class="link-action">{link.label}</a></li>
+        ))}
+        <li><a href="/contact/" class="link-action">Work with us</a></li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .notfound { padding-block: var(--space-2xl); }
+  .notfound__title { margin-top: var(--space-s); }
+  .notfound__lead { margin-top: var(--space-m); }
+  .notfound__links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+    margin-top: var(--space-xl);
+  }
+</style>

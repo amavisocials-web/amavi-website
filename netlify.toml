@@ -1,0 +1,26 @@
+# Netlify build configuration.
+#
+# Forms: both forms are static HTML with `data-netlify="true"`, so Netlify's
+# build-time form detection picks them up automatically. No extra config needed.
+# Submissions appear under Site configuration → Forms in the Netlify dashboard.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Match the local toolchain (.nvmrc) so builds are reproducible.
+  NODE_VERSION = "22"
+
+# Static assets are content-hashed by Astro, so they can be cached forever.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"

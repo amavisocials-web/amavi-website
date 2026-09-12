@@ -1,0 +1,73 @@
+---
+/**
+ * Stand-in for photography.
+ *
+ * TODO(client): no approved imagery supplied, and the template preview photos
+ * are not licensed for use. These are type-led colour compositions sized to
+ * the aspect ratio the real photograph will occupy, so swapping one in is a
+ * file replacement — `<Image />` from `astro:assets` with the same ratio — and
+ * shifts nothing on the page.
+ *
+ * These carry no information: every placeholder sits beside text that already
+ * says what it stands for, so they are hidden from assistive tech rather than
+ * announced as "placeholder image" on top of the heading next to them. The
+ * real photographs that replace them DO need descriptive alt text.
+ */
+interface Props {
+  ratio?: '4/5' | '3/4' | '1/1' | '16/9' | '3/2';
+  tone?: 'sage' | 'clay' | 'stone';
+  /** Short word set into the composition. Omit for a plain field. */
+  caption?: string;
+  class?: string;
+}
+const { ratio = '4/5', tone = 'sage', caption, class: className } = Astro.props;
+---
+
+<div
+  class:list={['ph', `ph--${tone}`, className]}
+  style={`--ratio:${ratio}`}
+  aria-hidden="true"
+>
+  {caption && <span class="ph__caption">{caption}</span>}
+</div>
+
+<style>
+  .ph {
+    aspect-ratio: var(--ratio);
+    width: 100%;
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background-color: var(--ph-base);
+    background-image:
+      radial-gradient(120% 90% at 22% 12%, var(--ph-light) 0%, transparent 58%),
+      linear-gradient(152deg, transparent 38%, var(--ph-deep) 100%);
+  }
+
+  .ph--sage  { --ph-base: #7E9186; --ph-light: #C9D3CB; --ph-deep: #33443B; }
+  .ph--clay  { --ph-base: #B8836A; --ph-light: #E4CBB9; --ph-deep: #6E3E2A; }
+  .ph--stone { --ph-base: #A9A295; --ph-light: #DCD5C7; --ph-deep: #575147; }
+
+  /* A single hairline, echoing the section rules, so the block reads as a
+     designed field rather than a failed image. */
+  .ph::after {
+    content: '';
+    position: absolute;
+    inset: var(--space-s);
+    border: 1px solid rgb(255 255 255 / 0.22);
+    pointer-events: none;
+  }
+
+  .ph__caption {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    text-align: center;
+    color: rgb(255 255 255 / 0.92);
+    padding-inline: var(--space-l);
+    max-width: 18ch;
+  }
+</style>

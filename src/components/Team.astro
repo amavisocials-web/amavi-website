@@ -1,0 +1,61 @@
+---
+import Placeholder from './Placeholder.astro';
+
+/**
+ * SCAFFOLDED AND DELIBERATELY UNIMPORTED.
+ *
+ * TODO(client): no team photos or bios supplied. The brief is explicit that an
+ * empty team section beats one filled with stock portraits, so /about ships
+ * without this. When real photos and bios arrive, import it into
+ * src/pages/about.astro and pass `members`. Nothing else needs to change.
+ */
+interface Member {
+  name: string;
+  role: string;
+  bio: string;
+  /** Swap Placeholder for <Image /> once real portraits exist. */
+  tone?: 'sage' | 'clay' | 'stone';
+}
+
+interface Props {
+  members: Member[];
+  heading?: string;
+}
+const { members, heading = 'The team' } = Astro.props;
+---
+
+<section class="section">
+  <div class="container">
+    <h2 class="display display--md">{heading}</h2>
+    <ul class="team" role="list">
+      {members.map((member) => (
+        <li class="team__member">
+          <Placeholder ratio="3/4" tone={member.tone ?? 'sage'} />
+          <h3 class="team__name">{member.name}</h3>
+          <p class="team__role">{member.role}</p>
+          <p class="team__bio">{member.bio}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .team {
+    list-style: none;
+    display: grid;
+    gap: var(--space-l);
+    margin-top: var(--space-xl);
+  }
+  @media (min-width: 40em) {
+    .team { grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+  }
+  .team__name {
+    margin-top: var(--space-s);
+    font-family: var(--font-display);
+    font-size: var(--display-sm);
+    line-height: 1.15;
+  }
+  .team__role { font-size: var(--text-sm); color: var(--accent); margin-top: var(--space-3xs); }
+  .team__bio { font-size: var(--text-sm); color: var(--ink-muted); margin-top: var(--space-xs); }
+</style>

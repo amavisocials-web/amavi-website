@@ -1,0 +1,199 @@
+---
+import Base from '../layouts/Base.astro';
+import Placeholder from '../components/Placeholder.astro';
+import CTA from '../components/CTA.astro';
+import { LOCATION } from '../consts';
+
+/**
+ * TODO(client): no team photos or bios supplied. Per the brief, this page
+ * ships without a team section rather than filling it with stock portraits.
+ * src/components/Team.astro is scaffolded and ready to import when they land.
+ */
+
+/** The process, in the order it actually happens. This one IS a sequence, so
+ *  it is the only numbered list on the site. */
+const process = [
+  {
+    title: 'Sourcing',
+    body: 'We build a longlist from our own creator database and fresh research against your brief. The database is the part that compounds — every programme we run adds to who we know and how they performed.',
+  },
+  {
+    title: 'Vetting',
+    body: 'Before a name reaches you, we check it. Audience quality rather than follower count, real engagement rather than inflated engagement, and whether the creator is a genuine fit for what you sell and how you talk about it.',
+  },
+  {
+    title: 'Outreach',
+    body: 'We approach creators in our name, not yours. That keeps your brand out of the negotiation, and it means a creator saying no costs you nothing.',
+  },
+  {
+    title: 'Agreements',
+    body: 'Every partnership is covered by a written agreement before anything is posted — deliverables, formats, usage rights and timings. This is the step most gifted collaborations skip, and it is the single biggest reason they produce nothing.',
+  },
+  {
+    title: 'Campaign management',
+    body: 'Briefing, content approvals, revisions, scheduling, boosting and collaborator tagging. You see content at approval stage, not for the first time when it appears on somebody’s feed.',
+  },
+  {
+    title: 'Reporting',
+    body: 'Delivery measured against the target that was agreed, content volume, reach — and non-follower reach reported separately, so you can see how much of the audience was genuinely new.',
+  },
+];
+---
+
+<Base
+  title="About"
+  description="AMAVI Socials is a boutique influencer marketing agency in Ireland, running creator partnership programmes end to end — sourcing, vetting, agreements, campaign management and reporting."
+>
+  <section class="section page-head">
+    <div class="container">
+      <h1 class="display display--lg">
+        A creator partnerships agency, not a social media agency.
+      </h1>
+      <p class="lead page-head__lead">
+        The difference matters more than it sounds. One is about what you post. The
+        other is about who will say it for you, and whether they are worth it.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="intro-grid">
+        <div class="prose">
+          <p>
+            AMAVI Socials is a boutique influencer marketing and social media agency
+            working with brands in {LOCATION}. Our roster leans towards healthcare,
+            wellbeing and hospitality, with some direct-to-consumer ecommerce — ADHD Now,
+            Fettle, AutismCare Ireland, Cleaning Doctor Hub and MyIrelandBox among them.
+          </p>
+          <p>
+            We run influencer and partnership programmes end to end. That means sourcing
+            and vetting creators, running outreach, negotiating and issuing creator
+            agreements, managing gifted and paid collaborations, running the campaign,
+            and reporting on what it returned. We keep our own creator database, which is
+            why a shortlist from us starts from evidence rather than from a search.
+          </p>
+          <p>
+            Boutique is a deliberate choice. It means the person who vetted the creator
+            is the person managing the campaign, and it means we take on the number of
+            programmes we can actually run properly.
+          </p>
+        </div>
+
+        <div class="intro-grid__media">
+          <Placeholder ratio="3/4" tone="stone" caption="Based in Ireland" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Process ================= -->
+  <section class="section section--alt">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="display display--md">How a programme actually runs</h2>
+        <p class="meta">
+          Six stages, in this order. The numbering here is real — each step depends on
+          the one before it.
+        </p>
+      </div>
+
+      <ol class="process">
+        {process.map((step, i) => (
+          <li class="process__step">
+            <hr class="rule" />
+            <div class="process__row">
+              <p class="process__number" aria-hidden="true">{String(i + 1).padStart(2, '0')}</p>
+              <h3 class="display display--sm process__title">{step.title}</h3>
+              <p class="process__body">{step.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= Why creator-led ================= -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="display display--md">Why creator-led, and not just posting more</h2>
+      </div>
+
+      <div class="why">
+        <div class="prose">
+          <p>
+            Your own channel reaches the people who already follow you. That is its job,
+            and it does it well. What it cannot do is introduce you to anyone new — every
+            post lands in front of an audience you have already earned.
+          </p>
+          <p>
+            Creator content works differently. It arrives through somebody else’s
+            audience, with that creator’s credibility attached. Across the four
+            programmes we ran between April and August 2026, between 87.7% and 95.9% of
+            the accounts reached were not already following the client.
+          </p>
+          <p>
+            That is the entire case. Not that creator content performs better in the
+            abstract, but that it reaches people your own posting cannot.
+          </p>
+          <p>
+            It also comes with a discipline most social work lacks. A creator agreement
+            names the deliverable, the format, the usage rights and the window. When that
+            is in place, the content arrives. When it is not — which is how most gifted
+            collaborations are run — it frequently does not.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    heading="Start with a conversation."
+    body="Tell us what you sell and who you are trying to reach. We will tell you honestly whether creator partnerships are the right tool for it."
+    primaryLabel="Work with us"
+    primaryHref="/contact/"
+    secondaryLabel="See our work"
+    secondaryHref="/work/"
+  />
+</Base>
+
+<style>
+  .page-head { padding-bottom: var(--space-l); }
+  .page-head__lead { margin-top: var(--space-m); max-width: 46ch; }
+
+  .intro-grid { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 60em) {
+    .intro-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: var(--space-2xl); }
+    .intro-grid__media { position: sticky; top: var(--space-l); }
+  }
+
+  /* ---------- Process ---------- */
+  .process { list-style: none; counter-reset: none; }
+  .process__step:last-child { border-bottom: 1px solid var(--rule); }
+
+  .process__row { display: grid; gap: var(--space-xs); padding-block: var(--space-l); }
+
+  .process__number {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    letter-spacing: var(--tracking-label);
+  }
+
+  .process__body { color: var(--ink-muted); max-width: 58ch; text-wrap: pretty; }
+
+  @media (min-width: 60em) {
+    .process__row {
+      grid-template-columns: 3rem minmax(0, 0.8fr) minmax(0, 1.4fr);
+      column-gap: var(--space-l);
+      align-items: baseline;
+    }
+    .process__number { grid-column: 1; }
+    .process__title { grid-column: 2; }
+    .process__body { grid-column: 3; }
+  }
+
+  .why { max-width: var(--measure); }
+</style>

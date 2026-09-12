@@ -1,0 +1,347 @@
+---
+import { CONTACT_EMAIL } from '../consts';
+
+/**
+ * Creator signup form, rebuilt from the live amavisocials.co page.
+ *
+ * Every field documented on the existing page is preserved here, in the same
+ * groups: identity, channel links, audience size and engagement, niches,
+ * collaboration preference, content formats, per-format rates with a currency
+ * selector, rate notes, audience insights, past collaborations, media kit,
+ * free-text notes and the consent checkbox.
+ *
+ * TODO(client): the consent wording below is a GDPR-appropriate reconstruction.
+ * The brief requires the live page's consent language be preserved verbatim,
+ * and the source file supplied was empty. Copy the exact wording off the live
+ * page into the <span> in the consent block before launch.
+ *
+ * TODO(client): confirm the follower bands and engagement bands below match
+ * the bands used on the live form — the brief names "Nano through Major" but
+ * not the numeric ranges.
+ */
+
+const followerBands = [
+  'Nano — 1,000 to 10,000',
+  'Micro — 10,000 to 50,000',
+  'Mid-tier — 50,000 to 100,000',
+  'Macro — 100,000 to 500,000',
+  'Mega — 500,000 to 1 million',
+  'Major — over 1 million',
+];
+
+const engagementBands = [
+  'Under 1%',
+  '1% – 2%',
+  '2% – 3%',
+  '3% – 5%',
+  '5% – 8%',
+  'Over 8%',
+  'Not sure',
+];
+
+const niches = [
+  'Health and wellbeing', 'Mental health', 'Neurodiversity', 'Parenting and family',
+  'Food and drink', 'Home and lifestyle', 'Travel', 'Fashion and beauty',
+  'Fitness', 'Business and career', 'Comedy and entertainment', 'Other',
+];
+
+const formats = [
+  'Instagram Reel', 'Instagram Story', 'Instagram in-feed post', 'TikTok video',
+  'YouTube video', 'YouTube Short', 'UGC — content only, no posting',
+  'Blog post', 'Other',
+];
+
+const rateFormats = [
+  { id: 'reel', label: 'Instagram Reel' },
+  { id: 'story', label: 'Instagram Story set' },
+  { id: 'tiktok', label: 'TikTok video' },
+  { id: 'youtube', label: 'YouTube video' },
+  { id: 'ugc', label: 'UGC, content only' },
+];
+
+const channels = [
+  { id: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/…' },
+  { id: 'tiktok', label: 'TikTok', placeholder: 'https://tiktok.com/@…' },
+  { id: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@…' },
+  { id: 'x', label: 'X', placeholder: 'https://x.com/…' },
+  { id: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/in/…' },
+  { id: 'blog', label: 'Blog or website', placeholder: 'https://…' },
+  { id: 'other', label: 'Other', placeholder: 'https://…' },
+];
+
+const currencies = ['EUR (€)', 'GBP (£)', 'USD ($)'];
+---
+
+<form
+  class="form creator-form"
+  name="creator-signup"
+  method="POST"
+  action="/creators/"
+  data-netlify="true"
+  netlify-honeypot="preferred-contact-time"
+  data-netlify-form
+>
+  <input type="hidden" name="form-name" value="creator-signup" />
+  <p class="honeypot" aria-hidden="true">
+    <label>Do not fill this in
+      <input name="preferred-contact-time" tabindex="-1" autocomplete="off" /></label>
+  </p>
+
+  <!-- About you -->
+  <fieldset class="fieldset">
+    <legend class="fieldset__legend">About you</legend>
+
+    <div class="field-grid field-grid--2">
+      <div class="field">
+        <label class="field__label" for="cr-name">Full name</label>
+        <input class="field__control" id="cr-name" name="name" type="text"
+               autocomplete="name" required aria-describedby="cr-name-error" />
+        <p class="field__error" id="cr-name-error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="cr-email">Email</label>
+        <input class="field__control" id="cr-email" name="email" type="email"
+               autocomplete="email" required aria-describedby="cr-email-error" />
+        <p class="field__error" id="cr-email-error" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="field-grid field-grid--2">
+      <div class="field">
+        <label class="field__label" for="cr-city">City</label>
+        <input class="field__control" id="cr-city" name="city" type="text"
+               autocomplete="address-level2" required aria-describedby="cr-city-error" />
+        <p class="field__error" id="cr-city-error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="cr-country">Country</label>
+        <input class="field__control" id="cr-country" name="country" type="text"
+               autocomplete="country-name" required aria-describedby="cr-country-error" />
+        <p class="field__error" id="cr-country-error" aria-live="polite"></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <hr class="rule" />
+
+  <!-- Channels -->
+  <fieldset class="fieldset">
+    <legend class="fieldset__legend">Your channels</legend>
+    <p class="fieldset__intro">Add the ones you use. Leave the rest blank.</p>
+
+    <div class="field-grid field-grid--2">
+      {channels.map((channel) => (
+        <div class="field">
+          <label class="field__label" for={`cr-${channel.id}`}>
+            {channel.label} <span class="field__optional">(optional)</span>
+          </label>
+          <input
+            class="field__control"
+            id={`cr-${channel.id}`}
+            name={`link_${channel.id}`}
+            type="url"
+            placeholder={channel.placeholder}
+            aria-describedby={`cr-${channel.id}-error`}
+          />
+          <p class="field__error" id={`cr-${channel.id}-error`} aria-live="polite"></p>
+        </div>
+      ))}
+    </div>
+  </fieldset>
+
+  <hr class="rule" />
+
+  <!-- Audience -->
+  <fieldset class="fieldset">
+    <legend class="fieldset__legend">Your audience</legend>
+
+    <div class="field-grid field-grid--2">
+      <div class="field">
+        <label class="field__label" for="cr-followers">Follower range</label>
+        <select class="field__control" id="cr-followers" name="follower_range" required
+                aria-describedby="cr-followers-hint cr-followers-error">
+          <option value="">Choose a range</option>
+          {followerBands.map((band) => <option value={band}>{band}</option>)}
+        </select>
+        <p class="field__hint" id="cr-followers-hint">Based on your largest channel.</p>
+        <p class="field__error" id="cr-followers-error" aria-live="polite"></p>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="cr-engagement">Engagement rate</label>
+        <select class="field__control" id="cr-engagement" name="engagement_rate"
+                aria-describedby="cr-engagement-hint">
+          <option value="">Choose a range</option>
+          {engagementBands.map((band) => <option value={band}>{band}</option>)}
+        </select>
+        <p class="field__hint" id="cr-engagement-hint">An estimate is fine.</p>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field__label" id="cr-niche-label">Your niches</span>
+      <p class="field__hint">Choose as many as apply.</p>
+      <div class="check-grid" role="group" aria-labelledby="cr-niche-label">
+        {niches.map((niche) => (
+          <label class="check">
+            <input type="checkbox" name="niches" value={niche} />
+            <span>{niche}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="cr-insights">
+        Audience insights <span class="field__optional">(optional)</span>
+      </label>
+      <textarea class="field__control" id="cr-insights" name="audience_insights" rows="4"
+                aria-describedby="cr-insights-hint"></textarea>
+      <p class="field__hint" id="cr-insights-hint">
+        Age split, gender split, top locations — whatever your analytics show.
+      </p>
+    </div>
+  </fieldset>
+
+  <hr class="rule" />
+
+  <!-- Collaborating -->
+  <fieldset class="fieldset">
+    <legend class="fieldset__legend">How you like to work</legend>
+
+    <div class="field">
+      <span class="field__label" id="cr-pref-label">Collaboration preference</span>
+      <div class="check-grid" role="radiogroup" aria-labelledby="cr-pref-label">
+        {['Gifted collaborations', 'Paid collaborations only', 'Open to both'].map((option, i) => (
+          <label class="check">
+            <input type="radio" name="collaboration_preference" value={option}
+                   required={i === 0}
+                   data-error="Please choose how you prefer to collaborate." />
+            <span>{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field__label" id="cr-formats-label">Content formats you create</span>
+      <p class="field__hint">Choose as many as apply.</p>
+      <div class="check-grid" role="group" aria-labelledby="cr-formats-label">
+        {formats.map((format) => (
+          <label class="check">
+            <input type="checkbox" name="content_formats" value={format} />
+            <span>{format}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  </fieldset>
+
+  <hr class="rule" />
+
+  <!-- Rates -->
+  <fieldset class="fieldset">
+    <legend class="fieldset__legend">Your rates</legend>
+    <p class="fieldset__intro">
+      Only fill in the formats you charge for. Leave anything else blank — a rate here
+      is a starting point, not a commitment.
+    </p>
+
+    <div class="field" style="max-width: 16rem;">
+      <label class="field__label" for="cr-currency">Currency</label>
+      <select class="field__control" id="cr-currency" name="rate_currency">
+        {currencies.map((c) => <option value={c}>{c}</option>)}
+      </select>
+    </div>
+
+    <div class="field-grid field-grid--3">
+      {rateFormats.map((format) => (
+        <div class="field">
+          <label class="field__label" for={`cr-rate-${format.id}`}>
+            {format.label} <span class="field__optional">(optional)</span>
+          </label>
+          <input class="field__control" id={`cr-rate-${format.id}`}
+                 name={`rate_${format.id}`} type="text" inputmode="decimal"
+                 placeholder="e.g. 250" />
+        </div>
+      ))}
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="cr-rate-notes">
+        Rate notes <span class="field__optional">(optional)</span>
+      </label>
+      <textarea class="field__control" id="cr-rate-notes" name="rate_notes" rows="3"
+                aria-describedby="cr-rate-notes-hint"></textarea>
+      <p class="field__hint" id="cr-rate-notes-hint">
+        Bundle pricing, usage rights, exclusivity, minimum spend — anything we should know.
+      </p>
+    </div>
+  </fieldset>
+
+  <hr class="rule" />
+
+  <!-- Background -->
+  <fieldset class="fieldset">
+    <legend class="fieldset__legend">Background</legend>
+
+    <div class="field">
+      <label class="field__label" for="cr-past">
+        Past collaborations <span class="field__optional">(optional)</span>
+      </label>
+      <textarea class="field__control" id="cr-past" name="past_collaborations" rows="4"
+                aria-describedby="cr-past-hint"></textarea>
+      <p class="field__hint" id="cr-past-hint">Brands you have worked with before.</p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="cr-mediakit">
+        Media kit link <span class="field__optional">(optional)</span>
+      </label>
+      <input class="field__control" id="cr-mediakit" name="media_kit" type="url"
+             placeholder="https://…" aria-describedby="cr-mediakit-error" />
+      <p class="field__error" id="cr-mediakit-error" aria-live="polite"></p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="cr-notes">
+        Anything else <span class="field__optional">(optional)</span>
+      </label>
+      <textarea class="field__control" id="cr-notes" name="notes" rows="4"></textarea>
+    </div>
+  </fieldset>
+
+  <hr class="rule" />
+
+  <label class="check check--consent">
+    <input type="checkbox" name="consent" value="yes" required
+           aria-describedby="cr-consent-error"
+           data-error="Please tick this box so we can add you to the database." />
+    <span>
+      I consent to AMAVI Socials adding my details to its creator database, and to
+      those details being shared with AMAVI’s clients for the purpose of
+      considering me for collaborations. I can withdraw this consent and ask for my
+      details to be deleted at any time by emailing
+      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. See our
+      <a href="/privacy/">Privacy Policy</a>.
+    </span>
+  </label>
+  <p class="field__error" id="cr-consent-error" aria-live="polite"></p>
+
+  <div class="form__footer">
+    <div class="form__status" data-form-status role="status" aria-live="polite" hidden></div>
+    <div>
+      <button type="submit" class="btn btn--primary" data-submit>Join the network</button>
+    </div>
+  </div>
+</form>
+
+<script>
+  import '../scripts/netlify-form';
+</script>
+
+<style>
+  .creator-form { gap: var(--space-xl); }
+</style>

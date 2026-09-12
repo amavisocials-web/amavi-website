@@ -1,0 +1,41 @@
+---
+import { SITE_NAME, SITE_URL } from '../consts';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path to a share image under /public. Defaults to the site-wide card. */
+  ogImage?: string;
+  /** Appends "| AMAVI Socials" unless the title already stands alone. */
+  standaloneTitle?: boolean;
+}
+
+const { title, description, ogImage = '/og.png', standaloneTitle = false } = Astro.props;
+
+const pageTitle = standaloneTitle ? title : `${title} | ${SITE_NAME}`;
+// Astro builds to directory format (/about/index.html), and @astrojs/sitemap
+// emits trailing slashes to match. Canonical and og:url must agree with both,
+// or every page canonicalises to a URL that only exists as a redirect.
+const path = Astro.url.pathname;
+const canonical = new URL(path.endsWith('/') ? path : `${path}/`, SITE_URL).href;
+const ogImageUrl = new URL(ogImage, SITE_URL).href;
+---
+
+<title>{pageTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:title" content={pageTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content="en_IE" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={pageTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />

@@ -1,0 +1,95 @@
+---
+/**
+ * A service entry. Deliberately not a card: a rule, a heading, a description
+ * and a list. The services are not a sequence, so they carry no numbers.
+ */
+interface Props {
+  title: string;
+  summary: string;
+  includes: string[];
+  provisional?: boolean;
+  id?: string;
+}
+const { title, summary, includes, provisional = false, id } = Astro.props;
+---
+
+<article class="service" id={id}>
+  <hr class="rule" />
+  <div class="service__inner">
+    <div class="service__lead">
+      <h3 class="display display--sm">{title}</h3>
+      {provisional && (
+        /* TODO(client): confirm this is sold as a standalone line item. */
+        <p class="service__flag">Scope to be confirmed</p>
+      )}
+      <p class="service__summary">{summary}</p>
+    </div>
+
+    <div class="service__detail">
+      <h4 class="label service__includes-heading">What’s included</h4>
+      <ul class="service__includes" role="list">
+        {includes.map((item) => <li>{item}</li>)}
+      </ul>
+      <div class="service__body"><slot /></div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .service__inner { display: grid; gap: var(--space-m); padding-block: var(--space-l); }
+
+  .service__summary {
+    margin-top: var(--space-s);
+    color: var(--ink-muted);
+    max-width: 38ch;
+    text-wrap: pretty;
+  }
+
+  .service__flag {
+    display: inline-block;
+    margin-top: var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--accent-alt);
+    border-bottom: 1px solid currentColor;
+  }
+
+  .service__includes-heading { display: block; margin-bottom: var(--space-s); }
+
+  .service__includes {
+    list-style: none;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+  .service__includes li {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    padding-left: 1.1em;
+    position: relative;
+    color: var(--ink);
+  }
+  .service__includes li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.68em;
+    width: 0.5em;
+    height: 1px;
+    background: var(--ink-muted);
+  }
+
+  .service__body {
+    margin-top: var(--space-m);
+    max-width: var(--measure);
+    color: var(--ink-muted);
+  }
+  .service__body :global(p + p) { margin-top: var(--space-s); }
+  .service__body :global(em) { font-style: italic; }
+
+  @media (min-width: 60em) {
+    .service__inner {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: var(--space-xl);
+      padding-block: var(--space-xl);
+    }
+  }
+</style>

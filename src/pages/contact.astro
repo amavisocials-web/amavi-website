@@ -1,0 +1,111 @@
+---
+import Base from '../layouts/Base.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
+import { CONTACT_EMAIL, SOCIALS, RESPONSE_TIME, LOCATION } from '../consts';
+---
+
+<Base
+  title="Work With Us"
+  description="Start a creator partnership programme with AMAVI Socials. Tell us what you sell and who you want to reach, and we will come back within two working days."
+>
+  <section class="section page-head">
+    <div class="container">
+      <h1 class="display display--lg">Work with us.</h1>
+      <p class="lead page-head__lead">
+        Tell us what you sell, who you want in front of it, and what you have tried
+        already. That is enough for us to come back with something useful.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <hr class="rule" />
+      <div class="contact-grid">
+        <div class="contact-form">
+          <h2 class="visually-hidden">Enquiry form</h2>
+          <EnquiryForm />
+        </div>
+
+        <aside class="contact-aside">
+          <div class="contact-block">
+            <h2 class="label">Or just email us</h2>
+            <p class="contact-email">
+              <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            </p>
+          </div>
+
+          <div class="contact-block">
+            <h2 class="label">Response time</h2>
+            <p class="contact-text">{RESPONSE_TIME}</p>
+          </div>
+
+          <div class="contact-block">
+            <h2 class="label">Elsewhere</h2>
+            <ul class="contact-links" role="list">
+              {SOCIALS.map((social) => (
+                <li>
+                  <a href={social.url} target="_blank" rel="noopener noreferrer">{social.name}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="contact-block">
+            <h2 class="label">Where we are</h2>
+            <p class="contact-text">{LOCATION}. We work with brands nationwide.</p>
+          </div>
+
+          <div class="contact-block contact-block--creator">
+            <h2 class="label">Are you a creator?</h2>
+            <p class="contact-text">
+              This form is for brands. If you make content and want to work with the
+              brands we represent, there is a separate form for you.
+            </p>
+            <p class="contact-cta">
+              <a href="/creators/" class="link-action">Join the creator network</a>
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-head { padding-bottom: var(--space-l); }
+  .page-head__lead { margin-top: var(--space-m); max-width: 46ch; }
+
+  .contact-grid { display: grid; gap: var(--space-2xl); padding-top: var(--space-xl); }
+  @media (min-width: 60em) {
+    .contact-grid {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+      gap: var(--space-2xl);
+      align-items: start;
+    }
+    .contact-aside { position: sticky; top: var(--space-l); }
+  }
+
+  .contact-aside { display: grid; gap: var(--space-l); align-content: start; }
+  .contact-block .label { display: block; margin-bottom: var(--space-2xs); }
+
+  .contact-email {
+    font-family: var(--font-display);
+    font-size: var(--display-sm);
+    line-height: 1.2;
+    word-break: break-word;
+  }
+  .contact-email a { text-decoration: none; border-bottom: 1px solid var(--rule); }
+  .contact-email a:hover { border-color: var(--ink); }
+
+  .contact-text { font-size: var(--text-sm); color: var(--ink-muted); max-width: 34ch; }
+
+  .contact-links { list-style: none; display: grid; gap: var(--space-3xs); }
+  .contact-links a { font-size: var(--text-sm); }
+
+  .contact-block--creator {
+    background: var(--paper-alt);
+    padding: var(--space-m);
+  }
+  .contact-cta { margin-top: var(--space-s); }
+</style>

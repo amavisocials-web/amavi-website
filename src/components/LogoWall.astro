@@ -1,0 +1,52 @@
+---
+/**
+ * Client wall.
+ *
+ * TODO(client): no logo files supplied. Set in the display face for now —
+ * when real marks arrive, replace the <li> contents with <Image /> and keep
+ * the row structure. Only clients already public on the related agency site
+ * are listed here; anything awaiting sign-off stays out until confirmed.
+ */
+interface Props {
+  clients: readonly string[];
+  heading?: string;
+}
+const { clients, heading } = Astro.props;
+---
+
+<div class="logo-wall">
+  {heading && <h2 class="label logo-wall__heading">{heading}</h2>}
+  <hr class="rule" />
+  <ul class="logo-wall__list" role="list">
+    {clients.map((client) => <li class="logo-wall__item">{client}</li>)}
+  </ul>
+  <hr class="rule" />
+</div>
+
+<style>
+  .logo-wall__heading { display: block; margin-bottom: var(--space-m); }
+
+  .logo-wall__list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m) var(--space-l);
+    padding-block: var(--space-l);
+  }
+
+  .logo-wall__item {
+    font-family: var(--font-display);
+    font-size: clamp(1.125rem, 0.85rem + 1.1vw, 1.625rem);
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 33.99em) {
+    .logo-wall__list { justify-content: flex-start; gap: var(--space-s) var(--space-m); }
+    .logo-wall__item { white-space: normal; }
+  }
+</style>

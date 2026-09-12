@@ -1,0 +1,137 @@
+---
+/**
+ * Per-client reach. A meter is the right form for a single ratio against a
+ * limit — a percentage of total reach, where the limit is 100%.
+ *
+ * Two rules this display is built around:
+ * - The track runs the full 0-100%. Truncating the axis to flatter a set of
+ *   high percentages would be a misread by construction.
+ * - Views and percentages are never plotted on the same scale. Views are set
+ *   as text; only the percentage gets a mark.
+ *
+ * The non-follower share leads each row because it is the number that
+ * actually argues for creator partnerships: it separates new audience from
+ * an existing following.
+ */
+export interface ReachRow {
+  client: string;
+  /** Formatted exactly as reported — do not re-round. */
+  views: string;
+  nonFollower: number;
+}
+
+interface Props {
+  rows: ReachRow[];
+  caption?: string;
+}
+const { rows, caption } = Astro.props;
+---
+
+<figure class="reach">
+  <ul class="reach__rows" role="list">
+    {rows.map((row) => (
+      <li class="reach__row">
+        <div class="reach__head">
+          <h3 class="reach__client">{row.client}</h3>
+          <p class="reach__value">
+            <span class="reach__pct">{row.nonFollower}%</span>
+            <span class="reach__pct-label">of accounts reached were not already following</span>
+          </p>
+        </div>
+
+        <div class="reach__meter" aria-hidden="true">
+          <div class="reach__fill" style={`--w:${row.nonFollower}%`}></div>
+        </div>
+
+        <p class="reach__views">
+          <span class="reach__views-value">{row.views}</span> views on the client
+          account, trailing 90 days
+        </p>
+      </li>
+    ))}
+  </ul>
+
+  {caption && <figcaption class="reach__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .reach { margin: 0; }
+  .reach__rows { list-style: none; }
+
+  .reach__row { padding-block: var(--space-m); border-top: 1px solid var(--rule); }
+  .reach__row:last-child { border-bottom: 1px solid var(--rule); }
+
+  .reach__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-s);
+    margin-bottom: var(--space-s);
+  }
+
+  .reach__client {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  .reach__value { display: flex; align-items: baseline; gap: 0.5em; flex-wrap: wrap; }
+  .reach__pct {
+    font-size: var(--figure-sm);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+  .reach__pct-label {
+    font-size: var(--text-sm);
+    color: var(--ink-muted);
+    max-width: 26ch;
+  }
+
+  /* The unfilled track is a lighter step of the fill's own ramp, so the
+     state reads across the whole bar rather than only where it is filled. */
+  .reach__meter { height: 14px; background: var(--accent-wash); position: relative; }
+  .reach__fill {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: var(--w);
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .reach__views {
+    margin-top: var(--space-s);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--ink-muted);
+  }
+  .reach__views-value { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .reach__caption {
+    margin-top: var(--space-m);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--ink-muted);
+    max-width: 62ch;
+  }
+
+  @media (min-width: 48em) {
+    .reach__row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      column-gap: var(--space-xl);
+      align-items: center;
+    }
+    .reach__head { grid-column: 1; grid-row: 1 / span 2; display: block; margin-bottom: 0; align-self: center; }
+    .reach__value { margin-top: var(--space-3xs); display: block; }
+    .reach__pct-label { display: block; margin-top: var(--space-3xs); }
+    .reach__meter { grid-column: 2; grid-row: 1; }
+    .reach__views { grid-column: 2; grid-row: 2; margin-top: var(--space-xs); }
+  }
+</style>

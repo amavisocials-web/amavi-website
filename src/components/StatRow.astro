@@ -1,0 +1,82 @@
+---
+/**
+ * A KPI row of stat tiles. The right form for a handful of headline numbers —
+ * a grouped bar chart of unrelated measures would be a misread waiting to
+ * happen, since these figures share no scale.
+ *
+ * Every figure here comes from AMAVI's own cumulative creator-programme
+ * report, April to August 2026. Do not add, round or extrapolate.
+ */
+export interface Stat {
+  value: string;
+  label: string;
+  /** Scoping note. Used where a figure would otherwise overstate its reach. */
+  note?: string;
+}
+
+interface Props {
+  stats: Stat[];
+  /** 3 reads calmer on a marketing page; 2 suits a narrow column. */
+  columns?: 2 | 3;
+}
+const { stats, columns = 3 } = Astro.props;
+---
+
+<ul class="stat-row" data-columns={columns} role="list">
+  {stats.map((stat) => (
+    <li class="stat-tile">
+      <p class="stat-tile__value">{stat.value}</p>
+      <p class="stat-tile__label">{stat.label}</p>
+      {stat.note && <p class="stat-tile__note">{stat.note}</p>}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .stat-row {
+    list-style: none;
+    display: grid;
+    gap: 0;
+    /* Hairline rules do the separating — no cards, no shadows. */
+    border-top: 1px solid var(--rule);
+  }
+
+  .stat-tile {
+    padding-block: var(--space-m);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .stat-tile__value {
+    font-family: var(--font-body);
+    font-size: var(--figure-md);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: proportional-nums;
+    color: var(--ink);
+  }
+
+  .stat-tile__label {
+    margin-top: var(--space-xs);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--ink);
+    max-width: 28ch;
+    text-wrap: pretty;
+  }
+
+  .stat-tile__note {
+    margin-top: var(--space-2xs);
+    font-size: var(--text-xs);
+    line-height: 1.45;
+    color: var(--ink-muted);
+    max-width: 32ch;
+  }
+
+  @media (min-width: 34em) {
+    .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-l); }
+  }
+  @media (min-width: 60em) {
+    .stat-row[data-columns='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+</style>

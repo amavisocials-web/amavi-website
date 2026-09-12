@@ -1,0 +1,14 @@
+# ── PRE-LAUNCH ────────────────────────────────────────────────────────────
+# Active while the site is under review on the Netlify subdomain. Keeps the
+# preview out of search results so it never competes with the live domain.
+User-agent: *
+Disallow: /
+
+# ── PRODUCTION ────────────────────────────────────────────────────────────
+# LAUNCH STEP: delete the two lines above and uncomment the three below, at
+# the same time as the custom domain is connected. Nothing else changes.
+#
+# User-agent: *
+# Allow: /
+#
+# Sitemap: https://www.amavisocials.co/sitemap-index.xml

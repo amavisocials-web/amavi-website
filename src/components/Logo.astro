@@ -1,0 +1,33 @@
+---
+/**
+ * Temporary wordmark, set in the display face.
+ *
+ * TODO(client): no logo files supplied. When the brand handover lands, replace
+ * the markup below with the supplied mark. This file and the token block in
+ * src/styles/global.css are the only two places that should need to change.
+ */
+interface Props {
+  /** `sm` is the header lockup; `lg` is the footer. */
+  size?: 'sm' | 'lg';
+}
+const { size = 'sm' } = Astro.props;
+---
+
+<span class:list={['wordmark', `wordmark--${size}`]} aria-hidden="true">Amavi</span>
+<span class="visually-hidden">AMAVI Socials</span>
+
+<style>
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: var(--tracking-wordmark);
+    line-height: 1;
+    color: var(--ink);
+    /* Letterspacing adds trailing space after the last letter; pull it back so
+       the mark optically aligns with the container edge. */
+    margin-right: calc(var(--tracking-wordmark) * -1);
+    display: inline-block;
+  }
+  .wordmark--sm { font-size: 1.5rem; }
+  .wordmark--lg { font-size: clamp(2.5rem, 1.5rem + 4vw, 4.5rem); }
+</style>

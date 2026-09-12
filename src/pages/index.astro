@@ -1,0 +1,316 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import StatCard from '../components/StatCard.astro';
+import StatRow from '../components/StatRow.astro';
+import LogoWall from '../components/LogoWall.astro';
+import Placeholder from '../components/Placeholder.astro';
+import CTA from '../components/CTA.astro';
+import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS } from '../consts';
+
+const services = (await getCollection('services')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+/** TODO(client): confirm The Humble Fishmonger and Beyond BMI before adding. */
+const clients = ['ADHD Now', 'Fettle', 'AutismCare Ireland', 'Cleaning Doctor Hub', 'MyIrelandBox'];
+
+/**
+ * Figures from AMAVI's cumulative creator-programme report, April to August
+ * 2026, across ADHD Now, Fettle, Cleaning Doctor and AutismCare. Reproduced
+ * exactly as reported — nothing here is rounded, combined or extrapolated.
+ */
+const headlineStats = [
+  { value: '61', label: 'All-time active and completed creator partnerships' },
+  { value: '1,100', label: 'Influencers sourced across four clients' },
+  { value: '115+', label: 'Content pieces delivered' },
+  {
+    value: '1.4M',
+    label: 'Combined views, approximately',
+    note: 'Scoped to the highlighted case-study content only, not total client reach.',
+  },
+  { value: '92%', label: 'Net-new audience reach' },
+  { value: '49', label: 'Partnerships built across four brands in five months' },
+];
+
+const situations = [
+  {
+    quote: 'We don’t know which creators are worth paying.',
+    answer:
+      'We vet before you ever see a name — audience quality, engagement, and whether they are a fit for what you actually sell. The shortlist starts from evidence, not a hashtag search.',
+  },
+  {
+    quote: 'Our gifted collabs never produce the content we were promised.',
+    answer:
+      'Because nothing was written down, so nothing was owed. We run gifting on a written agreement naming the deliverable, the format and the posting window — the same as paid work.',
+  },
+  {
+    quote: 'We can’t tell what the last campaign actually returned.',
+    answer:
+      'We report delivery against the target that was agreed, and we separate new audience from your existing following, so you can see whether the campaign reached anyone you did not already have.',
+  },
+  {
+    quote: 'We don’t have time to manage twenty creator relationships.',
+    answer:
+      'That is the job. Outreach, negotiation, agreements, briefing, approvals, scheduling and chasing all sit with us. You see content at approval stage.',
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  email: CONTACT_EMAIL,
+  address: { '@type': 'PostalAddress', addressCountry: 'IE' },
+  areaServed: 'IE',
+  sameAs: SOCIALS.map((s) => s.url),
+};
+---
+
+<Base
+  title="Influencer Marketing Agency Ireland"
+  description={SITE_DESCRIPTION}
+  schema={schema}
+>
+  <!-- ================= Hero ================= -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <h1 class="display display--lg enter enter--1">
+          Creator partnerships that reach the people you <em>don’t</em> already have.
+        </h1>
+        <p class="lead hero__lead enter enter--2">
+          AMAVI Socials is an influencer marketing agency in Ireland. We source and vet
+          the creators, handle the agreements, run the campaign, and report on what it
+          returned.
+        </p>
+        <div class="hero__actions enter enter--3">
+          <a href="/contact/" class="btn btn--primary">Work with us</a>
+          <a href="/creators/" class="btn btn--secondary">Join the network</a>
+        </div>
+      </div>
+
+      <div class="hero__media enter enter--2">
+        <Placeholder ratio="4/5" tone="sage" />
+        <div class="hero__stat">
+          <StatCard
+            value="49"
+            valueLabel="Creator partnerships delivered against a target of 40"
+            secondaryValue="92%"
+            secondaryLabel="of that reach was net new"
+            footnote="Across four client programmes, April to August 2026."
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Clients ================= -->
+  <section class="section section--tight">
+    <div class="container">
+      <LogoWall clients={clients} heading="Working with" />
+    </div>
+  </section>
+
+  <!-- ================= Situations ================= -->
+  <section class="section section--alt">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="display display--md">
+          Most brands arrive with one of these four sentences.
+        </h2>
+        <p class="meta">
+          None of them are creator problems. They are process problems, and each one has
+          a specific answer.
+        </p>
+      </div>
+
+      <ul class="situations" role="list">
+        {situations.map((item) => (
+          <li class="situation">
+            <hr class="rule" />
+            <blockquote class="situation__quote">
+              <p>{`“${item.quote}”`}</p>
+            </blockquote>
+            <p class="situation__answer">{item.answer}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= Services ================= -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="display display--md">What we do</h2>
+        <p class="meta">
+          Partnership programmes end to end, or the individual pieces where you already
+          have the rest covered.
+        </p>
+      </div>
+
+      <ul class="services-list" role="list">
+        {services.map((service) => (
+          <li class="services-list__item">
+            <hr class="rule" />
+            <div class="services-list__row">
+              <h3 class="display display--sm">{service.data.title}</h3>
+              <p class="services-list__summary">{service.data.summary}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      <p class="services-list__more">
+        <a href="/services/" class="link-action">See what each one includes</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= Proof ================= -->
+  <section class="section section--alt">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="display display--md">The numbers behind that.</h2>
+        <p class="meta">
+          Taken from our own cumulative creator-programme reporting across four client
+          accounts — ADHD Now, Fettle, Cleaning Doctor and AutismCare — covering April to
+          August 2026.
+        </p>
+      </div>
+
+      <StatRow stats={headlineStats} columns={3} />
+
+      <div class="proof__note">
+        <p class="prose">
+          The figure worth pausing on is the last one on the reach page: across these
+          programmes, <strong>92% of the audience reached was not already following the
+          brand</strong>. That is the whole argument for creator partnerships over
+          posting more often on your own channel. An existing following is people you
+          have already reached. Creator content is how you reach the rest.
+        </p>
+        <p class="proof__link">
+          <a href="/work/" class="link-action">See the full delivery figures</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <CTA
+    heading="Tell us what you’re trying to reach."
+    body="Send us what you sell and who you want in front of it. We’ll come back with whether creator partnerships are the right answer — and what it would take."
+    primaryLabel="Start a project"
+    primaryHref="/contact/"
+    secondaryLabel="I’m a creator"
+    secondaryHref="/creators/"
+  />
+</Base>
+
+<style>
+  /* ---------- Hero: unequal columns, type left, image right ---------- */
+  .hero { padding-block: var(--space-l) var(--section-y); }
+
+  .hero__inner { display: grid; gap: var(--space-xl); align-items: center; }
+
+  .hero__lead { margin-top: var(--space-m); max-width: 42ch; }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    margin-top: var(--space-l);
+  }
+
+  .hero__media { position: relative; }
+
+  /* The stat card overlaps the image — the one place proof interrupts the
+     composition. It sits inside the container on mobile so it never clips.
+     The placeholder is positioned, so the card needs its own stacking position
+     to paint above it rather than behind. */
+  .hero__stat {
+    position: relative;
+    z-index: 1;
+    margin-top: calc(var(--space-l) * -1);
+    margin-left: var(--space-s);
+  }
+
+  @media (min-width: 60em) {
+    .hero { padding-block: var(--space-xl) var(--section-y); }
+    .hero__inner {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      gap: var(--space-2xl);
+    }
+    .hero__stat {
+      position: absolute;
+      z-index: 1;
+      left: calc(var(--space-xl) * -1);
+      bottom: var(--space-xl);
+      margin: 0;
+    }
+  }
+
+  /* ---------- Situations ---------- */
+  .situations { list-style: none; display: grid; gap: 0; }
+
+  .situation { padding-block: var(--space-l); }
+  .situation:last-child { border-bottom: 1px solid var(--rule); }
+
+  .situation__quote { margin: 0; }
+  .situation__quote p {
+    font-family: var(--font-display);
+    font-size: var(--display-sm);
+    line-height: 1.15;
+    letter-spacing: var(--tracking-display);
+    color: var(--ink);
+    max-width: 24ch;
+    margin-top: var(--space-m);
+  }
+
+  .situation__answer {
+    margin-top: var(--space-s);
+    color: var(--ink-muted);
+    max-width: 52ch;
+    text-wrap: pretty;
+  }
+
+  @media (min-width: 60em) {
+    .situation {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      column-gap: var(--space-xl);
+    }
+    .situation .rule { grid-column: 1 / -1; }
+    .situation__quote p { margin-top: var(--space-l); }
+    .situation__answer { margin-top: var(--space-l); }
+  }
+
+  /* ---------- Services list ---------- */
+  .services-list { list-style: none; }
+  .services-list__item:last-child { border-bottom: 1px solid var(--rule); }
+
+  .services-list__row {
+    display: grid;
+    gap: var(--space-xs);
+    padding-block: var(--space-m);
+  }
+  .services-list__summary { color: var(--ink-muted); max-width: 56ch; text-wrap: pretty; }
+
+  @media (min-width: 60em) {
+    .services-list__row {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      column-gap: var(--space-xl);
+      align-items: baseline;
+      padding-block: var(--space-l);
+    }
+  }
+
+  .services-list__more { margin-top: var(--space-l); }
+
+  /* ---------- Proof ---------- */
+  .proof__note { margin-top: var(--space-xl); }
+  .proof__note strong { font-weight: 600; }
+  .proof__link { margin-top: var(--space-m); }
+</style>

@@ -1,0 +1,189 @@
+---
+/**
+ * Delivery against target, one row per client — a bullet-style bar with the
+ * agreed target as a reference marker.
+ *
+ * Form notes:
+ * - One hue. The bar carries magnitude; the tick carries the commitment. A bar
+ *   running past its tick reads as "beyond target" without a second colour.
+ * - Every value is set as text in the row, so nothing is encoded in colour
+ *   alone and the figure needs no separate table view.
+ * - No gridlines: direct labels come before gridlines, and every bar is
+ *   already labelled.
+ * - Values sit in their own column rather than at the bar tip, so a long bar
+ *   can never clip or collide with its own label.
+ */
+export interface DeliveryRow {
+  client: string;
+  target: number;
+  delivered: number;
+  outcome: string;
+  /** Set where delivery sits below target, so the outcome reads honestly. */
+  belowTarget?: boolean;
+}
+
+interface Props {
+  rows: DeliveryRow[];
+  /** Domain maximum. Keep above the largest value so bars have headroom. */
+  scaleMax?: number;
+  caption?: string;
+}
+const { rows, scaleMax = 25, caption } = Astro.props;
+const pct = (n: number) => `${((n / scaleMax) * 100).toFixed(2)}%`;
+---
+
+<figure class="delivery">
+  <div class="delivery__key" aria-hidden="true">
+    <span class="delivery__key-item">
+      <span class="delivery__key-bar"></span>Partnerships delivered
+    </span>
+    <span class="delivery__key-item">
+      <span class="delivery__key-tick"></span>Agreed target
+    </span>
+  </div>
+
+  <ul class="delivery__rows" role="list">
+    {rows.map((row) => (
+      <li class="delivery__row">
+        <div class="delivery__head">
+          <h3 class="delivery__client">{row.client}</h3>
+          <p class="delivery__value">
+            <span class="delivery__delivered">{row.delivered}</span>
+            <span class="delivery__target">of {row.target} target</span>
+          </p>
+        </div>
+
+        <div class="delivery__track" aria-hidden="true">
+          <div class="delivery__bar" style={`--w:${pct(row.delivered)}`}></div>
+          <div class="delivery__tick" style={`--x:${pct(row.target)}`}></div>
+        </div>
+
+        <p class:list={['delivery__outcome', row.belowTarget && 'is-below']}>{row.outcome}</p>
+      </li>
+    ))}
+  </ul>
+
+  {caption && <figcaption class="delivery__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .delivery { margin: 0; }
+
+  /* --- Key --- */
+  .delivery__key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+    padding-bottom: var(--space-m);
+    font-size: var(--text-sm);
+    color: var(--ink-muted);
+  }
+  .delivery__key-item { display: inline-flex; align-items: center; gap: 0.5em; }
+  .delivery__key-bar {
+    width: 14px; height: 10px;
+    background: var(--accent);
+    border-radius: 0 2px 2px 0;
+  }
+  .delivery__key-tick {
+    width: 2px; height: 14px;
+    background: var(--ink);
+  }
+
+  /* --- Rows --- */
+  .delivery__rows { list-style: none; }
+  .delivery__row { padding-block: var(--space-m); border-top: 1px solid var(--rule); }
+  .delivery__row:last-child { border-bottom: 1px solid var(--rule); }
+
+  .delivery__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2xs) var(--space-s);
+    margin-bottom: var(--space-s);
+  }
+
+  .delivery__client {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  .delivery__value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+    /* A column of figures read down the page, so align the digits. */
+    font-variant-numeric: tabular-nums;
+  }
+  .delivery__delivered {
+    font-size: var(--figure-sm);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .delivery__target { font-size: var(--text-sm); color: var(--ink-muted); }
+
+  /* --- Chart --- */
+  .delivery__track {
+    position: relative;
+    height: 14px;                 /* bars stay thin; the slot keeps its air */
+    background: var(--accent-wash);
+  }
+  .delivery__bar {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: var(--w);
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;   /* rounded data-end, square at the baseline */
+  }
+  .delivery__tick {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    left: var(--x);
+    width: 2px;
+    background: var(--ink);
+    transform: translateX(-1px);
+  }
+
+  .delivery__outcome {
+    margin-top: var(--space-s);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    color: var(--accent);
+    max-width: 52ch;
+  }
+  .delivery__outcome.is-below { color: var(--ink-muted); }
+
+  .delivery__caption {
+    margin-top: var(--space-m);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+    color: var(--ink-muted);
+    max-width: 62ch;
+  }
+
+  @media (min-width: 48em) {
+    .delivery__row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      column-gap: var(--space-xl);
+      align-items: center;
+    }
+    .delivery__head { margin-bottom: 0; display: block; }
+    .delivery__value { margin-top: var(--space-3xs); }
+    .delivery__track { grid-column: 2; grid-row: 1; }
+    .delivery__outcome {
+      grid-column: 2;
+      grid-row: 2;
+      margin-top: var(--space-xs);
+    }
+    .delivery__head { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
+  }
+</style>

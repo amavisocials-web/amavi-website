@@ -1,0 +1,234 @@
+---
+/**
+ * TODO(client): this policy is accurate to what the site actually does, but a
+ * published privacy policy needs the registered legal entity name, registered
+ * address, and a decision on whether a Data Protection Officer is named. Those
+ * are marked inline below. Have it reviewed before launch — the site collects
+ * personal data from creators and brands in the EU, so GDPR applies.
+ */
+import Base from '../layouts/Base.astro';
+import { CONTACT_EMAIL, SITE_NAME } from '../consts';
+
+const updated = 'September 2026';
+---
+
+<Base
+  title="Privacy Policy"
+  description="How AMAVI Socials collects, uses and stores personal data from brands and creators, and the rights you have under GDPR."
+>
+  <section class="section page-head">
+    <div class="container container--narrow">
+      <h1 class="display display--lg">Privacy Policy</h1>
+      <p class="meta page-head__meta">Last updated: {updated}</p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container container--narrow">
+      <div class="policy">
+        <p class="policy__lead">
+          This policy explains what personal data {SITE_NAME} collects through this
+          website, why we collect it, how long we keep it, and what you can ask us to do
+          with it. It applies to both brands making an enquiry and creators joining our
+          network.
+        </p>
+
+        <h2>Who we are</h2>
+        <p>
+          {SITE_NAME} is an influencer marketing agency operating in Ireland. For the
+          purposes of the General Data Protection Regulation (GDPR) we are the data
+          controller for the information described below.
+        </p>
+        <p class="policy__todo">
+          [TODO(client): insert the registered legal entity name, company registration
+          number and registered address. A published policy needs all three.]
+        </p>
+        <p>
+          You can reach us about anything in this policy at
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        </p>
+
+        <h2>What we collect, and why</h2>
+
+        <h3>If you make an enquiry as a brand</h3>
+        <p>
+          Through the form on our Work With Us page we collect your name, company, email
+          address, the service you are interested in, an optional budget range, and
+          whatever you write in the message field.
+        </p>
+        <p>
+          We use this solely to respond to your enquiry and to discuss working together.
+          Our lawful basis is your consent, given when you tick the box on the form. We
+          do not add enquiry contacts to a mailing list.
+        </p>
+
+        <h3>If you join the creator network</h3>
+        <p>
+          Through the form on our Creators page we collect your name, email address, city
+          and country, links to your social channels, your follower range, your
+          engagement rate, your niches, your collaboration preference, the content
+          formats you produce, your rates and any notes on them, any audience insights
+          you choose to share, details of past collaborations, a media kit link, and any
+          other notes you add.
+        </p>
+        <p>
+          We use this to maintain our creator database and to match creators to client
+          briefs. <strong>We share these details with our clients</strong> when we are
+          considering you for a collaboration — that is the purpose of the database, and
+          it is what the consent checkbox on the form covers. Our lawful basis is your
+          consent.
+        </p>
+
+        <h2>How long we keep it</h2>
+        <p>
+          Brand enquiries are kept for as long as we are in active conversation with you,
+          and for a reasonable period afterwards in case the conversation resumes.
+        </p>
+        <p>
+          Creator details are kept in our database until you ask us to remove them. We do
+          not set an automatic expiry, because the value of the database to you is that
+          we can come to you when something fits, potentially years after you sign up.
+          You can ask us to delete your details at any time.
+        </p>
+        <p class="policy__todo">
+          [TODO(client): if you want a fixed retention period instead — for example,
+          reviewing creator records every 24 months — state it here.]
+        </p>
+
+        <h2>Who we share it with</h2>
+        <ul>
+          <li>
+            <strong>Our clients.</strong> Creator details are shared with the brands we
+            represent, for the purpose of considering you for collaborations.
+          </li>
+          <li>
+            <strong>Netlify.</strong> This site is hosted by Netlify, and both forms are
+            processed through Netlify Forms. Form submissions pass through and are stored
+            on their infrastructure.
+          </li>
+        </ul>
+        <p>
+          We do not sell personal data, and we do not share it with anyone else for their
+          own marketing purposes.
+        </p>
+        <p class="policy__todo">
+          [TODO(client): if an analytics tool, CRM or email platform is added, list it
+          here. If a tool transfers data outside the EEA, that transfer and its safeguard
+          must be named.]
+        </p>
+
+        <h2>Cookies</h2>
+        <p>
+          This site sets no cookies of its own and uses no advertising or tracking
+          cookies. Because nothing non-essential is set, no cookie banner is shown.
+        </p>
+        <p class="policy__todo">
+          [TODO(client): analytics has not been added yet. If GA4 is chosen it sets
+          cookies and a consent banner becomes legally required before it loads. A
+          cookieless tool such as Plausible would not change this section.]
+        </p>
+
+        <h2>Your rights</h2>
+        <p>Under GDPR you have the right to:</p>
+        <ul>
+          <li>ask for a copy of the personal data we hold about you;</li>
+          <li>ask us to correct anything inaccurate;</li>
+          <li>ask us to delete your data;</li>
+          <li>ask us to restrict how we use it;</li>
+          <li>ask us to transfer it to you or another provider;</li>
+          <li>object to our use of it; and</li>
+          <li>
+            withdraw your consent at any time, which stops any further use without
+            affecting what was lawful beforehand.
+          </li>
+        </ul>
+        <p>
+          To exercise any of these, email
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. We will respond within
+          one month.
+        </p>
+
+        <h2>Complaints</h2>
+        <p>
+          If you believe we have handled your data improperly, you can complain to the
+          Irish Data Protection Commission at
+          <a href="https://www.dataprotection.ie" target="_blank" rel="noopener noreferrer">dataprotection.ie</a>.
+          We would rather you came to us first so we can put it right.
+        </p>
+
+        <h2>Changes to this policy</h2>
+        <p>
+          If we change how we handle personal data we will update this page and change
+          the date at the top.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-head { padding-bottom: var(--space-s); }
+  .page-head__meta { margin-top: var(--space-s); }
+
+  .policy { max-width: var(--measure); }
+
+  .policy__lead {
+    font-size: var(--text-lead);
+    line-height: 1.45;
+    color: var(--ink);
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid var(--rule);
+    text-wrap: pretty;
+  }
+
+  .policy h2 {
+    font-family: var(--font-display);
+    font-size: var(--display-sm);
+    line-height: 1.15;
+    letter-spacing: var(--tracking-display);
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-s);
+  }
+
+  .policy h3 {
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin-top: var(--space-l);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .policy p { color: var(--ink-muted); }
+  .policy p + p { margin-top: var(--space-s); }
+  .policy strong { color: var(--ink); font-weight: 600; }
+  .policy a { color: var(--accent-alt); }
+
+  .policy ul {
+    margin-top: var(--space-s);
+    padding-left: 0;
+    list-style: none;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+  .policy li {
+    color: var(--ink-muted);
+    padding-left: 1.1em;
+    position: relative;
+  }
+  .policy li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0.75em;
+    width: 0.5em; height: 1px;
+    background: var(--ink-muted);
+  }
+
+  /* Visible on purpose: these are unresolved and must not ship unnoticed. */
+  .policy__todo {
+    margin-top: var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    background: var(--paper-deep);
+    border-left: 3px solid var(--accent-alt);
+    font-size: var(--text-sm);
+    color: var(--ink) !important;
+  }
+</style>

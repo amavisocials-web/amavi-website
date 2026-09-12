@@ -1,0 +1,176 @@
+---
+import Logo from './Logo.astro';
+import { NAV_LINKS } from '../consts';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrent = (href: string) => path === href;
+---
+
+<!-- Runs during parse: marks the nav collapsible before it is ever painted,
+     so there is no flash of the expanded list on mobile. -->
+<script is:inline>document.documentElement.dataset.navReady = 'true';</script>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand" aria-label="AMAVI Socials — home">
+      <Logo />
+    </a>
+
+    <!--
+      JS justification: the only script on the site. A disclosure button with a
+      real aria-expanded state is the accessible pattern for a mobile menu; the
+      CSS-only checkbox alternative lies to screen readers. ~20 lines, inlined,
+      and the nav is fully usable without it (links render in the DOM and the
+      panel is only hidden at mobile widths once the script upgrades it).
+    -->
+    <button
+      class="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="primary-nav"
+      data-nav-toggle
+    >
+      <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span></span>
+      <span class="visually-hidden">Menu</span>
+    </button>
+
+    <nav id="primary-nav" class="nav" aria-label="Primary" data-nav>
+      <ul class="nav__list">
+        {NAV_LINKS.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="nav__link"
+              aria-current={isCurrent(link.href) ? 'page' : undefined}
+            >{link.label}</a>
+          </li>
+        ))}
+        <li class="nav__cta">
+          <a href="/contact/" class="btn btn--primary">Work with us</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <hr class="rule" />
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+
+  if (toggle && nav) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      nav.dataset.open = String(open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    nav.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .site-header { background: var(--paper); }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-m);
+    padding-block: var(--space-m);
+  }
+
+  .brand {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* --- Toggle (mobile only) --- */
+  .nav-toggle {
+    display: none;
+    position: relative;
+    z-index: 60; /* above the .nav overlay, so it can also close it */
+    cursor: pointer;
+    padding: var(--space-2xs);
+    margin-right: calc(var(--space-2xs) * -1);
+  }
+  .nav-toggle__bars {
+    display: grid;
+    gap: 5px;
+    width: 26px;
+  }
+  .nav-toggle__bars span {
+    height: 1px;
+    background: var(--ink);
+    transition: transform var(--dur) var(--ease);
+  }
+  [aria-expanded='true'] .nav-toggle__bars span:first-child { transform: translateY(3px) rotate(45deg); }
+  [aria-expanded='true'] .nav-toggle__bars span:last-child { transform: translateY(-3px) rotate(-45deg); }
+
+  /* --- Links --- */
+  .nav__list {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: clamp(1.25rem, 2.4vw, 2.25rem);
+  }
+
+  .nav__link {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--ink);
+    padding-block: 0.25em;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dur) var(--ease);
+  }
+  .nav__link:hover { border-color: var(--ink); }
+  .nav__link[aria-current='page'] { border-color: var(--ink); }
+
+  @media (max-width: 47.99em) {
+    .nav-toggle { display: block; }
+
+    /* Only collapse once the script has confirmed it can be reopened. */
+    :global([data-nav-ready='true']) .nav {
+      position: fixed;
+      inset: 0;
+      background: var(--paper);
+      display: grid;
+      place-items: center;
+      z-index: 50;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity var(--dur) var(--ease), visibility var(--dur);
+    }
+    :global([data-nav-ready='true']) .nav[data-open='true'] {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .nav__list {
+      flex-direction: column;
+      gap: var(--space-m);
+      text-align: center;
+    }
+    .nav__link { font-size: var(--display-sm); font-family: var(--font-display); font-weight: 400; }
+    .nav__cta { margin-top: var(--space-s); }
+  }
+
+  @media (min-width: 48em) {
+    .nav-toggle { display: none; }
+  }
+</style>

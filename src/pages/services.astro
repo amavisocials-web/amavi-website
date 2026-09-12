@@ -1,0 +1,84 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import CTA from '../components/CTA.astro';
+import { SITE_NAME, SITE_URL } from '../consts';
+
+const entries = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const services = await Promise.all(
+  entries.map(async (entry) => ({ ...entry, Content: (await render(entry)).Content })),
+);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: services.map((service, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Service',
+      name: service.data.title,
+      description: service.data.summary,
+      serviceType: 'Influencer marketing',
+      areaServed: { '@type': 'Country', name: 'Ireland' },
+      provider: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    },
+  })),
+};
+---
+
+<Base
+  title="Services"
+  description="Creator partnerships, campaign management, gifted and paid collaborations, social media management and campaign reporting — what each one includes."
+  schema={schema}
+>
+  <section class="section page-head">
+    <div class="container">
+      <h1 class="display display--lg">What you can actually buy.</h1>
+      <p class="lead page-head__lead">
+        Take the whole programme, or the parts you do not have covered. Each one below
+        says what you receive, not what it is called.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="services">
+        {services.map((service) => (
+          <ServiceCard
+            title={service.data.title}
+            summary={service.data.summary}
+            includes={service.data.includes}
+            provisional={service.data.provisional}
+            id={service.id}
+          >
+            <service.Content />
+          </ServiceCard>
+        ))}
+        <hr class="rule" />
+      </div>
+
+      <p class="services__note meta">
+        Anything marked “scope to be confirmed” is a capability we have, not
+        yet written up as a fixed line item. Ask and we will scope it properly.
+      </p>
+    </div>
+  </section>
+
+  <CTA
+    heading="Not sure which of these you need?"
+    body="Most people are not. Tell us the problem and we will tell you which of the above actually solves it — or whether none of them do."
+    primaryLabel="Work with us"
+    primaryHref="/contact/"
+    secondaryLabel="See the results"
+    secondaryHref="/work/"
+  />
+</Base>
+
+<style>
+  .page-head { padding-bottom: var(--space-l); }
+  .page-head__lead { margin-top: var(--space-m); max-width: 46ch; }
+  .services__note { margin-top: var(--space-l); max-width: 56ch; }
+</style>

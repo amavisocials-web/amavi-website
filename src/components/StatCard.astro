@@ -1,0 +1,90 @@
+---
+/**
+ * The floating proof card that overlaps the hero image.
+ *
+ * Carries the site's single hero figure. Per the data-display rules that
+ * govern every metric on this site: figures are set in the text face, not the
+ * display serif, and large standalone values use proportional figures —
+ * tabular-nums would make "49" read loose at this size.
+ */
+interface Props {
+  value: string;
+  valueLabel: string;
+  footnote?: string;
+  secondaryValue?: string;
+  secondaryLabel?: string;
+}
+const { value, valueLabel, footnote, secondaryValue, secondaryLabel } = Astro.props;
+---
+
+<figure class="stat-card">
+  <p class="stat-card__figure">{value}</p>
+  <figcaption class="stat-card__label">{valueLabel}</figcaption>
+
+  {secondaryValue && (
+    <div class="stat-card__secondary">
+      <span class="stat-card__secondary-value">{secondaryValue}</span>
+      <span class="stat-card__secondary-label">{secondaryLabel}</span>
+    </div>
+  )}
+
+  {footnote && <p class="stat-card__note">{footnote}</p>}
+</figure>
+
+<style>
+  .stat-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: var(--space-m) var(--space-m) var(--space-s);
+    max-width: 20rem;
+    margin: 0;
+  }
+
+  .stat-card__figure {
+    font-family: var(--font-body);
+    font-size: var(--figure-lg);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    /* Proportional figures: tabular digits read loose at display sizes. */
+    font-variant-numeric: proportional-nums;
+  }
+
+  .stat-card__label {
+    margin-top: var(--space-2xs);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--ink);
+    max-width: 22ch;
+    text-wrap: pretty;
+  }
+
+  .stat-card__secondary {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    margin-top: var(--space-s);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--rule);
+  }
+  .stat-card__secondary-value {
+    font-size: var(--figure-sm);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-card__secondary-label {
+    font-size: var(--text-sm);
+    color: var(--ink-muted);
+    line-height: 1.35;
+  }
+
+  .stat-card__note {
+    margin-top: var(--space-xs);
+    font-size: var(--text-xs);
+    line-height: 1.45;
+    color: var(--ink-muted);
+  }
+</style>
