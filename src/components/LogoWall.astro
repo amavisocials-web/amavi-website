@@ -1,24 +1,44 @@
 ---
+import { Image } from 'astro:assets';
+import { clearedLogos, opticalK, type ClientLogo } from '../logos';
+
 /**
  * Client wall.
  *
- * TODO(client): no logo files supplied. Set in the display face for now —
- * when real marks arrive, replace the <li> contents with <Image /> and keep
- * the row structure. Only clients already public on the related agency site
- * are listed here; anything awaiting sign-off stays out until confirmed.
+ * Real supplied logos, sized so a 6:1 wordmark and a 1:1 roundel carry
+ * comparable optical weight. The assets already have their backgrounds cut
+ * (see src/logos.ts), so they need no blend mode and sit correctly on both
+ * the paper and paper-alt bands.
+ *
+ * Only clients cleared for publication appear — see src/logos.ts.
  */
 interface Props {
-  clients: readonly string[];
   heading?: string;
+  /** Defaults to every cleared logo. */
+  logos?: ClientLogo[];
 }
-const { clients, heading } = Astro.props;
+const { heading, logos = clearedLogos() } = Astro.props;
+
+const sized = logos.map((logo) => ({ ...logo, k: opticalK(logo) }));
 ---
 
 <div class="logo-wall">
   {heading && <h2 class="label logo-wall__heading">{heading}</h2>}
   <hr class="rule" />
   <ul class="logo-wall__list" role="list">
-    {clients.map((client) => <li class="logo-wall__item">{client}</li>)}
+    {sized.map((logo) => (
+      <li class="logo-wall__item">
+        <Image
+          src={logo.src}
+          alt={`${logo.name} logo`}
+          height={140}
+          loading="lazy"
+          decoding="async"
+          class="logo-wall__img"
+          style={`--k:${logo.k.toFixed(3)}`}
+        />
+      </li>
+    ))}
   </ul>
   <hr class="rule" />
 </div>
@@ -32,21 +52,31 @@ const { clients, heading } = Astro.props;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-m) var(--space-l);
+    gap: var(--space-l) clamp(1.5rem, 3vw, 3rem);
     padding-block: var(--space-l);
   }
 
   .logo-wall__item {
-    font-family: var(--font-display);
-    font-size: clamp(1.125rem, 0.85rem + 1.1vw, 1.625rem);
-    line-height: 1.15;
-    letter-spacing: 0.01em;
-    color: var(--ink);
-    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 1 auto;
   }
 
-  @media (max-width: 33.99em) {
-    .logo-wall__list { justify-content: flex-start; gap: var(--space-s) var(--space-m); }
-    .logo-wall__item { white-space: normal; }
+  .logo-wall__img {
+    /* --k is the per-logo equal-area factor computed above. */
+    height: calc(var(--logo-base) * var(--k, 1));
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  .logo-wall__list { --logo-base: clamp(2.5rem, 1.9rem + 1.6vw, 3.4rem); }
+
+  @media (max-width: 47.99em) {
+    .logo-wall__list {
+      justify-content: flex-start;
+      gap: var(--space-m) var(--space-l);
+    }
   }
 </style>

@@ -29,6 +29,7 @@ const { ratio = '4/5', tone = 'sage', caption, class: className } = Astro.props;
   aria-hidden="true"
 >
   {caption && <span class="ph__caption">{caption}</span>}
+  <slot />
 </div>
 
 <style>
@@ -58,6 +59,8 @@ const { ratio = '4/5', tone = 'sage', caption, class: className } = Astro.props;
     border: 1px solid rgb(255 255 255 / 0.22);
     pointer-events: none;
   }
+
+  .ph > :global(*) { position: relative; }
 
   .ph__caption {
     position: relative;

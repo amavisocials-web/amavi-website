@@ -12,9 +12,6 @@ const services = (await getCollection('services')).sort(
   (a, b) => a.data.order - b.data.order,
 );
 
-/** TODO(client): confirm The Humble Fishmonger and Beyond BMI before adding. */
-const clients = ['ADHD Now', 'Fettle', 'AutismCare Ireland', 'Cleaning Doctor Hub', 'MyIrelandBox'];
-
 /**
  * Figures from AMAVI's cumulative creator-programme report, April to August
  * 2026, across ADHD Now, Fettle, Cleaning Doctor and AutismCare. Reproduced
@@ -110,7 +107,7 @@ const schema = {
   <!-- ================= Clients ================= -->
   <section class="section section--tight">
     <div class="container">
-      <LogoWall clients={clients} heading="Working with" />
+      <LogoWall heading="Working with" />
     </div>
   </section>
 

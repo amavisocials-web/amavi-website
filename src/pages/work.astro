@@ -22,8 +22,6 @@ const caseStudies = await Promise.all(
   published.map(async (entry) => ({ ...entry, Content: (await render(entry)).Content })),
 );
 
-const clients = ['ADHD Now', 'Fettle', 'AutismCare Ireland', 'Cleaning Doctor Hub', 'MyIrelandBox'];
-
 const delivery = [
   { client: 'ADHD Now', target: 15, delivered: 22, outcome: '7 partnerships beyond target' },
   { client: 'Fettle', target: 10, delivered: 14, outcome: '4 partnerships above target' },
@@ -124,7 +122,7 @@ const reach = [
   <!-- ================= Clients ================= -->
   <section class="section section--tight section--alt">
     <div class="container">
-      <LogoWall clients={clients} heading="Clients" />
+      <LogoWall heading="Clients" />
     </div>
   </section>
 

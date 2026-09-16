@@ -86,6 +86,8 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 ```
 src/
   consts.ts              Site-wide constants: contact email, nav, socials
+  logos.ts               Client logo manifest and optical sizing
+  assets/logos/          Client logo files, backgrounds already cut
   content.config.ts      Schemas for the two content collections
   content/
     case-studies/        One markdown file per case study
@@ -153,6 +155,53 @@ provisional: false   # true shows a "Scope to be confirmed" flag
 
 ---
 
+## Client logos
+
+Logos live in `src/assets/logos/` and are declared once in **`src/logos.ts`**,
+which both the logo wall and the case-study lockups read from. Adding or
+swapping one is an edit to that file — no component changes.
+
+```ts
+{ name: 'Client Name', src: clientLogo, cleared: true, scale: 1.0 }
+```
+
+- **`name`** must match the `client` field in the matching case study, which is
+  how a case study finds its logo.
+- **`cleared`** gates publication. Only clients already public on the related
+  agency site may appear (brief §9). The two held back — The Humble Fishmonger
+  and Beyond BMI — are wired up and ready; flip `cleared` here and `published`
+  in the matching markdown once sign-off lands. Until then Astro does not even
+  emit their image files.
+- **`scale`** is an optional optical nudge. Leave it off unless a logo reads
+  visibly heavy or light beside the others.
+
+### Two things the supplied files needed, and will need again
+
+**1. Backgrounds were cut, not blended.** Every logo arrived on a white or
+near-white square. They are composited onto warm paper, so that white had to
+go. It was removed by flood-filling inward from the border, which clears
+background white but leaves white that is *enclosed by artwork* — the
+knocked-out "IRELAND BOX" lettering, the ADHD Now roundel centre, the Cleaning
+Doctor disc. A blanket "make white transparent" would have deleted all three.
+A CSS `mix-blend-mode` would have turned that white lettering beige.
+
+**2. Each was trimmed to its own artwork.** The supplied squares had wildly
+different internal padding, so a shared display height sized them by their
+export settings rather than by their marks.
+
+If you re-export a logo from an original, both steps need repeating, otherwise
+it will sit on a white tile at the wrong size.
+
+### Why the logos are different heights
+
+They are sized to cover comparable *area*, not to a shared height — see
+`opticalK()` in `src/logos.ts`. A 6:1 wordmark set to the same height as a 1:1
+roundel towers over it, because the eye weighs a mark by the ink it covers.
+Height therefore falls off as the aspect ratio grows. This is deliberate; the
+wall looks wrong with a uniform height.
+
+---
+
 ## Brand handover
 
 The site is built so that swapping in AMAVI's real brand touches **two files**:
@@ -177,7 +226,8 @@ If the real brand guide supersedes these, re-check contrast before shipping.
 **Typefaces** are Instrument Serif (display) and Archivo (body), installed as
 npm packages and self-hosted — not loaded from Google's CDN.
 
-**Imagery** is placeholder colour fields at the correct aspect ratios. Swapping
+**Client logos** are real and in place (see above). **Photography** is still
+placeholder colour fields at the correct aspect ratios. Swapping
 in real photography is a file replacement via `<Image />` from `astro:assets`
 at the same ratio, and shifts nothing on the page.
 
@@ -244,7 +294,8 @@ The ones that matter most:
   page) and `hello@amavisocials.com` (the working mailbox). The working mailbox
   is used, defined once in `src/consts.ts`.
 - **Social handles.** The Instagram and LinkedIn URLs are assumed. Confirm them.
-- **Brand assets.** No logo files, colours or fonts supplied.
+- **AMAVI's own brand assets.** Client logos have been supplied and are in.
+  AMAVI's own logo, colours and fonts have not — the wordmark is still type.
 - **Photography.** None approved. Template preview images are not licensed.
 - **Team section.** No photos or bios, so `/about` ships without one rather than
   using stock portraits. `src/components/Team.astro` is scaffolded and

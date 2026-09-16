@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import Placeholder from './Placeholder.astro';
+import { logoFor, opticalK } from '../logos';
 
 /**
  * Case study: image on one side, meta on the other, with deliverables and
@@ -26,11 +28,28 @@ const {
   client, sector, summary, challenge, approach, results, deliverables,
   tone = 'sage', flipped = false,
 } = Astro.props;
+
+const logo = logoFor(client);
+const logoK = logo ? opticalK(logo) : 1;
 ---
 
 <article class:list={['case', flipped && 'case--flipped']}>
   <div class="case__media">
-    <Placeholder ratio="4/5" tone={tone} caption={client} />
+    <Placeholder ratio="4/5" tone={tone} caption={logo ? undefined : client}>
+      {logo && (
+        <div class="case__logo-panel">
+          <Image
+            src={logo.src}
+            alt={`${client} logo`}
+            height={140}
+            loading="lazy"
+            decoding="async"
+            class="case__logo"
+            style={`--k:${logoK.toFixed(3)}`}
+          />
+        </div>
+      )}
+    </Placeholder>
   </div>
 
   <div class="case__body">
@@ -78,6 +97,25 @@ const {
 <style>
   .case { display: grid; gap: var(--space-l); }
 
+  /* A paper panel keeps a white-background logo off the tinted field. */
+  .case__logo-panel {
+    /* Fixed proportions, so the lockup is the same shape on every case study
+       rather than shrink-wrapping to each logo's own aspect ratio. */
+    background: var(--paper);
+    width: 72%;
+    min-height: 9rem;
+    padding: var(--space-m);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .case__logo {
+    height: calc(var(--case-logo-base) * var(--k, 1));
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .case__media { --case-logo-base: clamp(3.25rem, 2.4rem + 2.4vw, 4.5rem); }
   .case__sector { display: block; margin-bottom: var(--space-xs); }
   .case__client { margin-bottom: var(--space-s); }
 
