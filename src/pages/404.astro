@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { NAV_LINKS } from '../consts';
+import { NAV_LINKS, CONTACT_PATH } from '../consts';
 ---
 
 <Base
@@ -20,7 +20,7 @@ import { NAV_LINKS } from '../consts';
         {NAV_LINKS.map((link) => (
           <li><a href={link.href} class="link-action">{link.label}</a></li>
         ))}
-        <li><a href="/contact/" class="link-action">Work with us</a></li>
+        <li><a href={CONTACT_PATH} class="link-action">Get in Touch</a></li>
       </ul>
     </div>
   </section>

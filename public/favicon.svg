@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="AMAVI Socials">
-  <!-- TODO(client): temporary mark, set in the display face. Replace with the
-       supplied logo when the brand handover lands. -->
-  <rect width="32" height="32" fill="#14120F"/>
-  <text x="16" y="23" text-anchor="middle"
-        font-family="Instrument Serif, Iowan Old Style, Georgia, serif"
-        font-size="22" fill="#F7F5F0">A</text>
-</svg>

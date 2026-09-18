@@ -1,14 +1,17 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import ServiceCard from '../components/ServiceCard.astro';
-import CTA from '../components/CTA.astro';
+import LogoWall from '../components/LogoWall.astro';
 import { SITE_NAME, SITE_URL } from '../consts';
 
-const entries = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
-const services = await Promise.all(
-  entries.map(async (entry) => ({ ...entry, Content: (await render(entry)).Content })),
-);
+/**
+ * TODO(client): the Services format is still open. The page is framed as
+ * "Work with us", per the current lean; the nav label stays "Services" so it
+ * doesn't sit beside "Get in Touch" as two near-identical calls to action.
+ * Renaming the tab is one line in src/consts.ts.
+ */
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 
 const schema = {
   '@context': 'https://schema.org',
@@ -29,21 +32,21 @@ const schema = {
 ---
 
 <Base
-  title="Services"
-  description="Creator partnerships, campaign management, gifted and paid collaborations, social media management and campaign reporting — what each one includes."
+  title="Work With Us"
+  description="Fully managed creator partnerships, campaign management, gifted and paid collaborations, social media management and reporting — what each includes."
   schema={schema}
 >
   <section class="section page-head">
     <div class="container">
-      <h1 class="display display--lg">What you can actually buy.</h1>
+      <h1 class="display display--lg">Work with us</h1>
       <p class="lead page-head__lead">
-        Take the whole programme, or the parts you do not have covered. Each one below
-        says what you receive, not what it is called.
+        Take the whole programme, fully managed — or just the parts you don’t already have
+        covered.
       </p>
     </div>
   </section>
 
-  <section class="section section--tight">
+  <section class="section section--tight services-section">
     <div class="container">
       <div class="services">
         {services.map((service) => (
@@ -53,32 +56,59 @@ const schema = {
             includes={service.data.includes}
             provisional={service.data.provisional}
             id={service.id}
-          >
-            <service.Content />
-          </ServiceCard>
+          />
         ))}
-        <hr class="rule" />
       </div>
-
-      <p class="services__note meta">
-        Anything marked “scope to be confirmed” is a capability we have, not
-        yet written up as a fixed line item. Ask and we will scope it properly.
-      </p>
     </div>
   </section>
 
-  <CTA
-    heading="Not sure which of these you need?"
-    body="Most people are not. Tell us the problem and we will tell you which of the above actually solves it — or whether none of them do."
-    primaryLabel="Work with us"
-    primaryHref="/contact/"
-    secondaryLabel="See the results"
-    secondaryHref="/work/"
-  />
+  {/*
+    Who AMAVI works with, carried over from the retired Work page. Types of
+    client and the kind of outcome only: no case studies, no per-client
+    detail, no figures. Client types are the cleared roster's sectors; the
+    brief's rule that Fettle is never a "therapy platform" is why this stays
+    at "healthcare and wellbeing" rather than naming services.
+  */}
+  <section class="section surface-band clients">
+    <div class="container">
+      <div class="clients__copy">
+        <h2 class="display display--md">Who we work with</h2>
+        <div class="prose clients__body">
+          <p>
+            Healthcare and wellbeing providers, home-services networks and direct-to-consumer
+            brands across Ireland — businesses where trust decides the sale, and a
+            recommendation from the right person does more than another ad.
+          </p>
+          <p>
+            What a creator programme gives them is reach their own channel can’t: people who
+            weren’t already following, hearing about the brand from someone they already
+            trust — in content that was agreed in writing, so it actually arrives.
+          </p>
+        </div>
+      </div>
+
+      <LogoWall level={3} />
+    </div>
+  </section>
 </Base>
 
 <style>
   .page-head { padding-bottom: var(--space-l); }
-  .page-head__lead { margin-top: var(--space-m); max-width: 46ch; }
-  .services__note { margin-top: var(--space-l); max-width: 56ch; }
+  .page-head__lead { margin-top: var(--space-m); }
+
+  .services-section { padding-top: 0; }
+
+  .services {
+    display: grid;
+    gap: var(--space-xl) var(--space-l);
+  }
+  @media (min-width: 40em) { .services { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64em) { .services { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  .clients__copy { display: grid; gap: var(--space-m); margin-bottom: var(--space-l); }
+  @media (min-width: 64em) {
+    .clients__copy { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-xl); align-items: start; }
+  }
+  .clients__body { color: var(--fg-muted); }
+
 </style>

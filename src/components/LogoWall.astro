@@ -3,28 +3,34 @@ import { Image } from 'astro:assets';
 import { clearedLogos, opticalK, type ClientLogo } from '../logos';
 
 /**
- * Client wall.
+ * Partner logo wall, centred.
  *
- * Real supplied logos, sized so a 6:1 wordmark and a 1:1 roundel carry
- * comparable optical weight. The assets already have their backgrounds cut
- * (see src/logos.ts), so they need no blend mode and sit correctly on both
- * the paper and paper-alt bands.
+ * Logos are sized so a 6:1 wordmark and a 1:1 roundel carry comparable
+ * optical weight (see opticalK in src/logos.ts), and their backgrounds were
+ * cut at the asset level, so they sit on any band without a blend mode.
  *
- * Only clients cleared for publication appear — see src/logos.ts.
+ * Only clients cleared for publication appear.
  */
 interface Props {
   heading?: string;
-  /** Defaults to every cleared logo. */
+  /** One line beneath the heading. */
+  intro?: string;
+  /** Heading level, to keep each page's outline valid. */
+  level?: 2 | 3;
   logos?: ClientLogo[];
 }
-const { heading, logos = clearedLogos() } = Astro.props;
-
+const { heading, intro, level = 2, logos = clearedLogos() } = Astro.props;
+const H = `h${level}` as 'h2' | 'h3';
 const sized = logos.map((logo) => ({ ...logo, k: opticalK(logo) }));
 ---
 
 <div class="logo-wall">
-  {heading && <h2 class="label logo-wall__heading">{heading}</h2>}
-  <hr class="rule" />
+  {(heading || intro) && (
+    <div class="logo-wall__head">
+      {heading && <H class="label logo-wall__heading">{heading}</H>}
+      {intro && <p class="logo-wall__intro">{intro}</p>}
+    </div>
+  )}
   <ul class="logo-wall__list" role="list">
     {sized.map((logo) => (
       <li class="logo-wall__item">
@@ -40,43 +46,42 @@ const sized = logos.map((logo) => ({ ...logo, k: opticalK(logo) }));
       </li>
     ))}
   </ul>
-  <hr class="rule" />
 </div>
 
 <style>
-  .logo-wall__heading { display: block; margin-bottom: var(--space-m); }
+  .logo-wall { text-align: center; }
+
+  .logo-wall__head {
+    display: grid;
+    gap: var(--space-2xs);
+    justify-items: center;
+    padding-bottom: var(--space-l);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .logo-wall__heading { color: var(--fg); }
+  .logo-wall__intro { color: var(--fg-muted); font-size: var(--text-sm); max-width: 46ch; }
 
   .logo-wall__list {
+    --logo-base: clamp(2.5rem, 1.9rem + 1.6vw, 3.4rem);
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-l) clamp(1.5rem, 3vw, 3rem);
-    padding-block: var(--space-l);
+    justify-content: center;
+    gap: var(--space-l) clamp(2rem, 5vw, 4.5rem);
+    padding-block: var(--space-xl) var(--space-s);
   }
 
-  .logo-wall__item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 1 auto;
-  }
+  .logo-wall__item { display: flex; align-items: center; justify-content: center; }
 
   .logo-wall__img {
-    /* --k is the per-logo equal-area factor computed above. */
     height: calc(var(--logo-base) * var(--k, 1));
     width: auto;
     max-width: 100%;
     object-fit: contain;
   }
 
-  .logo-wall__list { --logo-base: clamp(2.5rem, 1.9rem + 1.6vw, 3.4rem); }
-
   @media (max-width: 47.99em) {
-    .logo-wall__list {
-      justify-content: flex-start;
-      gap: var(--space-m) var(--space-l);
-    }
+    .logo-wall__list { gap: var(--space-m) var(--space-l); }
   }
 </style>

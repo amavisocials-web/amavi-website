@@ -58,8 +58,8 @@ const { rows, caption } = Astro.props;
   .reach { margin: 0; }
   .reach__rows { list-style: none; }
 
-  .reach__row { padding-block: var(--space-m); border-top: 1px solid var(--rule); }
-  .reach__row:last-child { border-bottom: 1px solid var(--rule); }
+  .reach__row { padding-block: var(--space-m); border-top: 1px solid var(--hairline); }
+  .reach__row:last-child { border-bottom: 1px solid var(--hairline); }
 
   .reach__head {
     display: flex;
@@ -75,7 +75,7 @@ const { rows, caption } = Astro.props;
     font-size: var(--text-base);
     font-weight: 500;
     line-height: 1.2;
-    color: var(--ink);
+    color: var(--fg);
   }
 
   .reach__value { display: flex; align-items: baseline; gap: 0.5em; flex-wrap: wrap; }
@@ -85,39 +85,39 @@ const { rows, caption } = Astro.props;
     line-height: 1;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
-    color: var(--accent);
+    color: var(--fg-accent);
   }
   .reach__pct-label {
     font-size: var(--text-sm);
-    color: var(--ink-muted);
+    color: var(--fg-muted);
     max-width: 26ch;
   }
 
   /* The unfilled track is a lighter step of the fill's own ramp, so the
      state reads across the whole bar rather than only where it is filled. */
-  .reach__meter { height: 14px; background: var(--accent-wash); position: relative; }
+  .reach__meter { height: 14px; background: var(--meter-track); position: relative; }
   .reach__fill {
     position: absolute;
     inset-block: 0;
     left: 0;
     width: var(--w);
-    background: var(--accent);
-    border-radius: 0 4px 4px 0;
+    background: var(--meter-fill);
+    border-radius: 0 2px 2px 0;
   }
 
   .reach__views {
     margin-top: var(--space-s);
     font-size: var(--text-sm);
     line-height: 1.45;
-    color: var(--ink-muted);
+    color: var(--fg-muted);
   }
-  .reach__views-value { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .reach__views-value { color: var(--fg); font-variant-numeric: tabular-nums; }
 
   .reach__caption {
     margin-top: var(--space-m);
     font-size: var(--text-xs);
     line-height: 1.5;
-    color: var(--ink-muted);
+    color: var(--fg-muted);
     max-width: 62ch;
   }
 

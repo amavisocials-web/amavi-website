@@ -1,8 +1,9 @@
 # Netlify build configuration.
 #
-# Forms: both forms are static HTML with `data-netlify="true"`, so Netlify's
-# build-time form detection picks them up automatically. No extra config needed.
-# Submissions appear under Site configuration → Forms in the Netlify dashboard.
+# The site has no forms: brands are sent to email and creators to the
+# existing application form (see src/consts.ts). Netlify Forms is unused.
+# The /creators redirect is defined in astro.config.mjs, not here, so the
+# destination URL is only ever written down once.
 
 [build]
   command = "npm run build"

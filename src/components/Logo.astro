@@ -1,33 +1,61 @@
 ---
 /**
- * Temporary wordmark, set in the display face.
+ * The AMAVI Socials wordmark, set as live text.
  *
- * TODO(client): no logo files supplied. When the brand handover lands, replace
- * the markup below with the supplied mark. This file and the token block in
- * src/styles/global.css are the only two places that should need to change.
+ * Built to match the supplied file (src/assets/amavi-socials-logo.png) rather
+ * than to use it: that PNG is a social avatar with its background baked in,
+ * and would render soft at header sizes. Every value below was measured from
+ * it, not eyeballed:
+ *
+ *   face      Poppins Light (300). Total ink per word sits within 5% of Light
+ *             and 14% under Regular; both words agree, so the gap is
+ *             anti-aliasing, not weight.
+ *   tracking  −0.068em. At Poppins' natural spacing both words run ~10% wide;
+ *             this closes "amavi" to 162px and "socials" to 170px at the PNG's
+ *             scale — both exact.
+ *   align     Right. Predicts the PNG's left and right ink edges within 1.7px;
+ *             centred is off by 4.7px, left by 10.9px.
+ *   leading   1.02 — the PNG's baselines sit 60px apart at a 58.6px size.
+ *
+ * The PNG itself is used only for the favicon and the share image
+ * (npm run brand:assets).
  */
 interface Props {
-  /** `sm` is the header lockup; `lg` is the footer. */
+  /** Pick by background: `white` on brand or black, `brand` or `black` on white. */
+  variant?: 'black' | 'white' | 'brand';
+  /** `sm` for the header lockup, `lg` for the footer. */
   size?: 'sm' | 'lg';
 }
-const { size = 'sm' } = Astro.props;
+const { variant = 'black', size = 'sm' } = Astro.props;
 ---
 
-<span class:list={['wordmark', `wordmark--${size}`]} aria-hidden="true">Amavi</span>
-<span class="visually-hidden">AMAVI Socials</span>
+<span class:list={['wordmark', `wordmark--${variant}`, `wordmark--${size}`]} translate="no">
+  <span class="wordmark__line">amavi</span>{' '}<span class="wordmark__line">socials</span>
+</span>
 
 <style>
   .wordmark {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: var(--tracking-wordmark);
-    line-height: 1;
-    color: var(--ink);
-    /* Letterspacing adds trailing space after the last letter; pull it back so
-       the mark optically aligns with the container edge. */
-    margin-right: calc(var(--tracking-wordmark) * -1);
     display: inline-block;
+    font-family: var(--font-wordmark);
+    font-weight: 300;
+    font-stretch: normal;
+    letter-spacing: -0.068em;
+    line-height: 1.02;
+    text-align: right;
+    text-transform: lowercase;
+    white-space: nowrap;
+    /* The body's "antialiased" smoothing thins light-on-dark text on macOS,
+       which made the Light cut read lighter than the supplied file. Default
+       smoothing restores its weight — checked side by side at the PNG's scale. */
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
-  .wordmark--sm { font-size: 1.5rem; }
-  .wordmark--lg { font-size: clamp(2.5rem, 1.5rem + 4vw, 4.5rem); }
+  .wordmark__line { display: block; }
+
+  .wordmark--black { color: var(--ink); }
+  .wordmark--white { color: var(--bg); }
+  .wordmark--brand { color: var(--accent); }
+
+  .wordmark--sm { font-size: 1.3125rem; }
+  .wordmark--lg { font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem); }
 </style>

@@ -1,347 +1,350 @@
 ---
+/**
+ * The creator application. Posts to Netlify Forms.
+ *
+ * Options mirror AMAVI's existing live form, so applications collected here
+ * line up with the ones already in the database: its follower bands (named
+ * Nano to Major, as specified), engagement bands, niches, content formats,
+ * per-format rates and currencies. The consent text is the live form's,
+ * adapted from "by submitting" to a checkbox.
+ *
+ * Works without JavaScript — it posts natively and Netlify shows its own
+ * confirmation. src/scripts/creator-form.ts adds inline validation, turns
+ * @handles into links, and shows success and failure on the page.
+ */
 import { CONTACT_EMAIL } from '../consts';
 
-/**
- * Creator signup form, rebuilt from the live amavisocials.co page.
- *
- * Every field documented on the existing page is preserved here, in the same
- * groups: identity, channel links, audience size and engagement, niches,
- * collaboration preference, content formats, per-format rates with a currency
- * selector, rate notes, audience insights, past collaborations, media kit,
- * free-text notes and the consent checkbox.
- *
- * TODO(client): the consent wording below is a GDPR-appropriate reconstruction.
- * The brief requires the live page's consent language be preserved verbatim,
- * and the source file supplied was empty. Copy the exact wording off the live
- * page into the <span> in the consent block before launch.
- *
- * TODO(client): confirm the follower bands and engagement bands below match
- * the bands used on the live form — the brief names "Nano through Major" but
- * not the numeric ranges.
- */
+const FORM_NAME = 'creator-application';
 
 const followerBands = [
-  'Nano — 1,000 to 10,000',
-  'Micro — 10,000 to 50,000',
-  'Mid-tier — 50,000 to 100,000',
-  'Macro — 100,000 to 500,000',
-  'Mega — 500,000 to 1 million',
-  'Major — over 1 million',
+  'Nano — under 5K', 'Micro — 5K to 15K', 'Mid — 15K to 50K', 'Macro — 50K to 150K', 'Major — 150K+',
 ];
-
-const engagementBands = [
-  'Under 1%',
-  '1% – 2%',
-  '2% – 3%',
-  '3% – 5%',
-  '5% – 8%',
-  'Over 8%',
-  'Not sure',
-];
-
+const engagementBands = ['Under 2%', '2% – 4%', '4% – 7%', '7%+', 'Not sure'];
 const niches = [
-  'Health and wellbeing', 'Mental health', 'Neurodiversity', 'Parenting and family',
-  'Food and drink', 'Home and lifestyle', 'Travel', 'Fashion and beauty',
-  'Fitness', 'Business and career', 'Comedy and entertainment', 'Other',
+  'Fashion', 'Beauty', 'Lifestyle', 'Food & Drink', 'Travel', 'Fitness & Wellness', 'Parenting',
+  'Tech & Gaming', 'Home & Interiors', 'Business & Finance', 'Music & Entertainment', 'Education', 'Other',
 ];
-
 const formats = [
-  'Instagram Reel', 'Instagram Story', 'Instagram in-feed post', 'TikTok video',
-  'YouTube video', 'YouTube Short', 'UGC — content only, no posting',
-  'Blog post', 'Other',
+  'Reels / Short-form video', 'Static feed posts', 'Stories', 'UGC / Product reviews',
+  'Long-form (YouTube / Blog)', 'Live content',
 ];
-
-const rateFormats = [
-  { id: 'reel', label: 'Instagram Reel' },
-  { id: 'story', label: 'Instagram Story set' },
-  { id: 'tiktok', label: 'TikTok video' },
-  { id: 'youtube', label: 'YouTube video' },
-  { id: 'ugc', label: 'UGC, content only' },
+const rates = [
+  { name: 'rate_reels', label: 'Reel or short-form video' },
+  { name: 'rate_static', label: 'Static feed post' },
+  { name: 'rate_stories', label: 'Story' },
+  { name: 'rate_ugc', label: 'UGC or product review' },
+  { name: 'rate_longform', label: 'Long-form video or blog' },
+  { name: 'rate_live', label: 'Live content' },
 ];
+const currencies = ['EUR (€)', 'GBP (£)', 'USD ($)', 'Other'];
 
+/** `base` turns a bare @handle into a link for that platform. */
 const channels = [
-  { id: 'instagram', label: 'Instagram', placeholder: 'https://instagram.com/…' },
-  { id: 'tiktok', label: 'TikTok', placeholder: 'https://tiktok.com/@…' },
-  { id: 'youtube', label: 'YouTube', placeholder: 'https://youtube.com/@…' },
-  { id: 'x', label: 'X', placeholder: 'https://x.com/…' },
-  { id: 'linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/in/…' },
-  { id: 'blog', label: 'Blog or website', placeholder: 'https://…' },
-  { id: 'other', label: 'Other', placeholder: 'https://…' },
+  { name: 'instagram', label: 'Instagram', base: 'https://www.instagram.com/', ph: '@yourname or link' },
+  { name: 'tiktok', label: 'TikTok', base: 'https://www.tiktok.com/@', ph: '@yourname or link' },
+  { name: 'youtube', label: 'YouTube', base: 'https://www.youtube.com/@', ph: '@yourchannel or link' },
+  { name: 'x', label: 'X', base: 'https://x.com/', ph: '@yourname or link' },
+  { name: 'linkedin', label: 'LinkedIn', base: 'https://www.linkedin.com/in/', ph: 'Profile link' },
+  { name: 'blog', label: 'Blog or website', base: '', ph: 'yourblog.com' },
+  { name: 'other_link', label: 'Other', base: '', ph: 'Any other platform' },
 ];
-
-const currencies = ['EUR (€)', 'GBP (£)', 'USD ($)'];
 ---
 
 <form
   class="form creator-form"
-  name="creator-signup"
+  name={FORM_NAME}
   method="POST"
-  action="/creators/"
+  action="/become-a-creator/"
   data-netlify="true"
-  netlify-honeypot="preferred-contact-time"
-  data-netlify-form
+  netlify-honeypot="company_website"
+  data-creator-form
 >
-  <input type="hidden" name="form-name" value="creator-signup" />
+  <input type="hidden" name="form-name" value={FORM_NAME} />
   <p class="honeypot" aria-hidden="true">
-    <label>Do not fill this in
-      <input name="preferred-contact-time" tabindex="-1" autocomplete="off" /></label>
+    <label>Leave this empty <input name="company_website" tabindex="-1" autocomplete="off" /></label>
   </p>
 
-  <!-- About you -->
-  <fieldset class="fieldset">
-    <legend class="fieldset__legend">About you</legend>
+  {/* ---------- 01 ---------- */}
+  <fieldset class="form-section">
+    <legend class="form-section__legend">
+      <span class="form-section__number">01</span>
+      <span class="display display--sm">About you</span>
+    </legend>
 
-    <div class="field-grid field-grid--2">
-      <div class="field">
-        <label class="field__label" for="cr-name">Full name</label>
-        <input class="field__control" id="cr-name" name="name" type="text"
-               autocomplete="name" required aria-describedby="cr-name-error" />
-        <p class="field__error" id="cr-name-error" aria-live="polite"></p>
-      </div>
+    <div class="field">
+      <label class="field__label" for="cf-name">Full name</label>
+      <input class="field__control" id="cf-name" name="name" type="text" required
+             autocomplete="name" aria-describedby="cf-name-error"
+             data-error="Please add your name." />
+      <p class="field__error" id="cf-name-error" aria-live="polite"></p>
+    </div>
 
-      <div class="field">
-        <label class="field__label" for="cr-email">Email</label>
-        <input class="field__control" id="cr-email" name="email" type="email"
-               autocomplete="email" required aria-describedby="cr-email-error" />
-        <p class="field__error" id="cr-email-error" aria-live="polite"></p>
-      </div>
+    <div class="field">
+      <label class="field__label" for="cf-email">Email</label>
+      <input class="field__control" id="cf-email" name="email" type="email" required
+             autocomplete="email" inputmode="email" aria-describedby="cf-email-error"
+             data-error="Please add your email address." />
+      <p class="field__error" id="cf-email-error" aria-live="polite"></p>
     </div>
 
     <div class="field-grid field-grid--2">
       <div class="field">
-        <label class="field__label" for="cr-city">City</label>
-        <input class="field__control" id="cr-city" name="city" type="text"
-               autocomplete="address-level2" required aria-describedby="cr-city-error" />
-        <p class="field__error" id="cr-city-error" aria-live="polite"></p>
+        <label class="field__label" for="cf-city">City</label>
+        <input class="field__control" id="cf-city" name="city" type="text" required
+               autocomplete="address-level2" aria-describedby="cf-city-error"
+               data-error="Please add your city." />
+        <p class="field__error" id="cf-city-error" aria-live="polite"></p>
       </div>
-
       <div class="field">
-        <label class="field__label" for="cr-country">Country</label>
-        <input class="field__control" id="cr-country" name="country" type="text"
-               autocomplete="country-name" required aria-describedby="cr-country-error" />
-        <p class="field__error" id="cr-country-error" aria-live="polite"></p>
+        <label class="field__label" for="cf-country">Country</label>
+        <input class="field__control" id="cf-country" name="country" type="text" required
+               autocomplete="country-name" aria-describedby="cf-country-error"
+               data-error="Please add your country." />
+        <p class="field__error" id="cf-country-error" aria-live="polite"></p>
       </div>
     </div>
   </fieldset>
 
-  <hr class="rule" />
-
-  <!-- Channels -->
-  <fieldset class="fieldset">
-    <legend class="fieldset__legend">Your channels</legend>
-    <p class="fieldset__intro">Add the ones you use. Leave the rest blank.</p>
+  {/* ---------- 02 ---------- */}
+  <fieldset class="form-section" data-channels aria-describedby="cf-channels-intro cf-channels-error">
+    <legend class="form-section__legend">
+      <span class="form-section__number">02</span>
+      <span class="display display--sm">Your channels</span>
+    </legend>
+    <p class="form-section__intro" id="cf-channels-intro">
+      Add at least one. An @handle or a link both work.
+    </p>
+    <p class="field__error" id="cf-channels-error" aria-live="polite"></p>
 
     <div class="field-grid field-grid--2">
-      {channels.map((channel) => (
+      {channels.map((c) => (
         <div class="field">
-          <label class="field__label" for={`cr-${channel.id}`}>
-            {channel.label} <span class="field__optional">(optional)</span>
-          </label>
-          <input
-            class="field__control"
-            id={`cr-${channel.id}`}
-            name={`link_${channel.id}`}
-            type="url"
-            placeholder={channel.placeholder}
-            aria-describedby={`cr-${channel.id}-error`}
-          />
-          <p class="field__error" id={`cr-${channel.id}-error`} aria-live="polite"></p>
+          <label class="field__label" for={`cf-${c.name}`}>{c.label}</label>
+          <input class="field__control" id={`cf-${c.name}`} name={c.name} type="text"
+                 inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false"
+                 placeholder={c.ph} data-link data-handle-base={c.base || undefined}
+                 aria-describedby={`cf-${c.name}-error`} />
+          <p class="field__error" id={`cf-${c.name}-error`} aria-live="polite"></p>
         </div>
       ))}
     </div>
   </fieldset>
 
-  <hr class="rule" />
-
-  <!-- Audience -->
-  <fieldset class="fieldset">
-    <legend class="fieldset__legend">Your audience</legend>
+  {/* ---------- 03 ---------- */}
+  <fieldset class="form-section">
+    <legend class="form-section__legend">
+      <span class="form-section__number">03</span>
+      <span class="display display--sm">Your audience</span>
+    </legend>
 
     <div class="field-grid field-grid--2">
       <div class="field">
-        <label class="field__label" for="cr-followers">Follower range</label>
-        <select class="field__control" id="cr-followers" name="follower_range" required
-                aria-describedby="cr-followers-hint cr-followers-error">
+        <label class="field__label" for="cf-followers">Follower range</label>
+        <select class="field__control" id="cf-followers" name="follower_range" required
+                aria-describedby="cf-followers-hint cf-followers-error"
+                data-error="Please choose your follower range.">
           <option value="">Choose a range</option>
-          {followerBands.map((band) => <option value={band}>{band}</option>)}
+          {followerBands.map((b) => <option value={b}>{b}</option>)}
         </select>
-        <p class="field__hint" id="cr-followers-hint">Based on your largest channel.</p>
-        <p class="field__error" id="cr-followers-error" aria-live="polite"></p>
+        <p class="field__hint" id="cf-followers-hint">On your largest channel.</p>
+        <p class="field__error" id="cf-followers-error" aria-live="polite"></p>
       </div>
-
       <div class="field">
-        <label class="field__label" for="cr-engagement">Engagement rate</label>
-        <select class="field__control" id="cr-engagement" name="engagement_rate"
-                aria-describedby="cr-engagement-hint">
+        <label class="field__label" for="cf-engagement">
+          Engagement rate <span class="field__optional">(optional)</span>
+        </label>
+        <select class="field__control" id="cf-engagement" name="engagement_rate"
+                aria-describedby="cf-engagement-hint">
           <option value="">Choose a range</option>
-          {engagementBands.map((band) => <option value={band}>{band}</option>)}
+          {engagementBands.map((b) => <option value={b}>{b}</option>)}
         </select>
-        <p class="field__hint" id="cr-engagement-hint">An estimate is fine.</p>
+        <p class="field__hint" id="cf-engagement-hint">An estimate is fine.</p>
       </div>
     </div>
 
-    <div class="field">
-      <span class="field__label" id="cr-niche-label">Your niches</span>
-      <p class="field__hint">Choose as many as apply.</p>
-      <div class="check-grid" role="group" aria-labelledby="cr-niche-label">
-        {niches.map((niche) => (
-          <label class="check">
-            <input type="checkbox" name="niches" value={niche} />
-            <span>{niche}</span>
+    <div class="field" role="group" aria-labelledby="cf-niches-label">
+      <span class="field__label" id="cf-niches-label">
+        Niches <span class="field__optional">(choose any)</span>
+      </span>
+      <div class="chips">
+        {niches.map((n) => (
+          <label class="chip">
+            <input type="checkbox" name="niches[]" value={n} />
+            <span class="chip__label">{n}</span>
           </label>
         ))}
       </div>
     </div>
 
     <div class="field">
-      <label class="field__label" for="cr-insights">
+      <label class="field__label" for="cf-insights">
         Audience insights <span class="field__optional">(optional)</span>
       </label>
-      <textarea class="field__control" id="cr-insights" name="audience_insights" rows="4"
-                aria-describedby="cr-insights-hint"></textarea>
-      <p class="field__hint" id="cr-insights-hint">
-        Age split, gender split, top locations — whatever your analytics show.
-      </p>
+      <textarea class="field__control" id="cf-insights" name="audience_insights" rows="4"
+                placeholder="E.g. 70% women, mostly 25–34, mainly Ireland and the UK"></textarea>
     </div>
   </fieldset>
 
-  <hr class="rule" />
+  {/* ---------- 04 ---------- */}
+  <fieldset class="form-section">
+    <legend class="form-section__legend">
+      <span class="form-section__number">04</span>
+      <span class="display display--sm">How you work</span>
+    </legend>
 
-  <!-- Collaborating -->
-  <fieldset class="fieldset">
-    <legend class="fieldset__legend">How you like to work</legend>
+    <div class="field" role="radiogroup" aria-labelledby="cf-pref-label"
+         aria-describedby="cf-pref-error" data-radio-group="collaboration_preference">
+      <span class="field__label" id="cf-pref-label">Collaboration preference</span>
+      <div class="chips">
+        {['Gifted', 'Paid', 'Both'].map((option) => (
+          <label class="chip">
+            <input type="radio" name="collaboration_preference" value={option} required />
+            <span class="chip__label">{option}</span>
+          </label>
+        ))}
+      </div>
+      <p class="field__error" id="cf-pref-error" aria-live="polite"></p>
+    </div>
 
-    <div class="field">
-      <span class="field__label" id="cr-pref-label">Collaboration preference</span>
-      <div class="check-grid" role="radiogroup" aria-labelledby="cr-pref-label">
-        {['Gifted collaborations', 'Paid collaborations only', 'Open to both'].map((option, i) => (
-          <label class="check">
-            <input type="radio" name="collaboration_preference" value={option}
-                   required={i === 0}
-                   data-error="Please choose how you prefer to collaborate." />
-            <span>{option}</span>
+    <div class="field" role="group" aria-labelledby="cf-formats-label">
+      <span class="field__label" id="cf-formats-label">
+        Content formats you create <span class="field__optional">(choose any)</span>
+      </span>
+      <div class="chips">
+        {formats.map((f) => (
+          <label class="chip">
+            <input type="checkbox" name="content_formats[]" value={f} />
+            <span class="chip__label">{f}</span>
           </label>
         ))}
       </div>
     </div>
-
-    <div class="field">
-      <span class="field__label" id="cr-formats-label">Content formats you create</span>
-      <p class="field__hint">Choose as many as apply.</p>
-      <div class="check-grid" role="group" aria-labelledby="cr-formats-label">
-        {formats.map((format) => (
-          <label class="check">
-            <input type="checkbox" name="content_formats" value={format} />
-            <span>{format}</span>
-          </label>
-        ))}
-      </div>
-    </div>
   </fieldset>
 
-  <hr class="rule" />
-
-  <!-- Rates -->
-  <fieldset class="fieldset">
-    <legend class="fieldset__legend">Your rates</legend>
-    <p class="fieldset__intro">
-      Only fill in the formats you charge for. Leave anything else blank — a rate here
-      is a starting point, not a commitment.
+  {/* ---------- 05 ---------- */}
+  <fieldset class="form-section">
+    <legend class="form-section__legend">
+      <span class="form-section__number">05</span>
+      <span class="display display--sm">Your rates</span>
+    </legend>
+    <p class="form-section__intro">
+      Only for the formats you charge for — leave the rest blank. A starting point, not a
+      commitment.
     </p>
 
-    <div class="field" style="max-width: 16rem;">
-      <label class="field__label" for="cr-currency">Currency</label>
-      <select class="field__control" id="cr-currency" name="rate_currency">
+    <div class="field cf-currency">
+      <label class="field__label" for="cf-currency">Currency</label>
+      <select class="field__control" id="cf-currency" name="rate_currency">
         {currencies.map((c) => <option value={c}>{c}</option>)}
       </select>
     </div>
 
-    <div class="field-grid field-grid--3">
-      {rateFormats.map((format) => (
+    <div class="field-grid rate-grid">
+      {rates.map((r) => (
         <div class="field">
-          <label class="field__label" for={`cr-rate-${format.id}`}>
-            {format.label} <span class="field__optional">(optional)</span>
-          </label>
-          <input class="field__control" id={`cr-rate-${format.id}`}
-                 name={`rate_${format.id}`} type="text" inputmode="decimal"
-                 placeholder="e.g. 250" />
+          <label class="field__label" for={`cf-${r.name}`}>{r.label}</label>
+          <input class="field__control" id={`cf-${r.name}`} name={r.name} type="text"
+                 inputmode="decimal" placeholder="e.g. 250" />
         </div>
       ))}
     </div>
 
     <div class="field">
-      <label class="field__label" for="cr-rate-notes">
+      <label class="field__label" for="cf-rate-notes">
         Rate notes <span class="field__optional">(optional)</span>
       </label>
-      <textarea class="field__control" id="cr-rate-notes" name="rate_notes" rows="3"
-                aria-describedby="cr-rate-notes-hint"></textarea>
-      <p class="field__hint" id="cr-rate-notes-hint">
-        Bundle pricing, usage rights, exclusivity, minimum spend — anything we should know.
-      </p>
+      <textarea class="field__control" id="cf-rate-notes" name="rate_notes" rows="3"
+                placeholder="Bundles, usage rights, exclusivity — anything we should know"></textarea>
     </div>
   </fieldset>
 
-  <hr class="rule" />
-
-  <!-- Background -->
-  <fieldset class="fieldset">
-    <legend class="fieldset__legend">Background</legend>
+  {/* ---------- 06 ---------- */}
+  <fieldset class="form-section">
+    <legend class="form-section__legend">
+      <span class="form-section__number">06</span>
+      <span class="display display--sm">Background</span>
+    </legend>
 
     <div class="field">
-      <label class="field__label" for="cr-past">
-        Past collaborations <span class="field__optional">(optional)</span>
+      <label class="field__label" for="cf-past">
+        Past brand collaborations <span class="field__optional">(optional)</span>
       </label>
-      <textarea class="field__control" id="cr-past" name="past_collaborations" rows="4"
-                aria-describedby="cr-past-hint"></textarea>
-      <p class="field__hint" id="cr-past-hint">Brands you have worked with before.</p>
+      <textarea class="field__control" id="cf-past" name="past_collaborations" rows="3"
+                placeholder="Brands you've worked with before"></textarea>
     </div>
 
     <div class="field">
-      <label class="field__label" for="cr-mediakit">
+      <label class="field__label" for="cf-mediakit">
         Media kit link <span class="field__optional">(optional)</span>
       </label>
-      <input class="field__control" id="cr-mediakit" name="media_kit" type="url"
-             placeholder="https://…" aria-describedby="cr-mediakit-error" />
-      <p class="field__error" id="cr-mediakit-error" aria-live="polite"></p>
+      <input class="field__control" id="cf-mediakit" name="media_kit" type="text"
+             inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false"
+             placeholder="PDF, Google Drive or portfolio link" data-link
+             aria-describedby="cf-mediakit-error" />
+      <p class="field__error" id="cf-mediakit-error" aria-live="polite"></p>
     </div>
 
     <div class="field">
-      <label class="field__label" for="cr-notes">
+      <label class="field__label" for="cf-else">
         Anything else <span class="field__optional">(optional)</span>
       </label>
-      <textarea class="field__control" id="cr-notes" name="notes" rows="4"></textarea>
+      <textarea class="field__control" id="cf-else" name="anything_else" rows="3"
+                placeholder="Availability, upcoming launches, brands you'd love to work with"></textarea>
     </div>
   </fieldset>
 
-  <hr class="rule" />
-
-  <label class="check check--consent">
-    <input type="checkbox" name="consent" value="yes" required
-           aria-describedby="cr-consent-error"
-           data-error="Please tick this box so we can add you to the database." />
-    <span>
-      I consent to AMAVI Socials adding my details to its creator database, and to
-      those details being shared with AMAVI’s clients for the purpose of
-      considering me for collaborations. I can withdraw this consent and ask for my
-      details to be deleted at any time by emailing
-      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. See our
-      <a href="/privacy/">Privacy Policy</a>.
-    </span>
-  </label>
-  <p class="field__error" id="cr-consent-error" aria-live="polite"></p>
-
-  <div class="form__footer">
-    <div class="form__status" data-form-status role="status" aria-live="polite" hidden></div>
-    <div>
-      <button type="submit" class="btn btn--primary" data-submit>Join the network</button>
+  {/* ---------- Consent + submit ---------- */}
+  <div class="form__submit">
+    <div class="field">
+      <label class="consent">
+        <input type="checkbox" name="consent" value="yes" required
+               aria-describedby="cf-consent-error"
+               data-error="Please tick this box to join the network." />
+        <span class="consent__text">
+          I agree to be added to the AMAVI Socials creator database and to be contacted about
+          potential collaborations, campaigns and partnership opportunities. I understand my
+          details may be shared with AMAVI’s clients for the purpose of evaluating and arranging
+          collaborations. See our <a href="/privacy/">Privacy Policy</a>.
+        </span>
+      </label>
+      <p class="field__error" id="cf-consent-error" aria-live="polite"></p>
     </div>
+
+    {/* Shown by the script: a validation nudge, or a failed send. Never both. */}
+    <p class="field__error" data-form-hint aria-live="polite"></p>
+    <div class="form-status surface-ink" data-form-error tabindex="-1" hidden>
+      <strong>Your application didn’t send.</strong>{' '}
+      <span data-form-error-reason>Something went wrong on the way.</span>{' '}
+      Nothing you’ve entered has been lost — please try again. If it keeps failing, email us at{' '}
+      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+    </div>
+
+    <button type="submit" class="btn btn--primary" data-submit>Send application</button>
   </div>
 </form>
 
+<div class="form-status surface-accent creator-success" data-form-success tabindex="-1" hidden>
+  <h2 class="display display--md">Application received.</h2>
+  <p>Thanks for applying. You’re in the AMAVI network — we’ll come to you when a brief fits your audience.</p>
+</div>
+
 <script>
-  import '../scripts/netlify-form';
+  import '../scripts/creator-form';
 </script>
 
 <style>
-  .creator-form { gap: var(--space-xl); }
+  .creator-form { gap: var(--space-2xl); }
+  .cf-currency { max-width: 16rem; }
+  /* Rates are short numbers: two per row even on a phone, three from tablet. */
+  .rate-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-m) var(--space-s);
+    /* Labels wrap to different lengths ("Reel or short-form video" vs
+       "Story"); bottom-aligning each row keeps the inputs level. */
+    align-items: end;
+  }
+  @media (min-width: 40em) { .rate-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  .creator-success { display: grid; gap: var(--space-s); padding: clamp(1.75rem, 1rem + 4vw, 3.5rem); font-size: var(--text-lead); }
+  .creator-success[hidden] { display: none; }
 </style>

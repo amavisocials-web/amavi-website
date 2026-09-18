@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import CreatorForm from '../components/CreatorForm.astro';
+import { CONTACT_EMAIL } from '../consts';
+---
+
+<Base
+  title="Become a Creator"
+  description="Apply to join the AMAVI Socials creator network. One application puts you in front of every brand we work with across Ireland."
+>
+  {/* Kept short: this is mostly filled in on a phone, and every line above the
+      form pushes the first field further down the screen. */}
+  <section class="section page-head">
+    <div class="container container--narrow">
+      <h1 class="display display--lg">Become a creator</h1>
+      <p class="lead page-head__lead">
+        One application puts you in front of every brand we work with. We come to you when a
+        brief fits.
+      </p>
+      <p class="meta page-head__meta">
+        About five minutes. Only the essentials are required. Questions? Email{' '}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section form-page">
+    <div class="container container--narrow">
+      <CreatorForm />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-head { padding-bottom: var(--space-l); }
+  .page-head__lead { margin-top: var(--space-m); }
+  .page-head__meta { margin-top: var(--space-s); }
+  .page-head__meta a { color: var(--link); }
+  .form-page { padding-top: 0; }
+</style>

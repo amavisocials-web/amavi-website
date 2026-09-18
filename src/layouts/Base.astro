@@ -1,10 +1,7 @@
 ---
-// Self-hosted via npm rather than loaded from Google's CDN. Latin subsets only.
-import '@fontsource/instrument-serif/latin-400.css';
-import '@fontsource/instrument-serif/latin-400-italic.css';
-import '@fontsource-variable/archivo/wght.css';
 import '../styles/global.css';
 
+import Fonts from '../components/Fonts.astro';
 import SEO from '../components/SEO.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
@@ -16,9 +13,14 @@ interface Props {
   standaloneTitle?: boolean;
   /** JSON-LD, serialised into a schema.org script tag. */
   schema?: Record<string, unknown>;
+  /**
+   * `overlay` floats a light header over a full-bleed first section. Only the
+   * home hero uses it; every other page gets the standard header.
+   */
+  nav?: 'standard' | 'overlay';
 }
 
-const { title, description, ogImage, standaloneTitle, schema } = Astro.props;
+const { title, description, ogImage, standaloneTitle, schema, nav = 'standard' } = Astro.props;
 ---
 
 <!doctype html>
@@ -26,9 +28,12 @@ const { title, description, ogImage, standaloneTitle, schema } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="generator" content={Astro.generator} />
+
+    <Fonts />
 
     <SEO
       title={title}
@@ -37,20 +42,18 @@ const { title, description, ogImage, standaloneTitle, schema } = Astro.props;
       standaloneTitle={standaloneTitle}
     />
 
-    {schema && (
-      <script type="application/ld+json" set:html={JSON.stringify(schema)} />
-    )}
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
 
-    <!--
-      TODO(client): analytics. GA4 or Plausible is the client's choice (brief §8).
-      If a cookie-setting tool is chosen, a cookie notice is required before it
-      loads; Plausible is cookieless and would not need one.
-    -->
+    {/*
+      TODO(client): analytics — GA4 or Plausible, client's choice (brief §8).
+      GA4 sets cookies and would require a consent banner before it loads;
+      Plausible is cookieless and would not.
+    */}
   </head>
 
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
-    <Nav />
+    <Nav variant={nav} />
     <main id="main">
       <slot />
     </main>

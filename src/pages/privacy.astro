@@ -1,13 +1,14 @@
 ---
 /**
- * TODO(client): this policy is accurate to what the site actually does, but a
- * published privacy policy needs the registered legal entity name, registered
- * address, and a decision on whether a Data Protection Officer is named. Those
- * are marked inline below. Have it reviewed before launch — the site collects
- * personal data from creators and brands in the EU, so GDPR applies.
+ * TODO(client): accurate to how the site now works — brands email, creators
+ * apply through the form on /become-a-creator/, which Netlify Forms receives.
+ * A published policy still needs the registered legal entity, its address and
+ * a decision on naming a Data Protection Officer (marked inline). Have it
+ * reviewed before launch: AMAVI holds personal data on EU creators and brands,
+ * so GDPR applies.
  */
 import Base from '../layouts/Base.astro';
-import { CONTACT_EMAIL, SITE_NAME } from '../consts';
+import { CONTACT_EMAIL, SITE_NAME, CREATOR_PATH, REGION } from '../consts';
 
 const updated = 'September 2026';
 ---
@@ -27,15 +28,15 @@ const updated = 'September 2026';
     <div class="container container--narrow">
       <div class="policy">
         <p class="policy__lead">
-          This policy explains what personal data {SITE_NAME} collects through this
-          website, why we collect it, how long we keep it, and what you can ask us to do
-          with it. It applies to both brands making an enquiry and creators joining our
-          network.
+          This policy explains what personal data {SITE_NAME} collects, why, how long we
+          keep it, and what you can ask us to do with it. It covers brands who email us
+          and creators who apply to join our network through the application form on this
+          site.
         </p>
 
         <h2>Who we are</h2>
         <p>
-          {SITE_NAME} is an influencer marketing agency operating in Ireland. For the
+          {SITE_NAME} is an influencer marketing agency working with brands across {REGION}. For the
           purposes of the General Data Protection Regulation (GDPR) we are the data
           controller for the information described below.
         </p>
@@ -50,26 +51,25 @@ const updated = 'September 2026';
 
         <h2>What we collect, and why</h2>
 
-        <h3>If you make an enquiry as a brand</h3>
+        <h3>If you email us as a brand</h3>
         <p>
-          Through the form on our Work With Us page we collect your name, company, email
-          address, the service you are interested in, an optional budget range, and
-          whatever you write in the message field.
+          When you email us we receive your name, your email address and whatever you
+          include in your message — typically your company, what you want to achieve and a
+          rough budget.
         </p>
         <p>
-          We use this solely to respond to your enquiry and to discuss working together.
-          Our lawful basis is your consent, given when you tick the box on the form. We
-          do not add enquiry contacts to a mailing list.
+          We use this solely to reply and to discuss working together. Our lawful basis is
+          our legitimate interest in responding to an enquiry you started. We do not add
+          enquiry contacts to a mailing list.
         </p>
 
-        <h3>If you join the creator network</h3>
+        <h3>If you apply to join the creator network</h3>
         <p>
-          Through the form on our Creators page we collect your name, email address, city
-          and country, links to your social channels, your follower range, your
-          engagement rate, your niches, your collaboration preference, the content
-          formats you produce, your rates and any notes on them, any audience insights
-          you choose to share, details of past collaborations, a media kit link, and any
-          other notes you add.
+          Through our <a href={CREATOR_PATH}>creator application form</a> we collect
+          your name, email address, location, links to your social channels, your follower
+          range, your engagement rate, your niches, your collaboration preferences, the
+          content formats you produce, your rates, any audience insights you choose to
+          share, past brand collaborations, a media kit link, and any other notes you add.
         </p>
         <p>
           We use this to maintain our creator database and to match creators to client
@@ -102,11 +102,19 @@ const updated = 'September 2026';
             represent, for the purpose of considering you for collaborations.
           </li>
           <li>
-            <strong>Netlify.</strong> This site is hosted by Netlify, and both forms are
-            processed through Netlify Forms. Form submissions pass through and are stored
-            on their infrastructure.
+            <strong>Google Workspace.</strong> Handles our email, so brand enquiries are
+            stored there.
+          </li>
+          <li>
+            <strong>Netlify.</strong> Hosts this website and receives creator applications
+            through Netlify Forms, where they are stored. Like any web host it also processes
+            standard request logs, such as IP addresses, to serve pages.
           </li>
         </ul>
+        <p class="policy__todo">
+          [TODO(client): if applications are moved on from Netlify Forms — to a
+          spreadsheet, database or CRM — name that tool here too.]
+        </p>
         <p>
           We do not sell personal data, and we do not share it with anyone else for their
           own marketing purposes.
@@ -175,17 +183,19 @@ const updated = 'September 2026';
   .policy__lead {
     font-size: var(--text-lead);
     line-height: 1.45;
-    color: var(--ink);
+    color: var(--fg);
     padding-bottom: var(--space-l);
-    border-bottom: 1px solid var(--rule);
+    border-bottom: 1px solid var(--hairline);
     text-wrap: pretty;
   }
 
   .policy h2 {
     font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    text-transform: uppercase;
     font-size: var(--display-sm);
-    line-height: 1.15;
-    letter-spacing: var(--tracking-display);
+    line-height: 1.2;
     margin-top: var(--space-xl);
     margin-bottom: var(--space-s);
   }
@@ -197,10 +207,10 @@ const updated = 'September 2026';
     margin-bottom: var(--space-2xs);
   }
 
-  .policy p { color: var(--ink-muted); }
+  .policy p { color: var(--fg-muted); }
   .policy p + p { margin-top: var(--space-s); }
-  .policy strong { color: var(--ink); font-weight: 600; }
-  .policy a { color: var(--accent-alt); }
+  .policy strong { color: var(--fg); font-weight: 600; }
+  .policy a { color: var(--link); }
 
   .policy ul {
     margin-top: var(--space-s);
@@ -210,7 +220,7 @@ const updated = 'September 2026';
     gap: var(--space-2xs);
   }
   .policy li {
-    color: var(--ink-muted);
+    color: var(--fg-muted);
     padding-left: 1.1em;
     position: relative;
   }
@@ -219,16 +229,16 @@ const updated = 'September 2026';
     position: absolute;
     left: 0; top: 0.75em;
     width: 0.5em; height: 1px;
-    background: var(--ink-muted);
+    background: var(--fg-muted);
   }
 
   /* Visible on purpose: these are unresolved and must not ship unnoticed. */
   .policy__todo {
     margin-top: var(--space-s);
     padding: var(--space-s) var(--space-m);
-    background: var(--paper-deep);
-    border-left: 3px solid var(--accent-alt);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--accent);
     font-size: var(--text-sm);
-    color: var(--ink) !important;
+    color: var(--fg) !important;
   }
 </style>

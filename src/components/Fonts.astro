@@ -1,0 +1,62 @@
+---
+/**
+ * The site's typefaces: Montserrat for text, ALT Rigatoni for display
+ * headings, and Poppins Light for the wordmark alone.
+ *
+ * Montserrat is open source and self-hosted from npm.
+ *
+ * ALT Rigatoni (Giulia Boggio, ALT.tf) is commercial and needs a web licence
+ * before it can ship. Rather than hard-code an @font-face that 404s until the
+ * files exist, this checks for them at build time and only declares the face
+ * once they are there. Installing the font is therefore a file drop, no code:
+ *
+ *   public/fonts/alt-rigatoni-variable.woff2          ← preferred, one file
+ *   — or any of —
+ *   public/fonts/alt-rigatoni-regular.woff2   (400)
+ *   public/fonts/alt-rigatoni-semibold.woff2  (600)  ← the weight headings use
+ *   public/fonts/alt-rigatoni-bold.woff2      (700)
+ *
+ * Until then Archivo, opened to its widest width axis, stands in. It is only
+ * downloaded while it is actually rendering something: once ALT Rigatoni is
+ * present and covers the glyphs, the browser never requests it.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import '@fontsource-variable/montserrat/wght.css';
+import '@fontsource-variable/archivo/standard.css';
+// The wordmark's face (Poppins Light). Latin, one weight: it sets two words.
+import '@fontsource/poppins/latin-300.css';
+
+const dir = path.join(process.cwd(), 'public', 'fonts');
+const present = (file: string) => fs.existsSync(path.join(dir, file));
+
+const VARIABLE = 'alt-rigatoni-variable.woff2';
+const STATICS = [
+  { file: 'alt-rigatoni-regular.woff2', weight: 400 },
+  { file: 'alt-rigatoni-semibold.woff2', weight: 600 },
+  { file: 'alt-rigatoni-bold.woff2', weight: 700 },
+];
+
+const variable = present(VARIABLE);
+const statics = variable ? [] : STATICS.filter((s) => present(s.file));
+
+const faces = variable
+  ? [`@font-face{font-family:'ALT Rigatoni';src:url('/fonts/${VARIABLE}') format('woff2-variations');font-weight:300 700;font-display:swap}`]
+  : statics.map(
+      (s) =>
+        `@font-face{font-family:'ALT Rigatoni';src:url('/fonts/${s.file}') format('woff2');font-weight:${s.weight};font-display:swap}`,
+    );
+
+// Preload the one file the headings render in, so the hero headline — the
+// page's largest paint — does not wait on a late font request.
+const heading = variable
+  ? VARIABLE
+  : (statics.find((s) => s.weight === 600) ?? statics.find((s) => s.weight === 700) ?? statics[0])?.file;
+---
+
+{faces.length > 0 && heading && (
+  <>
+    <link rel="preload" href={`/fonts/${heading}`} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={faces.join('')} />
+  </>
+)}

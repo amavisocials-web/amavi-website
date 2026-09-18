@@ -15,12 +15,12 @@
  */
 interface Props {
   ratio?: '4/5' | '3/4' | '1/1' | '16/9' | '3/2';
-  tone?: 'sage' | 'clay' | 'stone';
+  tone?: 'accent' | 'line' | 'ink';
   /** Short word set into the composition. Omit for a plain field. */
   caption?: string;
   class?: string;
 }
-const { ratio = '4/5', tone = 'sage', caption, class: className } = Astro.props;
+const { ratio = '4/5', tone = 'line', caption, class: className } = Astro.props;
 ---
 
 <div
@@ -40,15 +40,13 @@ const { ratio = '4/5', tone = 'sage', caption, class: className } = Astro.props;
     display: grid;
     place-items: center;
     overflow: hidden;
-    background-color: var(--ph-base);
-    background-image:
-      radial-gradient(120% 90% at 22% 12%, var(--ph-light) 0%, transparent 58%),
-      linear-gradient(152deg, transparent 38%, var(--ph-deep) 100%);
+    border-radius: var(--radius-media);
+    background: var(--ph-base);
   }
 
-  .ph--sage  { --ph-base: #7E9186; --ph-light: #C9D3CB; --ph-deep: #33443B; }
-  .ph--clay  { --ph-base: #B8836A; --ph-light: #E4CBB9; --ph-deep: #6E3E2A; }
-  .ph--stone { --ph-base: #A9A295; --ph-light: #DCD5C7; --ph-deep: #575147; }
+  .ph--accent { --ph-base: var(--accent); }
+  .ph--line   { --ph-base: var(--line); }
+  .ph--ink    { --ph-base: var(--ink); }
 
   /* A single hairline, echoing the section rules, so the block reads as a
      designed field rather than a failed image. */
@@ -57,6 +55,7 @@ const { ratio = '4/5', tone = 'sage', caption, class: className } = Astro.props;
     position: absolute;
     inset: var(--space-s);
     border: 1px solid rgb(255 255 255 / 0.22);
+    border-radius: calc(var(--radius-media) - 0.5rem);
     pointer-events: none;
   }
 

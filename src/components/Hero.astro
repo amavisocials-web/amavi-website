@@ -1,0 +1,136 @@
+---
+/**
+ * Full-bleed opening visual with the headline over it.
+ *
+ * TODO(client): no footage yet. Pass `video` (a path under /public, e.g.
+ * '/media/hero.mp4') and ideally a `poster` still, and the placeholder wall
+ * below is replaced by the clip. Keep it short, silent and loopable: it
+ * autoplays muted, and never plays for visitors who ask for reduced motion.
+ *
+ * Whatever goes in, check the headline still reads against it. Over the
+ * placeholder every tile is darker than the indigo ground, so white type never
+ * drops below its 9.74:1 on --brand; a bright clip would need a darker scrim.
+ */
+interface Props {
+  title: string;
+  subtitle?: string;
+  video?: string;
+  poster?: string;
+}
+const { title, subtitle, video, poster } = Astro.props;
+
+// Placeholder: a tilted wall of reel-shaped tiles in ink, solid and
+// translucent — all darker than the accent ground. Decoration standing in for
+// footage, so it is hidden from assistive tech. Enough tiles to fill a
+// portrait tablet (7 columns × 4 rows); elsewhere the surplus is clipped.
+const PALETTE = ['veil', 'ink', 'veil', 'shade', 'veil', 'ink', 'shade'];
+const tones = Array.from({ length: 28 }, (_, i) => PALETTE[(i * 3 + Math.floor(i / 7)) % PALETTE.length]);
+---
+
+<section class="hero surface-accent">
+  <div class="hero__media" aria-hidden="true">
+    {video ? (
+      <video class="hero__video" autoplay muted loop playsinline preload="metadata"
+             poster={poster} data-hero-video>
+        <source src={video} type="video/mp4" />
+      </video>
+    ) : (
+      <div class="hero__wall">
+        {tones.map((tone) => <span class:list={['hero__tile', `is-${tone}`]}></span>)}
+      </div>
+    )}
+  </div>
+  <div class="hero__scrim" aria-hidden="true"></div>
+
+  <div class="container hero__content">
+    <h1 class="display display--xl hero__title enter enter--1">{title}</h1>
+    {subtitle && <p class="hero__sub enter enter--2">{subtitle}</p>}
+    <div class="hero__actions enter enter--3"><slot name="actions" /></div>
+  </div>
+</section>
+
+{video && (
+  <script>
+    // Autoplay ignores prefers-reduced-motion on its own; honour it here.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll<HTMLVideoElement>('[data-hero-video]').forEach((v) => {
+        v.removeAttribute('autoplay');
+        v.pause();
+      });
+    }
+  </script>
+)}
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: min(100svh, 58rem);
+    display: grid;
+    align-items: center;
+  }
+
+  .hero__media { position: absolute; inset: 0; z-index: -2; }
+  .hero__video { width: 100%; height: 100%; object-fit: cover; }
+
+  /* --- Placeholder wall --- */
+  .hero__wall {
+    position: absolute;
+    inset: -20% -12%;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: clamp(0.75rem, 1.4vw, 1.25rem);
+    transform: rotate(-8deg);
+    align-content: center;
+  }
+  .hero__tile { aspect-ratio: 9 / 16; border-radius: var(--radius-media); }
+  /* Alternate tiles ride higher, the way a feed of reels never lines up. */
+  .hero__tile:nth-child(odd) { transform: translateY(-12%); }
+  /* Ink only, at three strengths — nothing outside the palette. */
+  .hero__tile.is-ink   { background: var(--ink); }
+  .hero__tile.is-shade { background: color-mix(in srgb, var(--ink) 55%, transparent); }
+  .hero__tile.is-veil  { background: color-mix(in srgb, var(--ink) 28%, transparent); }
+
+  @media (max-width: 47.99em) {
+    .hero__wall { grid-template-columns: repeat(4, minmax(0, 1fr)); inset: -15% -30%; }
+  }
+
+  /* Clean indigo behind the text, the wall showing at the edges. */
+  .hero__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(ellipse 58% 52% at 50% 52%,
+        color-mix(in srgb, var(--accent) 94%, transparent),
+        color-mix(in srgb, var(--accent) 55%, transparent) 62%,
+        transparent 88%);
+  }
+
+  .hero__content {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: var(--space-m);
+    padding-block: calc(var(--space-2xl) + 2rem) var(--space-2xl);
+  }
+
+  .hero__title { max-width: 26ch; }
+
+  .hero__sub {
+    font-size: var(--text-lead);
+    line-height: 1.55;
+    color: var(--fg-muted);
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-s);
+    margin-top: var(--space-s);
+  }
+</style>

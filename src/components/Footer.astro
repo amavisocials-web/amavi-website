@@ -1,82 +1,101 @@
 ---
 import Logo from './Logo.astro';
-import { CONTACT_EMAIL, SOCIALS, NAV_LINKS, SITE_NAME, LOCATION } from '../consts';
+import ContactPaths from './ContactPaths.astro';
+import { NAV_LINKS, SOCIALS, SITE_NAME, REGION, CONTACT_PATH, CREATOR_PATH } from '../consts';
+
 const year = new Date().getFullYear();
+
+// Get in Touch already is this block, and the application page is its creator
+// half; neither repeats it beneath itself.
+const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const showPanel = path !== CONTACT_PATH && path !== CREATOR_PATH;
 ---
 
 <footer class="site-footer">
-  <div class="container">
-    <hr class="rule" />
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <Logo size="lg" />
-        <p class="meta footer-tag">Influencer and creator partnerships. Based in {LOCATION}.</p>
+  {/* Indigo band straight onto black: the page's last hard edge, on purpose. */}
+  {showPanel && (
+    <section class="touch surface-accent" aria-labelledby="touch-heading">
+      <div class="container touch__inner">
+        <h2 id="touch-heading" class="display display--lg touch__heading">Get in touch</h2>
+        <ContactPaths level={3} size="panel" />
+      </div>
+    </section>
+  )}
+
+  <div class="footer-main surface-ink">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <Logo size="lg" variant="white" />
+          <p class="meta footer-tag">
+            Influencer and creator partnerships, working with brands across {REGION}.
+          </p>
+        </div>
+
+        <nav class="footer-col" aria-label="Footer">
+          <h2 class="label footer-heading">Site</h2>
+          <ul>
+            <li><a href="/">Home</a></li>
+            {NAV_LINKS.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
+            <li><a href={CONTACT_PATH}>Get in Touch</a></li>
+          </ul>
+        </nav>
+
+        <div class="footer-col">
+          <h2 class="label footer-heading">Follow</h2>
+          <ul>
+            {SOCIALS.map((s) => (
+              <li>
+                <a href={s.url} rel="noopener noreferrer" target="_blank">
+                  {s.name}<span class="visually-hidden"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      <nav class="footer-nav" aria-label="Footer">
-        <h2 class="label footer-heading">Site</h2>
-        <ul>
-          <li><a href="/">Home</a></li>
-          {NAV_LINKS.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
-          <li><a href="/contact/">Work with us</a></li>
-        </ul>
-      </nav>
-
-      <div class="footer-contact">
-        <h2 class="label footer-heading">Contact</h2>
-        <ul>
-          <li><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></li>
-          {SOCIALS.map((s) => (
-            <li><a href={s.url} rel="noopener noreferrer" target="_blank">{s.name}</a></li>
-          ))}
-        </ul>
+      <hr class="rule" />
+      <div class="footer-base">
+        <p class="meta">&copy; {year} {SITE_NAME}. All rights reserved.</p>
+        <p class="meta"><a href="/privacy/">Privacy Policy</a></p>
       </div>
-    </div>
-
-    <hr class="rule" />
-    <div class="footer-base">
-      <p class="meta">&copy; {year} {SITE_NAME}. All rights reserved.</p>
-      <p class="meta"><a href="/privacy/">Privacy Policy</a></p>
     </div>
   </div>
 </footer>
 
 <style>
-  .site-footer { padding-top: var(--section-y); }
+  .touch__inner {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--section-y);
+  }
+  .touch__heading { max-width: 14ch; }
 
   .footer-grid {
     display: grid;
     gap: var(--space-xl);
-    padding-block: var(--space-xl);
+    padding-block: var(--space-2xl) var(--space-xl);
   }
   @media (min-width: 48em) {
     .footer-grid {
-      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr);
       gap: var(--space-l);
       align-items: start;
     }
   }
 
-  .footer-tag { margin-top: var(--space-s); max-width: 28ch; }
+  .footer-tag { margin-top: var(--space-m); max-width: 30ch; }
+  .footer-heading { display: block; margin-bottom: var(--space-s); }
 
-  .footer-heading { margin-bottom: var(--space-s); display: block; }
-
-  .footer-nav ul,
-  .footer-contact ul {
-    list-style: none;
-    display: grid;
-    gap: var(--space-2xs);
-  }
-  .footer-nav a,
-  .footer-contact a {
+  .footer-col ul { list-style: none; display: grid; gap: var(--space-2xs); }
+  .footer-col a {
     font-size: var(--text-sm);
     text-decoration: none;
-    color: var(--ink);
     border-bottom: 1px solid transparent;
     transition: border-color var(--dur) var(--ease);
   }
-  .footer-nav a:hover,
-  .footer-contact a:hover { border-color: var(--ink); }
+  .footer-col a:hover { border-color: currentColor; }
 
   .footer-base {
     display: flex;
@@ -85,5 +104,5 @@ const year = new Date().getFullYear();
     gap: var(--space-s);
     padding-block: var(--space-m) var(--space-l);
   }
-  .footer-base a { color: var(--ink-muted); }
+  .footer-base a { color: inherit; }
 </style>

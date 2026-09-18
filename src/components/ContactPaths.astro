@@ -1,0 +1,81 @@
+---
+/**
+ * The two ways in: brands go to email, creators to the application page.
+ *
+ * Shared by the footer panel on every page and the Get in Touch page, so the
+ * routing and the copy exist in exactly one place.
+ */
+import {
+  CONTACT_EMAIL, BRAND_ENQUIRY_MAILTO, CREATOR_PATH, RESPONSE_TIME,
+} from '../consts';
+
+interface Props {
+  /** Heading level for the two path titles, to keep the page outline valid. */
+  level?: 2 | 3;
+  /** `panel` is the compact footer version; `page` is the contact page. */
+  size?: 'panel' | 'page';
+}
+const { level = 3, size = 'panel' } = Astro.props;
+const H = `h${level}` as 'h2' | 'h3';
+---
+
+<div class:list={['paths', `paths--${size}`]}>
+  {/* On the contact page each path is its own block of colour; in the footer
+      band they sit on the band's indigo. */}
+  <div class:list={['path', size === 'page' && 'surface-accent']}>
+    <p class="label path__label">For brands</p>
+    <H class="display display--sm path__title">Start a creator programme</H>
+    <p class="path__body">
+      Tell us what you sell and who you want in front of it. {RESPONSE_TIME}
+    </p>
+    <div class="path__actions">
+      <a href={BRAND_ENQUIRY_MAILTO} class="btn btn--primary">Email us</a>
+      <a href={`mailto:${CONTACT_EMAIL}`} class="path__email">{CONTACT_EMAIL}</a>
+    </div>
+  </div>
+
+  <div class:list={['path', size === 'page' && 'surface-ink']}>
+    <p class="label path__label">For creators</p>
+    <H class="display display--sm path__title">Join the creator network</H>
+    <p class="path__body">
+      One application puts you in front of every brand we work with. We come to
+      you when a brief fits.
+    </p>
+    <div class="path__actions">
+      <a href={CREATOR_PATH} class="btn btn--secondary">Join the Creator Network</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .paths { display: grid; gap: var(--space-xl); }
+  @media (min-width: 48em) {
+    .paths { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-l); }
+  }
+
+  .path { display: grid; gap: var(--space-s); align-content: start; }
+  .path__title { max-width: 18ch; }
+  .path__body { max-width: 40ch; color: var(--fg-muted); text-wrap: pretty; }
+
+  .path__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+    margin-top: var(--space-2xs);
+  }
+
+  .path__email {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    word-break: break-word;
+  }
+
+  /* Contact page: two square-cornered blocks, indigo and black, side by side. */
+  .paths--page { gap: var(--space-s); }
+  .paths--page .path { padding: clamp(1.75rem, 1rem + 3.5vw, 3.5rem); }
+  .paths--page .path__title { font-size: var(--display-md); }
+</style>

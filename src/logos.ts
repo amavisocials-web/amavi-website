@@ -2,11 +2,18 @@ import type { ImageMetadata } from 'astro';
 
 import adhdNow from './assets/logos/adhd-now.png';
 import autismcareIreland from './assets/logos/autismcare-ireland.png';
-import beyondBmi from './assets/logos/beyond-bmi.png';
 import cleaningDoctorHub from './assets/logos/cleaning-doctor-hub.png';
 import fettle from './assets/logos/fettle.png';
 import myirelandbox from './assets/logos/myirelandbox.png';
-import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
+
+// TODO(client): not cleared for publication (brief §9). Their files sit in
+// ./assets/logos/pending/ and are deliberately NOT imported: Astro copies every
+// imported image into the public build, rendered or not, so importing them
+// here would put an uncleared client's logo on the live server. Once sign-off
+// lands, move the file up a folder, uncomment its import and manifest line
+// below, and set `published: true` in the matching case study.
+// import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
+// import beyondBmi from './assets/logos/beyond-bmi.png';
 
 /**
  * Client logos, supplied by AMAVI.
@@ -25,14 +32,17 @@ import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
  * The Humble Fishmonger is the exception: its artwork *is* a navy field, so it
  * renders as its own tile. Nothing to cut.
  *
- * `cleared` follows the brief: only clients already public on the related
- * agency site may appear. The two held back are wired up and ready — flip the
- * flag here and in the matching case-study markdown once sign-off lands.
+ * Only clients already public on the related agency site may appear (brief
+ * §9). Note what keeps a logo off the site: NOT importing it. `cleared: false`
+ * hides a logo from every page, but Astro still copies any imported image into
+ * the public build — so for a client awaiting sign-off, leave the file in
+ * ./assets/logos/pending/ and its import commented out, as below.
  */
 export interface ClientLogo {
-  /** Must match the `client` field in src/content/case-studies/. */
+  /** The client's name, as used in the logo's alt text. */
   name: string;
   src: ImageMetadata;
+  /** Hides the logo from pages. Does NOT keep the file off the server — see above. */
   cleared: boolean;
   /** Per-logo optical nudge, where a mark reads heavy or light beside the rest. */
   scale?: number;
@@ -52,10 +62,9 @@ export const CLIENT_LOGOS: ClientLogo[] = [
   { name: 'Cleaning Doctor Hub',   src: cleaningDoctorHub,   cleared: true,  scale: 1.15 },
   { name: 'MyIrelandBox',          src: myirelandbox,        cleared: true,  scale: 0.95 },
 
-  // TODO(client): not cleared for publication (brief §9). Flip `cleared` here
-  // and `published` in the matching case study once sign-off is confirmed.
-  { name: 'The Humble Fishmonger', src: theHumbleFishmonger, cleared: false },
-  { name: 'Beyond BMI',            src: beyondBmi,           cleared: false },
+  // Pending sign-off — see the note on the imports above.
+  // { name: 'The Humble Fishmonger', src: theHumbleFishmonger, cleared: true },
+  // { name: 'Beyond BMI',            src: beyondBmi,           cleared: true },
 ];
 
 /**
@@ -80,6 +89,3 @@ export const opticalK = (logo: ClientLogo) =>
 /** The wall only ever shows cleared logos. */
 export const clearedLogos = () => CLIENT_LOGOS.filter((l) => l.cleared);
 
-/** Look one up by the case study's `client` field. */
-export const logoFor = (client: string) =>
-  CLIENT_LOGOS.find((l) => l.name === client);
