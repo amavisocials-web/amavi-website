@@ -1,57 +1,47 @@
 /* ==========================================================================
    AMAVI Socials — design tokens and global styles
 
-   BRAND HANDOVER: every colour, typeface, size and spacing value the site
-   uses is a custom property in the :root block below.
+   Black and white. #341BCA is an accent only.
 
-   Colour works in two layers:
-     palette  the six colours. Fixed — edit these to rebrand.
-     roles    what components actually use (--fg, --fg-muted, --hairline,
-              the button set…). Each .surface-* class sets them from the
-              palette, so components never need to know what they sit on.
+   BRAND HANDOVER: every colour, typeface, size and spacing value the site
+   uses is a custom property in the :root block below. These seven colours —
+   four for the white page, three for its only dark or grey surfaces — are the
+   only colour values anywhere in the codebase.
    ========================================================================== */
 
 :root {
-  /* --- Colour: palette ----------------------------------------------------
-     Six colours, nothing else. Never redefined anywhere below. */
-  --bg:     #FFFFFF;   /* page background */
-  --band:   #FBEEF1;   /* pale petal pink — tint sections only */
-  --ink:    #0D0D0D;   /* true black: text, and black sections */
-  --muted:  #6E6E73;   /* supporting text, form-field edges */
-  --line:   #EAEAEA;   /* hairlines; supporting text on dark sections */
-  --accent: #341BCA;   /* indigo: buttons, links, indigo sections */
+  /* --- Colour ------------------------------------------------------------ */
+  --bg:     #FFFFFF;   /* every background, bar the three surfaces below */
+  --ink:    #000000;   /* all text */
+  --line:   #000000;   /* every rule, divider, border, field outline, table line */
+  /* The accent appears only on: the logo, links, button fills and outlines,
+     hover and pressed states, focus rings, and small marks such as the active
+     nav indicator. Nowhere else. */
+  --accent: #341BCA;
 
-  /* Measured contrast (WCAG), so nothing here is a guess:
-       ink on bg      19.44:1     accent on bg    9.74:1 — AA and AAA,
-       muted on bg     5.07:1                      body text included
-       bg on accent    9.74:1     bg on ink      19.44:1
-       ink on band    17.22:1     accent on band  8.63:1
-       muted on band   4.49:1  ← a hair under AA's 4.5, so on band
-                                  sections supporting text uses ink
-       muted on ink    3.83:1  ← fails; on dark sections supporting
-       muted on accent 1.92:1     text uses line instead:
-       line on ink    16.16:1     line on accent  8.10:1
-       accent on ink   2.00:1  ← fails even for large text: on black,
-                                  indigo is only ever a solid block
-       muted edge on bg 5.07:1   form fields need 3:1 — line (1.20:1)
-                                  is never used as a field edge */
+  /* The only exceptions to the white background: the hero's overlay, the
+     Get in Touch band and the footer. See "Surfaces" below. */
+  --surface-dark:  #000000;
+  --on-dark:       #FFFFFF;   /* text, links, outlines and focus on black */
+  --surface-soft:  #F2F2F2;   /* only if Get in Touch is switched to grey */
 
-  /* --- Colour: roles (white-surface values) ------------------------------ */
-  --surface:          var(--bg);
-  --fg:               var(--ink);
-  --fg-muted:         var(--muted);
-  --fg-accent:        var(--accent);   /* indigo type; flips on dark sections */
-  --hairline:         var(--line);
-  --hairline-strong:  var(--ink);
-  --field-edge:       var(--muted);
-  --link:             var(--accent);
-  --focus:            var(--accent);
-  --btn-bg:           var(--accent);
-  --btn-fg:           var(--bg);
-  --btn-bg-hover:     var(--ink);
-  --btn-fg-hover:     var(--bg);
-  --meter-fill:       var(--accent);
-  --meter-track:      var(--line);     /* 8.10:1 against the fill */
+  /* Contrast, measured:
+       ink on bg       21.00:1   passes everything
+       accent on bg     9.74:1   links, the logo, focus rings (need 3:1)
+       bg on accent     9.74:1   the label on a filled button — the one place
+                                 on white that text is not black, because
+                                 black on #341BCA is only 2.16:1 and fails AA
+       on-dark on dark 21.00:1   text on the three dark surfaces
+       ink on soft     18.76:1   text on the grey Get in Touch, if chosen
+       accent on dark   2.16:1   hover only, on dark links: never at rest,
+                                 and never for a focus ring (needs 3:1) */
+
+  /* --- Line weight --------------------------------------------------------
+     Colour no longer separates anything, so weight, type scale and space do.
+     Thin throughout: 1px, or a true hairline where the design calls for it. */
+  --stroke: 1px;          /* borders, field outlines, section rules */
+  --stroke-hair: 1px;     /* fine dividers; one device pixel on dense screens */
+  --stroke-mark: 2px;     /* accent marks only: focus ring, active nav */
 
   /* --- Type ------------------------------------------------------------- */
   /* Display headings: ALT Rigatoni (Giulia Boggio / ALT.tf), a wide extended
@@ -78,6 +68,11 @@
 
   --figure-sm: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
 
+  /* Hierarchy without grey: secondary text is black, lighter and smaller. */
+  --weight-secondary: 300;
+  --weight-body: 400;
+  --weight-strong: 600;
+
   --leading-display: 1.04;
   --leading-body: 1.7;
   --tracking-caps: 0.12em;   /* small Montserrat caps: labels, buttons */
@@ -91,7 +86,8 @@
   --space-l:   2.5rem;
   --space-xl:  4rem;
   --space-2xl: 6rem;
-  --section-y: clamp(3.5rem, 2rem + 6.5vw, 7rem);
+  /* More room than before: space now does the separating colour used to. */
+  --section-y: clamp(4rem, 2.25rem + 7.5vw, 8.5rem);
 
   /* --- Layout ----------------------------------------------------------- */
   --container: 76rem;
@@ -99,9 +95,6 @@
   --gutter: clamp(1.25rem, 0.6rem + 3.2vw, 4rem);
   --measure: 64ch;
 
-  /* Cool and edgy, not soft: media corners are barely there, and blocks of
-     colour run full-bleed rather than sitting in rounded panels. The pill
-     stays — it is the secondary button's shape, not a surface. */
   --radius-media: 0.25rem;
   --radius-pill: 999px;
 
@@ -112,77 +105,9 @@
   color-scheme: light;
 }
 
-/* --- Surfaces --------------------------------------------------------------
-   Full-bleed sections in white, petal pink, indigo and black. Each class sets
-   its background and every role, so sections nest safely and every component
-   is correct on each without knowing which it is on. */
-
-.surface-bg, .surface-band {
-  --fg: var(--ink);
-  --fg-muted: var(--muted);
-  --fg-accent: var(--accent);
-  --hairline: var(--line);
-  --hairline-strong: var(--ink);
-  --field-edge: var(--muted);
-  --link: var(--accent);
-  --focus: var(--accent);
-  --btn-bg: var(--accent);
-  --btn-fg: var(--bg);
-  --btn-bg-hover: var(--ink);
-  --btn-fg-hover: var(--bg);
-  --meter-fill: var(--accent);
-  --meter-track: var(--line);
-  background: var(--surface);
-  color: var(--fg);
-}
-.surface-bg   { --surface: var(--bg); }
-.surface-band {
-  --surface: var(--band);
-  /* muted on band is 4.49:1 — just under AA — so supporting text is ink. */
-  --fg-muted: var(--ink);
-}
-
-.surface-accent {
-  --surface: var(--accent);
-  --fg: var(--bg);
-  --fg-muted: var(--line);                 /* 8.10:1 */
-  --fg-accent: var(--bg);
-  --hairline: var(--line);
-  --hairline-strong: var(--bg);
-  --field-edge: var(--line);
-  --link: var(--bg);
-  --focus: var(--bg);                      /* 9.74:1 against accent */
-  --btn-bg: var(--bg);
-  --btn-fg: var(--ink);
-  --btn-bg-hover: var(--ink);
-  --btn-fg-hover: var(--bg);
-  --meter-fill: var(--bg);
-  --meter-track: var(--ink);
-  background: var(--surface);
-  color: var(--fg);
-}
-
-.surface-ink {
-  --surface: var(--ink);
-  --fg: var(--bg);
-  --fg-muted: var(--line);                 /* 16.16:1 — muted fails here */
-  --fg-accent: var(--bg);                  /* never accent: 2.00:1 on ink */
-  --hairline: var(--muted);
-  --hairline-strong: var(--bg);
-  --field-edge: var(--line);
-  --link: var(--bg);
-  --focus: var(--bg);
-  /* Indigo on black, on purpose: a solid block of accent with white type
-     (9.74:1). The label identifies the button, so the fill needn't clear 3:1
-     against black; hover flips to white for an unmistakable state. */
-  --btn-bg: var(--accent);
-  --btn-fg: var(--bg);
-  --btn-bg-hover: var(--bg);
-  --btn-fg-hover: var(--ink);
-  --meter-fill: var(--bg);
-  --meter-track: var(--muted);
-  background: var(--surface);
-  color: var(--fg);
+/* On dense screens a hairline is one device pixel; elsewhere it stays 1px. */
+@media (min-resolution: 2dppx) {
+  :root { --stroke-hair: 0.5px; }
 }
 
 /* --- Reset ------------------------------------------------------------- */
@@ -196,11 +121,11 @@ html {
 body {
   margin: 0;
   background: var(--bg);
-  color: var(--fg);
+  color: var(--ink);
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-body);
-  font-weight: 400;
+  font-weight: var(--weight-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -210,10 +135,20 @@ h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
 ul, ol { margin: 0; padding: 0; }
 img, picture, svg, video { display: block; max-width: 100%; }
 button { font: inherit; color: inherit; background: none; border: 0; }
+/* No browser grey on any control, even the off-screen honeypot. */
+input, select, textarea { border-color: var(--line); }
 
-strong { font-weight: 600; }
+strong { font-weight: var(--weight-strong); }
 
-a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+/* Links in running text carry the accent. Navigation, buttons and the logo
+   set their own treatment and take the accent only as a mark or a state. */
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: var(--stroke);
+  text-underline-offset: 0.2em;
+}
+a:hover { text-decoration-thickness: var(--stroke-mark); }
 
 /* --- Display type --------------------------------------------------------
    Headings only. Set in capitals: that is what the face is drawn for. */
@@ -233,30 +168,28 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
 
 .lead {
   font-size: var(--text-lead);
+  font-weight: var(--weight-secondary);
   line-height: 1.6;
-  color: var(--fg-muted);
   max-width: 48ch;
   text-wrap: pretty;
 }
 
 .prose { max-width: var(--measure); }
 .prose p + p { margin-top: var(--space-s); }
-.prose a { color: var(--link); }
 
 .meta {
   font-size: var(--text-sm);
+  font-weight: var(--weight-secondary);
   line-height: 1.55;
-  color: var(--fg-muted);
 }
 
 /* Small Montserrat capitals, for a section that genuinely needs naming. */
 .label {
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: var(--weight-strong);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--fg-muted);
 }
 
 /* --- Layout primitives -------------------------------------------------- */
@@ -271,9 +204,13 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
 .section { padding-block: var(--section-y); }
 .section--tight { padding-block: clamp(2.5rem, 1.5rem + 4vw, 4.5rem); }
 
+/* Where a section once separated itself with a background, it now takes a
+   full-width black hairline and the extra space above. */
+.section--ruled { border-top: var(--stroke-hair) solid var(--line); }
+
 .centered { text-align: center; margin-inline: auto; }
 
-.rule { border: 0; border-top: 1px solid var(--hairline); margin: 0; }
+.rule { border: 0; border-top: var(--stroke-hair) solid var(--line); margin: 0; }
 
 .section-head {
   display: grid;
@@ -283,7 +220,7 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
 .section-head--center { text-align: center; justify-items: center; }
 .section-head--center .lead { margin-inline: auto; }
 
-/* --- Buttons: two styles; each surface supplies their colours ----------- */
+/* --- Buttons: two styles ------------------------------------------------ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -292,7 +229,7 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
   padding: 1.05em 1.9em;
   font-family: var(--font-body);
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: var(--weight-strong);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   text-decoration: none;
@@ -302,48 +239,66 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
   text-align: center;
   text-wrap: balance;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: var(--stroke) solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
   transition: background-color var(--dur) var(--ease),
               color var(--dur) var(--ease),
               border-color var(--dur) var(--ease);
 }
+.btn:hover { text-decoration: none; }
 
-.btn--primary {
-  background: var(--btn-bg);
-  color: var(--btn-fg);
-  border-color: var(--btn-bg);
-}
-.btn--primary:hover {
-  background: var(--btn-bg-hover);
-  color: var(--btn-fg-hover);
-  border-color: var(--btn-bg-hover);
-}
+/* Primary: an accent fill. Its label is white — black on #341BCA is 2.16:1
+   and fails; white is 9.74:1. Hover inverts to an outline; pressed refills. */
+.btn--primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn--primary:hover { background: var(--bg); color: var(--accent); }
+.btn--primary:active { background: var(--accent); color: var(--bg); }
 
-.btn--secondary {
-  background: transparent;
-  color: var(--fg);
-  border-color: var(--fg);
-  border-radius: var(--radius-pill);
-}
-.btn--secondary:hover { background: var(--fg); color: var(--surface); }
+/* Secondary: a black outline. The accent arrives on hover and press. */
+.btn--secondary { border-radius: var(--radius-pill); }
+.btn--secondary:hover { color: var(--accent); border-color: var(--accent); }
+.btn--secondary:active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
 /* A text link that acts like an action. No arrow glued to the end. */
 .link-action {
   display: inline-block;
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: var(--weight-strong);
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
   text-decoration: none;
-  color: inherit;
-  border-bottom: 1px solid currentColor;
+  color: var(--ink);
+  border-bottom: var(--stroke) solid var(--line);
   padding-bottom: 0.25em;
-  transition: color var(--dur) var(--ease);
+  transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-.link-action:hover { color: var(--link); }
+.link-action:hover { color: var(--accent); border-color: var(--accent); }
 
-/* --- Focus and accessibility ------------------------------------------- */
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+/* --- Surfaces: the three exceptions to white ----------------------------
+   The hero overlay, Get in Touch and the footer. Nothing else on the site
+   sits on anything but --bg.
+
+   On black, text, links, outlines and rules turn white. The accent keeps the
+   primary button's fill and marks hover. Focus rings turn white too: the
+   accent is only 2.16:1 against black, and a focus ring needs 3:1. */
+.surface-dark { background: var(--surface-dark); color: var(--on-dark); }
+.surface-soft { background: var(--surface-soft); color: var(--ink); }
+
+.surface-dark a:not(.btn) { color: var(--on-dark); }
+.surface-dark a:not(.btn):hover { color: var(--accent); }
+.surface-dark .btn--secondary,
+.surface-dark .link-action { color: var(--on-dark); border-color: var(--on-dark); background: none; }
+.surface-dark .btn--secondary:hover,
+.surface-dark .btn--secondary:active { color: var(--on-dark); border-color: var(--accent); background: var(--accent); }
+.surface-dark .link-action:hover { color: var(--accent); border-color: var(--accent); }
+.surface-dark .rule { border-color: var(--on-dark); }
+.surface-dark :focus-visible { outline-color: var(--on-dark); }
+
+/* --- Focus and accessibility -------------------------------------------
+   The accent ring is 9.74:1 against white (focus indicators need 3:1), and
+   the offset leaves a white gap so it stays distinct even around a filled
+   accent button. */
+:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
 
 .visually-hidden {
   position: absolute;
@@ -361,8 +316,9 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
   left: var(--space-s);
   top: -4rem;
   z-index: 100;
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--bg);
+  color: var(--ink);
+  border: var(--stroke) solid var(--line);
   padding: var(--space-2xs) var(--space-s);
   font-size: var(--text-sm);
   text-decoration: none;
@@ -395,44 +351,17 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
    Mobile-first: one column, 3rem-tall controls, 16px type in every input (so
    iOS never zooms the page on focus), and tap targets of at least 44px.
 
-   States, with no third colour: the brief rules one out, so an error is a
-   heavy black border plus an icon and a message — never colour alone — while
-   focus is indigo, keeping the two visibly different on the same field.
+   Every outline is a 1px black line. Focus is the accent ring. An error is
+   named in a message with an icon beside the field — never colour, since
+   there is none to use.
    ========================================================================== */
 
 .form { display: grid; gap: var(--space-xl); }
 
-/* A titled group of fields. Numbered, because the sections are a sequence. */
-.form-section {
-  border: 0;
-  margin: 0;
-  padding: var(--space-l) 0 0;
-  border-top: 2px solid var(--hairline-strong);
-  display: grid;
-  gap: var(--space-m);
-  min-width: 0;
-}
-.form-section__legend {
-  padding: 0;
-  margin-bottom: var(--space-2xs);
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-s);
-}
-.form-section__number {
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: var(--tracking-caps);
-  font-variant-numeric: tabular-nums;
-  color: var(--fg-accent);
-}
-.form-section__intro { font-size: var(--text-sm); color: var(--fg-muted); max-width: 56ch; }
-
 .field { display: grid; gap: var(--space-2xs); align-content: start; min-width: 0; }
-.field__label { font-size: var(--text-sm); font-weight: 600; line-height: 1.4; color: var(--fg); }
-.field__optional { font-weight: 400; color: var(--fg-muted); }
-.field__hint { font-size: var(--text-sm); line-height: 1.45; color: var(--fg-muted); }
+.field__label { font-size: var(--text-sm); font-weight: var(--weight-strong); line-height: 1.4; }
+.field__optional { font-weight: var(--weight-secondary); }
+.field__hint { font-size: var(--text-sm); font-weight: var(--weight-secondary); line-height: 1.45; }
 
 .field__control {
   width: 100%;
@@ -440,42 +369,42 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em
   padding: 0.75rem 0.875rem;
   font: inherit;
   font-size: 1rem;              /* ≥16px, or iOS zooms on focus */
+  font-weight: 500;             /* what's typed sits heavier than a placeholder */
   line-height: 1.4;
-  color: var(--fg);
-  background: var(--surface);
-  border: 1px solid var(--field-edge);   /* muted: 5.07:1 on bg — form edges need 3:1 */
+  color: var(--ink);
+  background: var(--bg);
+  border: var(--stroke) solid var(--line);
   border-radius: 0;
-  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
-.field__control::placeholder { color: var(--fg-muted); opacity: 1; }
-.field__control:hover { border-color: var(--fg); }
-.field__control:focus { outline: none; border-color: var(--focus); box-shadow: inset 0 0 0 1px var(--focus); }
+/* No grey placeholder: black, at the secondary weight. */
+.field__control::placeholder { color: var(--ink); font-weight: var(--weight-secondary); opacity: 1; }
+.field__control:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 2px; }
 textarea.field__control { min-height: 7.5rem; resize: vertical; }
 
-select.field__control {
-  appearance: none;
-  padding-right: 2.75rem;
-  background-image:
-    linear-gradient(45deg, transparent 50%, var(--fg) 50%),
-    linear-gradient(135deg, var(--fg) 50%, transparent 50%);
-  background-position: right 1.3rem center, right 0.95rem center;
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
+/* Selects draw their arrow with two black strokes rather than a gradient,
+   so they sit in a wrapper that can carry the ::after. */
+.select { position: relative; display: block; }
+.select .field__control { appearance: none; padding-right: 2.75rem; }
+.select::after {
+  content: '';
+  position: absolute;
+  right: 1.1rem;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: var(--stroke) solid var(--line);
+  border-bottom: var(--stroke) solid var(--line);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
 }
-
-/* Set by the form script, not by :invalid, so nothing is marked wrong
-   before the person has had a chance to fill it in. */
-.field__control[aria-invalid='true'] { border: 2px solid var(--fg); }
-.field__control[aria-invalid='true']:focus { border-color: var(--focus); box-shadow: none; }
 
 .field__error {
   display: flex;
   align-items: flex-start;
   gap: 0.5em;
   font-size: var(--text-sm);
-  font-weight: 600;
+  font-weight: var(--weight-strong);
   line-height: 1.4;
-  color: var(--fg);
 }
 .field__error:empty { display: none; }
 .field__error::before {
@@ -486,9 +415,8 @@ select.field__control {
   width: 1.15rem;
   height: 1.15rem;
   margin-top: 0.05rem;
+  border: var(--stroke) solid var(--line);
   border-radius: 50%;
-  background: var(--fg);
-  color: var(--surface);
   font-size: 0.75rem;
   font-weight: 700;
   line-height: 1;
@@ -501,8 +429,9 @@ select.field__control {
 }
 
 /* --- Chips: multi-select (checkbox) and single-select (radio) ----------
-   Real inputs, laid over the chip so the whole chip is the hit area. Selected
-   chips gain a tick as well as the fill, so state never rests on colour. */
+   Real inputs, laid over the chip so the whole chip is the hit area. A
+   selected chip takes an accent outline and an accent tick, and its label
+   goes heavier — three signals, so state never rests on colour. */
 .chips { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
 .chip { position: relative; display: inline-flex; }
 .chip input {
@@ -521,19 +450,18 @@ select.field__control {
   min-height: 2.75rem;          /* 44px tap target */
   padding: 0.55rem 1rem;
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: var(--weight-body);
   line-height: 1.25;
-  color: var(--fg);
-  background: var(--surface);
-  border: 1px solid var(--field-edge);
+  color: var(--ink);
+  background: var(--bg);
+  border: var(--stroke) solid var(--line);
   border-radius: var(--radius-media);
-  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease);
 }
-.chip:hover .chip__label { border-color: var(--fg); }
-.chip input:checked + .chip__label { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-.chip input:checked + .chip__label::before { content: '✓'; font-weight: 700; }
-.chip input:focus-visible + .chip__label { outline: 2px solid var(--focus); outline-offset: 2px; }
-.chips[aria-invalid='true'] .chip__label { border: 2px solid var(--fg); }
+.chip:hover .chip__label { border-color: var(--accent); }
+.chip input:checked + .chip__label { border-color: var(--accent); font-weight: var(--weight-strong); }
+.chip input:checked + .chip__label::before { content: '✓'; color: var(--accent); font-weight: 700; }
+.chip input:focus-visible + .chip__label { outline: var(--stroke-mark) solid var(--accent); outline-offset: 2px; }
 
 /* --- Consent ------------------------------------------------------------ */
 .consent {
@@ -542,7 +470,7 @@ select.field__control {
   gap: var(--space-s);
   align-items: start;
   padding: var(--space-m);
-  border: 1px solid var(--hairline);
+  border: var(--stroke) solid var(--line);
   cursor: pointer;
 }
 .consent input {
@@ -550,40 +478,42 @@ select.field__control {
   width: 1.5rem;
   height: 1.5rem;
   margin: 0.1rem 0 0;
-  border: 2px solid var(--fg);
+  border: var(--stroke) solid var(--line);
   background: var(--bg);
   display: grid;
   place-content: center;
   cursor: pointer;
 }
+/* The tick is a small accent mark, drawn with two strokes. */
 .consent input::before {
   content: '';
   width: 0.75rem;
   height: 0.45rem;
-  border-left: 2.5px solid var(--bg);
-  border-bottom: 2.5px solid var(--bg);
+  border-left: var(--stroke-mark) solid var(--accent);
+  border-bottom: var(--stroke-mark) solid var(--accent);
   transform: rotate(-45deg) translate(1px, -1px) scale(0);
   transition: transform 120ms var(--ease);
 }
-.consent input:checked { background: var(--accent); border-color: var(--accent); }
+.consent input:checked { border-color: var(--accent); }
 .consent input:checked::before { transform: rotate(-45deg) translate(1px, -1px) scale(1); }
-.consent input:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
-.consent input[aria-invalid='true'] { border-width: 3px; }
-.consent__text { font-size: var(--text-sm); line-height: 1.55; color: var(--fg); }
-.consent__text a { color: var(--link); }
+.consent input:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
+.consent__text { font-size: var(--text-sm); line-height: 1.55; }
 
-/* --- Submission ----------------------------------------------------------- */
-.form__submit { display: grid; gap: var(--space-m); }
-.form__submit .btn { width: 100%; min-height: 3.25rem; }
-@media (min-width: 40em) { .form__submit .btn { width: auto; justify-self: start; } }
-
-.form-status { padding: var(--space-m); font-size: var(--text-sm); line-height: 1.55; }
+/* Success and failure: a black outline and plain words, told apart by what
+   they say rather than by colour. */
+.form-status {
+  padding: var(--space-m);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  border: var(--stroke) solid var(--line);
+  background: var(--bg);
+}
 .form-status[hidden] { display: none; }
 .form-status strong { display: block; font-size: var(--text-base); margin-bottom: 0.25em; }
-.form-status a { color: var(--link); }
-.form-status:focus { outline: 2px solid var(--focus); outline-offset: 3px; }
+.form-status:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
 
 /* Netlify's spam honeypot: invisible to people, still in the DOM for bots. */
 .honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-button[disabled], .btn[disabled] { opacity: 0.6; cursor: progress; }
+/* Sending: the label says so. No fade — a faded button would read as grey. */
+button[disabled], .btn[disabled] { cursor: progress; }

@@ -1,159 +1,44 @@
 ---
 import Base from '../layouts/Base.astro';
-import ReachMeters from '../components/ReachMeters.astro';
-import { TAGLINE } from '../consts';
+import { TAGLINE, BRAND_ENQUIRY_MAILTO } from '../consts';
 
 /**
+ * Deliberately short: who AMAVI is, and one way to get in touch. The
+ * programme detail and the per-account figures that used to live here are on
+ * /services.
+ *
+ * The site-wide Get in Touch band is left off this page (see Footer.astro), so
+ * the email button below is its only call to action.
+ *
  * TODO(client): no team photos or bios supplied, so this page ships without a
  * team section rather than with stock portraits (brief §9).
  * src/components/Team.astro is scaffolded and ready to import.
  */
-
-/** The programme, in the order it runs. A real sequence, so it is numbered. */
-const programme = [
-  { title: 'Sourcing', body: 'A shortlist built from our own creator database and fresh research against your brief.' },
-  { title: 'Vetting', body: 'Audience quality, real engagement and brand fit — checked before a name ever reaches you.' },
-  { title: 'Outreach', body: 'We approach creators in our name, not yours, so a “no” costs you nothing.' },
-  { title: 'Agreements', body: 'Deliverables, formats, usage rights and timings, in writing, before anything is posted.' },
-  { title: 'Campaign management', body: 'Briefing, approvals, scheduling, boosting and tagging. You see content before it goes live.' },
-  { title: 'Reporting', body: 'Delivery against target, content and reach — and how much of that reach was new.' },
-];
-
-/**
- * Per-account reach, by sector rather than by name, as requested.
- *
- * Source: AMAVI's cumulative creator-programme report, April–August 2026.
- * These are CLIENT ACCOUNT totals over the trailing 90 days, not figures
- * attributable to creator content alone (brief §5). The caption says so, and
- * it must stay whatever else changes here.
- */
-const accounts = [
-  { client: 'Neurodiversity assessment provider', views: '3.6M+', nonFollower: 87.7 },
-  { client: 'Home services franchise network', views: '380,054', nonFollower: 94.8 },
-  { client: 'Autism assessment and aftercare service', views: '281,664', nonFollower: 95.9 },
-  { client: 'Mental health concierge platform', views: '204K+', nonFollower: 93.4 },
-];
 ---
 
 <Base
   title="About"
   description="AMAVI Socials runs influencer and creator partnership programmes end to end for brands across Ireland — sourcing, vetting, agreements, campaign management and reporting."
 >
-  {/* ================= Intro ================= */}
-  <section class="section page-head">
-    <div class="container">
+  <section class="section about">
+    <div class="container container--narrow about__inner">
       <h1 class="label">About AMAVI</h1>
-      <p class="display display--lg page-head__statement">{TAGLINE}</p>
-      <p class="lead page-head__lead">
+      <p class="display display--lg about__statement">{TAGLINE}</p>
+      <p class="lead about__lead">
         AMAVI Socials is a boutique influencer marketing agency working with brands across
         Ireland. We run creator partnership programmes from the first shortlist to the final
         report — so you get the reach without managing twenty creator relationships yourself.
       </p>
-    </div>
-  </section>
-
-  {/* ================= Programme ================= */}
-  <section class="section surface-band">
-    <div class="container">
-      <div class="section-head">
-        <h2 class="display display--md">How a programme works</h2>
-        <p class="lead">Six stages, in this order. Each one depends on the one before it.</p>
-      </div>
-
-      <ol class="programme">
-        {programme.map((step, i) => (
-          <li class="programme__step">
-            <span class="programme__number" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <h3 class="display display--sm programme__title">{step.title}</h3>
-            <p class="programme__body">{step.body}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  {/* ================= Why creator-led ================= */}
-  <section class="section surface-accent">
-    <div class="container why">
-      <h2 class="display display--md why__heading">Why creator-led beats posting more</h2>
-
-      <div class="prose why__body">
-        <p>
-          Posting more on your own channel reaches the same people, more often. Everyone who
-          sees it already follows you. That has its place — but <strong>it cannot introduce
-          you to anyone new</strong>.
-        </p>
-        <p>
-          Creator content arrives through someone else’s audience, with their credibility
-          attached. It puts you in front of people who have never heard of you, in a voice
-          they already trust.
-        </p>
-        <p>
-          And it only works if the content actually arrives. Most gifted collaborations run
-          on a handshake, which is why so many produce nothing. Every AMAVI partnership is
-          agreed in writing first — the deliverable, the format and the date — so what we
-          promise is what you get. Between April and August 2026, four brands set us a target
-          of 40 partnerships. <strong>We delivered 49.</strong>
-        </p>
-      </div>
-    </div>
-  </section>
-
-  {/* ================= Results ================= */}
-  <section class="section">
-    <div class="container">
-      <div class="section-head">
-        <h2 class="display display--md">What it looks like on real accounts</h2>
-        <p class="lead">
-          Four client accounts during their partnership period, by sector. On every one, the
-          large majority of accounts reached were not already following the brand.
-        </p>
-      </div>
-
-      <ReachMeters
-        rows={accounts}
-        caption="Client account totals over the trailing 90 days, covering the period each partnership ran. These are account-level figures and are not attributable to creator content alone — they are not presented as campaign results. Client names withheld."
-      />
+      <a href={BRAND_ENQUIRY_MAILTO} class="btn btn--primary about__cta">Email us</a>
     </div>
   </section>
 </Base>
 
 <style>
-  .page-head { padding-bottom: var(--space-xl); }
-  .page-head__statement { margin-top: var(--space-m); max-width: 22ch; }
-  .page-head__lead { margin-top: var(--space-l); max-width: 56ch; }
-
-  /* ---------- Programme: a numbered grid, not a stack of cards ---------- */
-  .programme {
-    list-style: none;
-    display: grid;
-    gap: var(--space-l) var(--space-xl);
-  }
-  @media (min-width: 40em) { .programme { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 64em) { .programme { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-  .programme__step {
-    display: grid;
-    gap: var(--space-xs);
-    align-content: start;
-    padding-top: var(--space-m);
-    border-top: 2px solid var(--hairline-strong);
-  }
-  .programme__number {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    letter-spacing: var(--tracking-caps);
-    font-variant-numeric: tabular-nums;
-    color: var(--fg-accent);
-  }
-  .programme__body { color: var(--fg-muted); max-width: 36ch; }
-
-  /* ---------- Why ---------- */
-  .why { display: grid; gap: var(--space-l); }
-  @media (min-width: 64em) {
-    .why { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
-  }
-  .why__heading { max-width: 16ch; }
-  .why__body { color: var(--fg-muted); font-size: var(--text-lead); line-height: 1.65; }
-  .why__body strong { color: var(--fg); }
+  /* Space does the work here: very little text, a lot of room around it. */
+  .about { padding-block: clamp(6rem, 3rem + 12vw, 14rem); }
+  .about__inner { display: grid; justify-items: start; }
+  .about__statement { margin-top: var(--space-m); }
+  .about__lead { margin-top: var(--space-l); max-width: 50ch; }
+  .about__cta { margin-top: var(--space-xl); }
 </style>

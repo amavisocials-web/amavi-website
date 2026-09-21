@@ -21,12 +21,15 @@
  * (npm run brand:assets).
  */
 interface Props {
-  /** Pick by background: `white` on brand or black, `brand` or `black` on white. */
+  /**
+   * `brand` (#341BCA) is the site's logo everywhere: every surface is white.
+   * `black` and `white` are kept for anything made off-site.
+   */
   variant?: 'black' | 'white' | 'brand';
   /** `sm` for the header lockup, `lg` for the footer. */
   size?: 'sm' | 'lg';
 }
-const { variant = 'black', size = 'sm' } = Astro.props;
+const { variant = 'brand', size = 'sm' } = Astro.props;
 ---
 
 <span class:list={['wordmark', `wordmark--${variant}`, `wordmark--${size}`]} translate="no">
@@ -44,9 +47,9 @@ const { variant = 'black', size = 'sm' } = Astro.props;
     text-align: right;
     text-transform: lowercase;
     white-space: nowrap;
-    /* The body's "antialiased" smoothing thins light-on-dark text on macOS,
-       which made the Light cut read lighter than the supplied file. Default
-       smoothing restores its weight — checked side by side at the PNG's scale. */
+    /* The body's "antialiased" smoothing thins text on macOS, which made the
+       Light cut read lighter than the supplied file. Default smoothing
+       restores its weight — checked side by side at the PNG's scale. */
     -webkit-font-smoothing: auto;
     -moz-osx-font-smoothing: auto;
   }

@@ -1,20 +1,31 @@
 ---
 import Logo from './Logo.astro';
 import ContactPaths from './ContactPaths.astro';
-import { NAV_LINKS, SOCIALS, SITE_NAME, REGION, CONTACT_PATH, CREATOR_PATH } from '../consts';
+import {
+  NAV_LINKS, SOCIALS, SITE_NAME, REGION, CONTACT_PATH, CREATOR_PATH, GET_IN_TOUCH_SURFACE,
+} from '../consts';
+
+interface Props {
+  /** The Get in Touch band's background. Set site-wide in src/consts.ts. */
+  touch?: 'dark' | 'soft';
+}
+const { touch = GET_IN_TOUCH_SURFACE } = Astro.props;
 
 const year = new Date().getFullYear();
 
-// Get in Touch already is this block, and the application page is its creator
-// half; neither repeats it beneath itself.
+// Get in Touch already is the contact page, the application page is its
+// creator half, and About ends on its own single call to action: none of
+// them repeats the band beneath itself.
 const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
-const showPanel = path !== CONTACT_PATH && path !== CREATOR_PATH;
+const showPanel = ![CONTACT_PATH, CREATOR_PATH, '/about/'].includes(path);
 ---
 
 <footer class="site-footer">
-  {/* Indigo band straight onto black: the page's last hard edge, on purpose. */}
   {showPanel && (
-    <section class="touch surface-accent" aria-labelledby="touch-heading">
+    <section
+      class:list={['touch', touch === 'soft' ? 'surface-soft' : 'surface-dark']}
+      aria-labelledby="touch-heading"
+    >
       <div class="container touch__inner">
         <h2 id="touch-heading" class="display display--lg touch__heading">Get in touch</h2>
         <ContactPaths level={3} size="panel" />
@@ -22,7 +33,7 @@ const showPanel = path !== CONTACT_PATH && path !== CREATOR_PATH;
     </section>
   )}
 
-  <div class="footer-main surface-ink">
+  <div class:list={['footer-main', 'surface-dark', showPanel && touch === 'dark' && 'footer-main--joined']}>
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
@@ -77,6 +88,10 @@ const showPanel = path !== CONTACT_PATH && path !== CREATOR_PATH;
     gap: var(--space-xl);
     padding-block: var(--space-2xl) var(--space-xl);
   }
+  /* Black band straight onto the black footer: a white hairline marks where
+     one ends and the other begins. */
+  .footer-main--joined .footer-grid { border-top: var(--stroke-hair) solid var(--on-dark); }
+
   @media (min-width: 48em) {
     .footer-grid {
       grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr);
@@ -89,13 +104,20 @@ const showPanel = path !== CONTACT_PATH && path !== CREATOR_PATH;
   .footer-heading { display: block; margin-bottom: var(--space-s); }
 
   .footer-col ul { list-style: none; display: grid; gap: var(--space-2xs); }
-  .footer-col a {
-    font-size: var(--text-sm);
+
+  /* White links; the accent marks hover, with an underline so the state
+     never rests on colour alone. */
+  .footer-col a,
+  .footer-base a {
     text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color var(--dur) var(--ease);
+    transition: color var(--dur) var(--ease);
   }
-  .footer-col a:hover { border-color: currentColor; }
+  .footer-col a { font-size: var(--text-sm); }
+  .footer-col a:hover,
+  .footer-base a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: var(--stroke);
+  }
 
   .footer-base {
     display: flex;
@@ -104,5 +126,4 @@ const showPanel = path !== CONTACT_PATH && path !== CREATOR_PATH;
     gap: var(--space-s);
     padding-block: var(--space-m) var(--space-l);
   }
-  .footer-base a { color: inherit; }
 </style>

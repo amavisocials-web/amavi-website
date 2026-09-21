@@ -1,111 +1,108 @@
 ---
 /**
- * Full-bleed opening visual with the headline over it.
+ * The opening: a full-bleed background video with the headline, one line of
+ * support and both calls to action over it.
  *
- * TODO(client): no footage yet. Pass `video` (a path under /public, e.g.
- * '/media/hero.mp4') and ideally a `poster` still, and the placeholder wall
- * below is replaced by the clip. Keep it short, silent and loopable: it
- * autoplays muted, and never plays for visitors who ask for reduced motion.
+ * The footage is one constant, HERO_VIDEO in src/consts.ts — a base path the
+ * hero turns into `.webm`, `.mp4` and `.jpg` (the poster). Each file is
+ * checked for at build time and left out if it isn't in /public yet, so the
+ * page never requests a file that doesn't exist: today only the placeholder
+ * poster is there, and the hero shows that still.
  *
- * Whatever goes in, check the headline still reads against it. Over the
- * placeholder every tile is darker than the indigo ground, so white type never
- * drops below its 9.74:1 on --brand; a bright clip would need a darker scrim.
+ * Motion is opt-in. Visitors who ask for reduced motion get the poster and
+ * no video — the video is hidden, paused and never allowed to autoplay.
  */
+import fs from 'node:fs';
+import path from 'node:path';
+import { HERO_VIDEO } from '../consts';
+
 interface Props {
   title: string;
   subtitle?: string;
+  /** Base path under /public, without an extension. */
   video?: string;
-  poster?: string;
 }
-const { title, subtitle, video, poster } = Astro.props;
+const { title, subtitle, video = HERO_VIDEO } = Astro.props;
 
-// Placeholder: a tilted wall of reel-shaped tiles in ink, solid and
-// translucent — all darker than the accent ground. Decoration standing in for
-// footage, so it is hidden from assistive tech. Enough tiles to fill a
-// portrait tablet (7 columns × 4 rows); elsewhere the surplus is clipped.
-const PALETTE = ['veil', 'ink', 'veil', 'shade', 'veil', 'ink', 'shade'];
-const tones = Array.from({ length: 28 }, (_, i) => PALETTE[(i * 3 + Math.floor(i / 7)) % PALETTE.length]);
+const inPublic = (file: string) => fs.existsSync(path.join(process.cwd(), 'public', file));
+const webm = inPublic(`${video}.webm`) ? `${video}.webm` : undefined;
+const mp4 = inPublic(`${video}.mp4`) ? `${video}.mp4` : undefined;
+const poster = inPublic(`${video}.jpg`) ? `${video}.jpg` : undefined;
 ---
 
-<section class="hero surface-accent">
+<section class="hero surface-dark">
+  {/* Silent, captionless footage: decoration, so hidden from assistive tech. */}
   <div class="hero__media" aria-hidden="true">
-    {video ? (
-      <video class="hero__video" autoplay muted loop playsinline preload="metadata"
-             poster={poster} data-hero-video>
-        <source src={video} type="video/mp4" />
-      </video>
-    ) : (
-      <div class="hero__wall">
-        {tones.map((tone) => <span class:list={['hero__tile', `is-${tone}`]}></span>)}
-      </div>
-    )}
+    {poster && <img class="hero__poster" src={poster} alt="" width="1920" height="1080" fetchpriority="high" />}
+    {/* WebM first: smaller where it's supported; the MP4 (H.264) covers the rest. */}
+    <video class="hero__video" autoplay muted loop playsinline preload="metadata" poster={poster} data-hero-video>
+      {webm && <source src={webm} type="video/webm" />}
+      {mp4 && <source src={mp4} type="video/mp4" />}
+    </video>
+    {/* Runs as soon as the video is parsed, before it can start: autoplay
+        ignores prefers-reduced-motion on its own. Also follows the setting
+        if it changes while the page is open. */}
+    <script is:inline>
+      (function () {
+        var v = document.querySelector('[data-hero-video]');
+        var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+        function apply() {
+          if (still.matches) {
+            v.removeAttribute('autoplay');
+            v.pause();
+          } else if (v.querySelector('source')) {
+            v.play().catch(function () {});
+          }
+        }
+        apply();
+        if (still.addEventListener) still.addEventListener('change', apply);
+      })();
+    </script>
+    <div class="hero__overlay"></div>
   </div>
-  <div class="hero__scrim" aria-hidden="true"></div>
 
   <div class="container hero__content">
     <h1 class="display display--xl hero__title enter enter--1">{title}</h1>
-    {subtitle && <p class="hero__sub enter enter--2">{subtitle}</p>}
+    {subtitle && <p class="lead hero__sub enter enter--2">{subtitle}</p>}
     <div class="hero__actions enter enter--3"><slot name="actions" /></div>
   </div>
 </section>
 
-{video && (
-  <script>
-    // Autoplay ignores prefers-reduced-motion on its own; honour it here.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.querySelectorAll<HTMLVideoElement>('[data-hero-video]').forEach((v) => {
-        v.removeAttribute('autoplay');
-        v.pause();
-      });
-    }
-  </script>
-)}
-
 <style>
   .hero {
+    /* How much the overlay darkens the footage. Retune once the real footage
+       is in: just enough that the white headline holds on its brightest
+       frame. */
+    --hero-overlay: 0.5;
+
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    min-height: min(100svh, 58rem);
     display: grid;
     align-items: center;
+    min-height: clamp(32rem, 86svh, 56rem);
   }
 
-  .hero__media { position: absolute; inset: 0; z-index: -2; }
-  .hero__video { width: 100%; height: 100%; object-fit: cover; }
-
-  /* --- Placeholder wall --- */
-  .hero__wall {
-    position: absolute;
-    inset: -20% -12%;
-    display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: clamp(0.75rem, 1.4vw, 1.25rem);
-    transform: rotate(-8deg);
-    align-content: center;
-  }
-  .hero__tile { aspect-ratio: 9 / 16; border-radius: var(--radius-media); }
-  /* Alternate tiles ride higher, the way a feed of reels never lines up. */
-  .hero__tile:nth-child(odd) { transform: translateY(-12%); }
-  /* Ink only, at three strengths — nothing outside the palette. */
-  .hero__tile.is-ink   { background: var(--ink); }
-  .hero__tile.is-shade { background: color-mix(in srgb, var(--ink) 55%, transparent); }
-  .hero__tile.is-veil  { background: color-mix(in srgb, var(--ink) 28%, transparent); }
-
-  @media (max-width: 47.99em) {
-    .hero__wall { grid-template-columns: repeat(4, minmax(0, 1fr)); inset: -15% -30%; }
-  }
-
-  /* Clean indigo behind the text, the wall showing at the edges. */
-  .hero__scrim {
+  .hero__media { position: absolute; inset: 0; z-index: -1; }
+  .hero__poster,
+  .hero__video {
     position: absolute;
     inset: 0;
-    z-index: -1;
-    background:
-      radial-gradient(ellipse 58% 52% at 50% 52%,
-        color-mix(in srgb, var(--accent) 94%, transparent),
-        color-mix(in srgb, var(--accent) 55%, transparent) 62%,
-        transparent 88%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* The overlay is the one tint on the site: black, part-transparent, flat. */
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--surface-dark);
+    opacity: var(--hero-overlay);
+  }
+
+  /* Reduced motion: the poster, and no video at all. */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__video { display: none; }
   }
 
   .hero__content {
@@ -113,18 +110,12 @@ const tones = Array.from({ length: 28 }, (_, i) => PALETTE[(i * 3 + Math.floor(i
     justify-items: center;
     text-align: center;
     gap: var(--space-m);
-    padding-block: calc(var(--space-2xl) + 2rem) var(--space-2xl);
+    padding-block: var(--space-2xl);
   }
 
   .hero__title { max-width: 26ch; }
-
-  .hero__sub {
-    font-size: var(--text-lead);
-    line-height: 1.55;
-    color: var(--fg-muted);
-    max-width: 44ch;
-    text-wrap: pretty;
-  }
+  /* Regular rather than light: thin strokes break up over moving footage. */
+  .hero__sub { max-width: 44ch; font-weight: var(--weight-body); }
 
   .hero__actions {
     display: flex;

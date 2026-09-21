@@ -1,0 +1,88 @@
+---
+/**
+ * A row of headline figures. Each is a stat tile: the value, a label saying
+ * what it measures, and the raw counts behind it.
+ *
+ * The numbers are the chart — no bars, no colour. Values are set in the body
+ * sans with proportional figures, as large type rather than display type, so
+ * they read as data rather than decoration.
+ */
+export interface Stat {
+  value: string;
+  label: string;
+  /** The counts the value was taken from, in words. */
+  detail?: string;
+}
+
+interface Props {
+  heading: string;
+  stats: Stat[];
+  /** Where the figures come from; shown beneath the row. */
+  source?: string;
+}
+const { heading, stats, source } = Astro.props;
+---
+
+<div class="stats">
+  <h2 class="display display--md stats__heading">{heading}</h2>
+  <ul class="stats__list" role="list">
+    {stats.map((stat) => (
+      <li class="stat">
+        <p class="stat__value">{stat.value}</p>
+        <p class="stat__label">{stat.label}</p>
+        {stat.detail && <p class="stat__detail">{stat.detail}</p>}
+      </li>
+    ))}
+  </ul>
+  {source && <p class="stats__source">{source}</p>}
+</div>
+
+<style>
+  .stats__heading { margin-bottom: var(--space-xl); }
+
+  .stats__list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl) var(--space-m);
+  }
+  @media (min-width: 64em) {
+    .stats__list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-l); }
+  }
+
+  .stat {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+    padding-top: var(--space-m);
+    border-top: var(--stroke) solid var(--line);
+  }
+
+  .stat__value {
+    font-family: var(--font-body);
+    font-size: clamp(3rem, 2.2rem + 3.4vw, 5rem);
+    font-weight: var(--weight-strong);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .stat__label {
+    margin-top: var(--space-2xs);
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+    line-height: 1.35;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+  .stat__detail {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-secondary);
+    line-height: 1.5;
+    max-width: 26ch;
+  }
+
+  .stats__source {
+    margin-top: var(--space-xl);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-secondary);
+  }
+</style>

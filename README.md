@@ -5,7 +5,8 @@ partnerships agency working with brands across Ireland.
 
 Built with [Astro](https://astro.build). Static output, no UI framework, no CSS
 framework. Two small scripts: ~20 lines for the mobile menu, and the creator
-application's validation and submission.
+application's steps, validation and submission. Creator applications land in a
+Google Sheet, with Netlify Forms keeping a backup copy.
 
 ---
 
@@ -79,6 +80,7 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the built `dist/` locally, to check the real output |
 | `npm run brand:assets` | Regenerate the favicon and share image from the logo file |
+| `npm run logos:mono` | Convert every client logo to solid black (see Client logos) |
 
 ---
 
@@ -86,10 +88,10 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 
 | Path | What it is |
 |---|---|
-| `/` | Hero, partner logos, content tiles |
-| `/about` | Tagline, how a programme runs, why creator-led, results by sector |
-| `/services` | "Work with us": the services, then who AMAVI works with |
-| `/become-a-creator` | The creator application (Netlify Forms) |
+| `/` | Background-video hero, partners marquee, results, content tiles |
+| `/about` | A short introduction and one call to action: email us |
+| `/services` | "Work with us": the services, how a programme works, results by sector, who AMAVI works with |
+| `/become-a-creator` | The creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Get in Touch: brands to email, creators to the application |
 | `/privacy` | Privacy policy |
 
@@ -103,18 +105,23 @@ src/
   logos.ts               Client logo manifest and optical sizing
   assets/
     amavi-socials-logo.png   The supplied logo — favicon and share image only
-    logos/                   Client logos, backgrounds already cut
+    logos/                   Client logos, solid black on transparent
   content.config.ts      Schema for the services collection
   content/services/      One markdown file per service
   layouts/Base.astro     <head>, header, footer — every page uses this
-  components/            Logo, Nav, Footer, Hero, content tiles, logo wall,
-                         contact paths, the creator form, Fonts.astro
-  scripts/creator-form.ts  The application's validation and submission
+  components/            Logo, Nav, Footer, Hero, stats, content tiles, logo
+                         wall, contact paths, the creator form, Fonts.astro
+  scripts/creator-form.ts  The application's steps, validation and submission
   pages/                 One file per route
-  styles/global.css      Tokens, surfaces, and the shared form styles
+  styles/global.css      Tokens and the shared form styles
 scripts/brand-assets.mjs Generates the favicon and share image
+scripts/logos-mono.mjs   Converts client logos to solid black
+scripts/google-sheets-handler.gs  The Apps Script that writes applications to
+                         a Google Sheet (see "Creator applications → Google Sheets")
 public/                  favicon, share image, robots.txt
+public/media/            Hero video and poster (see Visual content)
 public/fonts/            ALT Rigatoni goes here once licensed (see Typefaces)
+.env.example             The one environment variable, PUBLIC_SHEETS_ENDPOINT
 ```
 
 ---
@@ -123,56 +130,69 @@ public/fonts/            ALT Rigatoni goes here once licensed (see Typefaces)
 
 ### Colour
 
-Six colours, defined once in `src/styles/global.css`:
+Black and white. `#341BCA` is an accent only. Seven colours, defined once in
+`src/styles/global.css`, and the only colour values anywhere in the codebase —
+four for the page, and three for its only non-white surfaces:
 
 | Token | Value | Use |
 |---|---|---|
-| `--bg` | `#FFFFFF` | Page background |
-| `--band` | `#FBEEF1` | Pale petal pink — tint sections only |
-| `--ink` | `#0D0D0D` | True black: text, and black sections |
-| `--muted` | `#6E6E73` | Supporting text; form-field edges |
-| `--line` | `#EAEAEA` | Hairlines; supporting text on dark sections |
-| `--accent` | `#341BCA` | Buttons, links, indigo sections |
+| `--bg` | `#FFFFFF` | Every background. No tinted, grey or alternating sections |
+| `--ink` | `#000000` | All text |
+| `--line` | `#000000` | Every rule, divider, border, field outline and table line |
+| `--accent` | `#341BCA` | Only: the logo, links, button fills and outlines, hover and pressed states, focus rings, and small marks such as the active nav underline and the application's step number and progress bar |
+| `--surface-dark` | `#000000` | The hero overlay, Get in Touch (by default) and the footer |
+| `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on those dark surfaces |
+| `--surface-soft` | `#F2F2F2` | Get in Touch, only if it is switched to grey |
 
-These are the **palette**: fixed, and the only colours in the codebase. To
-rebrand, edit them. Components never use them directly; they read **role**
-tokens (`--fg`, `--fg-muted`, `--hairline`, `--link`, `--focus`, the button
-colours), which each section sets from the palette:
+**The three exceptions to white** are the hero's overlay, the Get in Touch
+band and the footer; nothing else sits on anything but `--bg`. They use the
+`.surface-dark` and `.surface-soft` classes, which flip text, links, the
+outline button and the focus ring to suit. Get in Touch is one switch,
+`GET_IN_TOUCH_SURFACE` in `src/consts.ts`: `'dark'` (the default) or `'soft'`.
 
-| Section class | Background | Text | Supporting text |
-|---|---|---|---|
-| `.surface-bg` (default) | `--bg` | `--ink` | `--muted` |
-| `.surface-band` | `--band` | `--ink` | `--ink` — see below |
-| `.surface-accent` | `--accent` | `--bg` | `--line` |
-| `.surface-ink` | `--ink` | `--bg` | `--line` |
+There are no greys, tints, gradients or shadows beyond those. The hero
+overlay is the one tint: black at part opacity over the footage.
 
-So a component never needs to know what it sits on, and sections nest safely.
+**Separation without colour.** Depth comes from line weight, type scale and
+space. Where a section used to sit on a tint, it now takes `.section--ruled`:
+a full-width black hairline, and more room above and below (`--section-y`).
+
+| Token | Value | Use |
+|---|---|---|
+| `--stroke` | 1px | Borders, field outlines, rules |
+| `--stroke-hair` | 1px, 0.5px on dense screens | Section and row dividers |
+| `--stroke-mark` | 2px | Accent marks only: focus ring, active nav |
+
+**Secondary text** is never grey. It is black, set smaller or lighter:
+`--weight-secondary` (300) against `--weight-body` (400) and
+`--weight-strong` (600). Long reading text, such as the privacy policy, stays
+at the body weight.
 
 **Contrast, measured:**
 
 | Pairing | Ratio | |
 |---|---|---|
-| `--ink` on `--bg` | 19.44:1 | |
-| `--accent` on `--bg` | 9.74:1 | Passes for body text, not only large text |
-| `--bg` on `--accent` | 9.74:1 | |
-| `--muted` on `--bg` | 5.07:1 | |
-| `--muted` on `--band` | 4.49:1 | **A hair under AA (4.5)** — so on band sections supporting text is `--ink` |
-| `--muted` on `--ink` | 3.83:1 | Fails — supporting text on black is `--line` (16.16:1) |
-| `--muted` on `--accent` | 1.92:1 | Fails — supporting text on indigo is `--line` (8.10:1) |
-| `--accent` on `--ink` | 2.00:1 | **Fails** even for large text — on black, indigo is only ever a solid block |
-| `--muted` field edge on `--bg` | 5.07:1 | Form fields need 3:1; `--line` (1.20:1) is never a field edge |
+| `--ink` on `--bg` | 21.00:1 | Every piece of text |
+| `--accent` on `--bg` | 9.74:1 | Links and the logo, at any size |
+| `--bg` on `--accent` | 9.74:1 | The label on a filled button |
+| `--ink` on `--accent` | 2.16:1 | **Fails** — so a filled button's label is white |
+| `--on-dark` on `--surface-dark` | 21.00:1 | Text on the dark surfaces |
+| `--ink` on `--surface-soft` | 18.76:1 | Text on a grey Get in Touch |
+| `--accent` on `--surface-dark` | 2.16:1 | **Hover only.** Footer and Get in Touch links turn `#341BCA` on hover, as specified; an underline appears too, so the state never rests on colour. Never used at rest on black, or for a focus ring there — those are white |
 
-If you'd rather keep grey supporting text on the pink band, darkening
-`--muted` one step (to about `#6A6A6F`) clears AA there — at the cost of
-changing the value above.
+That last row is the one exception to black text: the primary button is an
+accent fill with a white label, because black on `#341BCA` fails AA. On hover
+it inverts to an accent outline with an accent label; pressed, it refills.
+The secondary button is a black outline that takes the accent on hover.
 
-Button hover on light sections is `--ink`. The one place colour is thinned
-rather than used flat is the hero's placeholder reel wall: `--ink` at three
-strengths over `--accent`.
+**Focus** is a 2px accent ring, offset 3px: 9.74:1 against white, where 3:1 is
+required. The offset leaves a white gap, so the ring stays distinct even
+around a filled accent button.
 
-Form errors use no extra colour: an errored field gets a heavy `--ink` border
-plus an icon and a message, while focus is `--accent`, so the two states stay
-distinct.
+**Form states** use no colour, since there is none to use. An error is a
+message with an outlined "!" beside the field. A selected chip gets an accent
+outline, an accent tick and a heavier label: three signals, not one. Success
+and failure panels are black-outlined boxes, told apart by what they say.
 
 ### Logo
 
@@ -184,8 +204,8 @@ Poppins Light (300), lowercase, right-aligned on two lines, tracking
 within ~2px at its own scale.
 
 ```astro
-<Logo variant="brand" />   <!-- indigo, on white -->
-<Logo variant="white" />   <!-- on indigo or black -->
+<Logo />                   <!-- brand, #341BCA: the header -->
+<Logo variant="white" />   <!-- the black footer -->
 <Logo variant="black" />
 ```
 
@@ -198,7 +218,9 @@ npm run brand:assets
 
 The share image is the PNG placed pixel-for-pixel (never upscaled) on a
 1200×630 canvas of its own exact background colour, with the wordmark
-centred.
+centred. Both it and the favicon are the supplied avatar, white on `#341BCA`:
+the logo, which is one of the places the accent belongs. They appear in
+browser tabs and share previews, not on the page.
 
 ### Typefaces
 
@@ -228,32 +250,118 @@ real face may set wider; the display sizes are the `--display-*` tokens.
 
 ## The creator application
 
-`/become-a-creator` posts to **Netlify Forms** as `creator-application`.
-Netlify detects the form at deploy time — nothing to configure. Submissions
-appear under **Site configuration → Forms**.
+`/become-a-creator` is a six-step form in a single card, one step on screen at
+a time:
+
+1. **About you** — name, email, city, country
+2. **Your channels** — Instagram, TikTok, YouTube, X, LinkedIn, blog, other
+3. **Your audience** — follower range, engagement rate, audience insights
+4. **Your content** — niches, content formats
+5. **Rates** — collaboration preference, rates per format, currency, rate
+   notes, past collaborations, media kit link
+6. **Review & submit** — every answer to check (each group has an Edit link),
+   anything else, and the consent checkbox
 
 Its options mirror AMAVI's existing live form, so new applications line up
-with the ones already collected: the follower bands (Nano to Major), engagement
-bands, niches, content formats, per-format rates and currencies. The consent
-wording is the live form's, adapted to a checkbox.
+with the ones already collected. The consent wording is the live form's,
+adapted to a checkbox — word for word; keep it that way.
 
-Built for a phone first: one column, 48px controls, 16px text in every input
-(so iOS never zooms), tap-sized chips for multi-select.
-
-- **Required:** name, email, city, country, at least one channel, follower
-  range, collaboration preference, consent.
-- **Validation** is inline. On a failed submit it says how many fields need
-  attention and takes you to the first.
+- **Each step is checked before Next.** Errors appear under the field, with
+  an outlined "!", and focus moves to the first one.
+- **Back keeps every answer.** It's one form throughout; steps only slide.
+- **Focus moves to the step's heading** on every change, and the heading tells
+  screen readers "Step n of 6". The progress bar and large step number are
+  visual only.
+- **Motion:** a slide between steps; instant for visitors who ask for reduced
+  motion.
+- **Phone first:** the card runs edge to edge, every input is 16px (so iOS
+  never zooms), chips are tap-sized, and Back/Next stay pinned to the bottom
+  of the screen on long steps.
 - **Handles become links.** "@jane" in the Instagram field is sent as
   `https://www.instagram.com/jane`; a bare domain gets `https://`. Anything
   that isn't a link is flagged as typed, never rewritten.
-- **Success** replaces the form with a confirmation.
-- **Failure** — offline, a timeout (20s) or a server error — shows a panel
-  saying so, keeps everything that was typed, and gives the email address as a
-  fallback. It never fails silently.
-- **Without JavaScript** it still posts natively, with the browser's own
-  validation.
+- **Without JavaScript** it is one long form that posts natively to Netlify
+  Forms, with the browser's own validation. The same happens if the script
+  fails to load: after six seconds the long form comes back.
 - A honeypot field filters spam.
+
+### Where applications go
+
+Each application is sent to two places at once:
+
+- **A Google Sheet** — one row per application, via a Google Apps Script web
+  app. This is the working copy. Setup below.
+- **Netlify Forms** — a backup copy of every application, under **Site
+  configuration → Forms → creator-application**. Netlify detects the form at
+  deploy time; nothing to configure.
+
+The success message appears **only after a confirmed response**: the Apps
+Script replied `{"result":"success"}`, or Netlify accepted the submission. If
+neither confirms — offline, a 20-second timeout, a server error — the error
+state shows instead, everything typed stays in place to retry, and the email
+address is offered as a fallback. If only one of the two fails, the applicant
+still sees success (the application is safe in the other) and the failure is
+logged to the browser console for you to diagnose.
+
+## Creator applications → Google Sheets
+
+The script is `scripts/google-sheets-handler.gs`. Its header has the same
+steps as below, in more detail.
+
+### 1. Deploy the script
+
+1. Sign in to Google as **AMAVI's Workspace account** (hello@amavisocials.com),
+   not a personal Gmail — the sheet holds applicants' personal data, and the
+   privacy policy says it's kept in Google Workspace.
+2. Create a Google Sheet, e.g. "AMAVI creator applications".
+3. In the sheet: **Extensions → Apps Script**. Replace the sample code with the
+   whole of `scripts/google-sheets-handler.gs`, and save.
+4. **Deploy → New deployment** → gear icon → **Web app**.
+
+### 2. Set its access
+
+| Setting | Value | Why |
+|---|---|---|
+| Execute as | **Me** | The script writes to your sheet as you |
+| Who has access | **Anyone** | Applicants aren't signed in to Google. This lets anyone *send* an application — as the form does — but not read the sheet, which stays private |
+
+Click **Deploy** and authorise it. Google warns that it "hasn't verified this
+app" because it's your own script: **Advanced → Go to … (unsafe) → Allow**.
+
+Copy the **Web app URL** — it ends in `/exec`. Open it in a browser to check:
+you should see `{"result":"ok", …}`.
+
+### 3. Add the URL to Netlify
+
+**Site configuration → Environment variables → Add a variable:**
+
+| Key | Value |
+|---|---|
+| `PUBLIC_SHEETS_ENDPOINT` | the `/exec` URL |
+
+Then **Deploys → Trigger deploy → Deploy site**. The URL is built into the
+page, so it only takes effect on the next deploy. Submit a test application:
+a row appears in the sheet's **Applications** tab, which the script creates
+with a header row on first use.
+
+The build checks the value: if it isn't a `https://script.google.com/…/exec`
+URL — the script editor's address is the usual mistake — the deploy fails with
+a message saying so, and the previous deploy stays live. If the variable is
+missing, the build warns and applications go to Netlify Forms only.
+
+For local development, copy `.env.example` to `.env` and set the same value.
+
+### Later changes
+
+- **Changing the script:** Deploy → Manage deployments → pencil → Version:
+  **New version** → Deploy. That keeps the URL. A *new deployment* makes a new
+  URL, which Netlify would then need.
+- **Columns** are matched by header text, so you can reorder them or add your
+  own (status, notes) freely. Don't rename the script's headers.
+- **Adding a field** to the form means adding it to `FIELDS` in the script, then
+  deploying a new version.
+- Values that start with `=`, `+`, `-` or `@` are stored as text, never run as
+  formulas.
 
 ---
 
@@ -266,22 +374,42 @@ Logos live in `src/assets/logos/` and are declared once in **`src/logos.ts`**.
 ```
 
 - **Clearance.** Only clients already public on the related agency site may
-  appear (brief §9). The two held back — The Humble Fishmonger and Beyond BMI —
-  have their files in `src/assets/logos/pending/`, deliberately **not
-  imported**: Astro copies every imported image into the public build whether
-  or not a page shows it. Once sign-off lands, move the file up a folder and
-  uncomment its two lines in `src/logos.ts`.
-- **`scale`** is an optional optical nudge. Leave it off unless a logo reads
-  visibly heavy or light beside the others.
+  appear (brief §9). The one still held back, Beyond BMI, has its file in
+  `src/assets/logos/pending/`, deliberately **not imported**: Astro copies
+  every imported image into the public build whether or not a page shows it.
+  Once sign-off lands, move the file up a folder and uncomment its two lines
+  in `src/logos.ts`.
+- **No logo file yet?** Leave out `src` and the partner's name is set in type
+  in its place, at the same optical weight (Line 98, Pearls Collective and
+  Le Olive, for now). When the file arrives, import it and add `src`.
+- **`scale`** evens out optical weight: a solid black disc and a thin ring
+  cover the same area but not the same amount of ink. The comment above the
+  manifest explains how the current values were set.
 
-Every supplied logo needed two things, and will again if re-exported:
-**backgrounds cut** by flood-filling inward from the border (which clears the
-background white but keeps white enclosed by artwork, like the knocked-out
-"IRELAND BOX" lettering), and **trimming** to the artwork. Logos are sized to
-cover comparable *area*, not a shared height — see `opticalK()` — which is why
-a 6:1 wordmark and a 1:1 roundel are different heights on purpose.
+**Every logo is solid black** on transparent, with no colour versions. The
+supplied colour artwork was converted in place by:
 
-Client logos keep their own colours, so they only sit on light surfaces.
+```bash
+npm run logos:mono
+```
+
+It maps each pixel's lightness to black ink: dark artwork on a light ground
+becomes black, and light areas enclosed by the artwork — the knocked-out
+"IRELAND BOX" lettering, the ADHD Now roundel centre — stay open. Artwork
+supplied light-on-dark (The Humble Fishmonger) is detected and inverted, so its
+lettering is the black. Each file is then trimmed to its artwork. Run it on
+any new or re-exported logo; running it twice changes nothing. The colour
+originals are in git history.
+
+Logos are sized to cover comparable *area*, not a shared height — see
+`opticalK()` — which is why a 6:1 wordmark and a 1:1 roundel are different
+heights on purpose.
+
+On the home page the row is a **marquee**: a continuous scroll with no visible
+join, paused on hover and while it has keyboard focus. The repeated copies are
+hidden from screen readers, so each partner is read once. With reduced motion
+on, it doesn't move: it's a static, wrapped row. On `/services` the same logos
+are a static row.
 
 ## Adding a service
 
@@ -295,18 +423,34 @@ includes:
   - What's included, one line per item
 order: 7
 provisional: false   # true shows a "Scope to be confirmed" flag
+image: ./images/service-name.jpg   # optional; 4:5, at least 960×1200
+imageAlt: What the photograph shows   # required once image is set
 ---
 ```
+
+Each service card has a fixed 4:5 image frame. Until `image` is set it shows an
+outlined placeholder; the real photograph fills the same frame, cropped to
+fit, so swapping it in moves nothing. The markdown body isn't shown on the
+page; it's kept for a longer format later.
 
 ## Visual content
 
 No footage or content has been supplied. Both slots are built and waiting:
 
-- **Hero** (`src/components/Hero.astro`): pass `video="/media/hero.mp4"` and a
-  `poster` still. Until then a wall of reel-shaped tiles stands in. The clip
-  autoplays muted and never plays for visitors who ask for reduced motion.
+- **Hero** — a full-bleed background video. Its source is one constant,
+  `HERO_VIDEO` in `src/consts.ts` (now `/media/hero`). The hero loads
+  `public/media/hero.webm`, `hero.mp4` and `hero.jpg` (the poster), and leaves
+  out any file that isn't there — so today it shows the placeholder poster
+  alone. To go live, export the footage as a compressed **H.264 MP4 plus a
+  WebM, each under ~5MB**, silent and loopable, with a 1920×1080 poster from
+  the first frame, and drop them in under those names: no code change. Other
+  names are a one-line change to the constant. It autoplays muted and
+  inline; visitors who ask for reduced motion get the poster and no video. A
+  black overlay (`--hero-overlay` in `Hero.astro`, 0.5) keeps the white
+  headline legible — retune it against the real footage.
 - **Content tiles** (home page): give a tile a `video` or an `image` plus
-  `alt`. Tiles are 9:16, the native reel ratio.
+  `alt`. Tiles are 9:16, the native reel ratio; until then each is a
+  black-outlined frame.
 
 Get sign-off from the creator and the client before publishing any creator's
 content.
@@ -324,6 +468,9 @@ Netlify, connected to this repo. `netlify.toml` holds the build config.
 Brands are sent to email (`CONTACT_EMAIL`, with the subject and a short prompt
 pre-filled). Creators go to `/become-a-creator`. Both live in `src/consts.ts`.
 
+**One environment variable:** `PUBLIC_SHEETS_ENDPOINT`, the Google Apps Script
+URL — see "Creator applications → Google Sheets".
+
 ### Before launch
 
 The site is configured for `https://www.amavisocials.co`, so canonical URLs and
@@ -333,11 +480,13 @@ the sitemap are right at launch. Review it on the Netlify subdomain first.
    commented out directly beneath; swapping them is the launch step.
 2. **Export the old creator form's submissions.** The previous form (a Vercel
    app on `www.amavisocials.co`) saved applications through its own
-   `/api/submit`. New ones arrive in Netlify Forms. Anything the old form
-   collected stays with the old app once DNS moves.
-3. **Fill in the privacy policy blanks** — registered entity name, company
+   `/api/submit`. New ones arrive in the Google Sheet (and Netlify Forms).
+   Anything the old form collected stays with the old app once DNS moves.
+3. **Deploy the Google Sheets script and set `PUBLIC_SHEETS_ENDPOINT`** — see
+   "Creator applications → Google Sheets".
+4. **Fill in the privacy policy blanks** — registered entity name, company
    number and address. They render visibly on `/privacy`.
-4. **Connect the custom domain and HTTPS.**
+5. **Connect the custom domain and HTTPS.**
 
 ### Open questions for the client
 
@@ -353,7 +502,11 @@ The ones that matter most:
 - **ALT Rigatoni licence.** See Typefaces.
 - **Hero footage and content tiles.** See Visual content.
 - **The tagline is a working draft.** One constant, `TAGLINE`, in
-  `src/consts.ts`.
+  `src/consts.ts`. The home content heading is another, `CONTENT_TAGLINE`,
+  under copy review.
+- **Get in Touch: black or grey.** `GET_IN_TOUCH_SURFACE` in `src/consts.ts`.
+- **Partner logos** for Line 98, Pearls Collective and Le Olive, and service
+  photographs (4:5) for each service.
 - **The old creator form's email is dead.** It tells creators to write to
   `hello@amavi.social`, a domain with no DNS. This site uses
   `hello@amavisocials.com`, which is verified working.
@@ -371,7 +524,7 @@ The ones that matter most:
 - `prefers-reduced-motion` respected
 - WCAG AA contrast on every text pairing — measured; see Colour
 - Form fields have real labels, `aria-describedby` hints and errors, and
-  `aria-invalid` states; errors are never colour alone
+  `aria-invalid` states; no state relies on colour
 - Placeholder visuals are hidden from assistive tech
 - No HTML comments ship in page source — internal notes use `{/* */}`
 - Tested at 375px, 390px, 768px, 1024px, 1280px and 1440px

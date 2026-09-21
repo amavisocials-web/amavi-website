@@ -1,7 +1,8 @@
 ---
 /**
  * TODO(client): accurate to how the site now works — brands email, creators
- * apply through the form on /become-a-creator/, which Netlify Forms receives.
+ * apply through the form on /become-a-creator/, which saves each application
+ * to a Google Sheet, with a backup copy in Netlify Forms.
  * A published policy still needs the registered legal entity, its address and
  * a decision on naming a Data Protection Officer (marked inline). Have it
  * reviewed before launch: AMAVI holds personal data on EU creators and brands,
@@ -103,17 +104,18 @@ const updated = 'September 2026';
           </li>
           <li>
             <strong>Google Workspace.</strong> Handles our email, so brand enquiries are
-            stored there.
+            stored there, and holds the spreadsheet creator applications are saved to.
           </li>
           <li>
-            <strong>Netlify.</strong> Hosts this website and receives creator applications
-            through Netlify Forms, where they are stored. Like any web host it also processes
+            <strong>Netlify.</strong> Hosts this website and keeps a backup copy of each
+            creator application through Netlify Forms. Like any web host it also processes
             standard request logs, such as IP addresses, to serve pages.
           </li>
         </ul>
         <p class="policy__todo">
-          [TODO(client): if applications are moved on from Netlify Forms — to a
-          spreadsheet, database or CRM — name that tool here too.]
+          [TODO(client): confirm the applications spreadsheet lives in AMAVI’s Google
+          Workspace account rather than a personal Google account, and name any further
+          tool applications are moved on to — a database or CRM — here too.]
         </p>
         <p>
           We do not sell personal data, and we do not share it with anyone else for their
@@ -183,9 +185,8 @@ const updated = 'September 2026';
   .policy__lead {
     font-size: var(--text-lead);
     line-height: 1.45;
-    color: var(--fg);
     padding-bottom: var(--space-l);
-    border-bottom: 1px solid var(--hairline);
+    border-bottom: var(--stroke-hair) solid var(--line);
     text-wrap: pretty;
   }
 
@@ -202,15 +203,13 @@ const updated = 'September 2026';
 
   .policy h3 {
     font-size: var(--text-base);
-    font-weight: 600;
+    font-weight: var(--weight-strong);
     margin-top: var(--space-l);
     margin-bottom: var(--space-2xs);
   }
 
-  .policy p { color: var(--fg-muted); }
+  /* Body copy stays at the regular weight: this page is read, not skimmed. */
   .policy p + p { margin-top: var(--space-s); }
-  .policy strong { color: var(--fg); font-weight: 600; }
-  .policy a { color: var(--link); }
 
   .policy ul {
     margin-top: var(--space-s);
@@ -220,25 +219,24 @@ const updated = 'September 2026';
     gap: var(--space-2xs);
   }
   .policy li {
-    color: var(--fg-muted);
     padding-left: 1.1em;
     position: relative;
   }
   .policy li::before {
     content: '';
     position: absolute;
-    left: 0; top: 0.75em;
-    width: 0.5em; height: 1px;
-    background: var(--fg-muted);
+    left: 0; top: 0.8em;
+    width: 0.5em;
+    border-top: var(--stroke) solid var(--line);
   }
 
-  /* Visible on purpose: these are unresolved and must not ship unnoticed. */
+  /* Visible on purpose: these are unresolved and must not ship unnoticed.
+     A black outline and heavier type mark them, not a colour. */
   .policy__todo {
     margin-top: var(--space-s);
     padding: var(--space-s) var(--space-m);
-    border: 1px solid var(--hairline);
-    border-left: 3px solid var(--accent);
+    border: var(--stroke) solid var(--line);
     font-size: var(--text-sm);
-    color: var(--fg) !important;
+    font-weight: var(--weight-strong);
   }
 </style>

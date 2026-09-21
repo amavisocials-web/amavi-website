@@ -13,14 +13,9 @@ interface Props {
   standaloneTitle?: boolean;
   /** JSON-LD, serialised into a schema.org script tag. */
   schema?: Record<string, unknown>;
-  /**
-   * `overlay` floats a light header over a full-bleed first section. Only the
-   * home hero uses it; every other page gets the standard header.
-   */
-  nav?: 'standard' | 'overlay';
 }
 
-const { title, description, ogImage, standaloneTitle, schema, nav = 'standard' } = Astro.props;
+const { title, description, ogImage, standaloneTitle, schema } = Astro.props;
 ---
 
 <!doctype html>
@@ -53,7 +48,7 @@ const { title, description, ogImage, standaloneTitle, schema, nav = 'standard' }
 
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
-    <Nav variant={nav} />
+    <Nav />
     <main id="main">
       <slot />
     </main>

@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import ServiceCard from '../components/ServiceCard.astro';
+import ReachMeters from '../components/ReachMeters.astro';
 import LogoWall from '../components/LogoWall.astro';
 import { SITE_NAME, SITE_URL } from '../consts';
 
@@ -12,6 +13,31 @@ import { SITE_NAME, SITE_URL } from '../consts';
  * Renaming the tab is one line in src/consts.ts.
  */
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+
+/** The programme, in the order it runs. A real sequence, so it is numbered. */
+const programme = [
+  { title: 'Sourcing', body: 'A shortlist built from our own creator database and fresh research against your brief.' },
+  { title: 'Vetting', body: 'Audience quality, real engagement and brand fit — checked before a name ever reaches you.' },
+  { title: 'Outreach', body: 'We approach creators in our name, not yours, so a “no” costs you nothing.' },
+  { title: 'Agreements', body: 'Deliverables, formats, usage rights and timings, in writing, before anything is posted.' },
+  { title: 'Campaign management', body: 'Briefing, approvals, scheduling, boosting and tagging. You see content before it goes live.' },
+  { title: 'Reporting', body: 'Delivery against target, content and reach — and how much of that reach was new.' },
+];
+
+/**
+ * Per-account reach, by sector rather than by name, as requested.
+ *
+ * Source: AMAVI's cumulative creator-programme report, April–August 2026.
+ * These are CLIENT ACCOUNT totals over the trailing 90 days, not figures
+ * attributable to creator content alone (brief §5). The caption says so, and
+ * it must stay whatever else changes here.
+ */
+const accounts = [
+  { client: 'Neurodiversity assessment provider', views: '3.6M+', nonFollower: 87.7 },
+  { client: 'Home services franchise network', views: '380,054', nonFollower: 94.8 },
+  { client: 'Autism assessment and aftercare service', views: '281,664', nonFollower: 95.9 },
+  { client: 'Mental health concierge platform', views: '204K+', nonFollower: 93.4 },
+];
 
 const schema = {
   '@context': 'https://schema.org',
@@ -40,8 +66,7 @@ const schema = {
     <div class="container">
       <h1 class="display display--lg">Work with us</h1>
       <p class="lead page-head__lead">
-        Take the whole programme, fully managed — or just the parts you don’t already have
-        covered.
+        The whole programme, fully managed — or just the parts you need.
       </p>
     </div>
   </section>
@@ -55,9 +80,74 @@ const schema = {
             summary={service.data.summary}
             includes={service.data.includes}
             provisional={service.data.provisional}
+            image={service.data.image}
+            imageAlt={service.data.imageAlt}
             id={service.id}
           />
         ))}
+      </div>
+    </div>
+  </section>
+
+  {/*
+    TODO(client): moved here from About, as it was. Kept for now; to be
+    reviewed and cut down after copy review.
+  */}
+  <section class="section section--ruled" aria-labelledby="programme-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="programme-heading" class="display display--md">How a programme works</h2>
+        <p class="lead">Six stages, in this order. Each one depends on the one before it.</p>
+      </div>
+
+      <ol class="programme">
+        {programme.map((step, i) => (
+          <li class="programme__step">
+            <span class="programme__number" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="display display--sm programme__title">{step.title}</h3>
+            <p class="programme__body">{step.body}</p>
+          </li>
+        ))}
+      </ol>
+
+      <div class="subsection why">
+        <h3 class="display display--md why__heading">Why creator-led beats posting more</h3>
+
+        <div class="prose why__body">
+          <p>
+            Posting more on your own channel reaches the same people, more often. Everyone who
+            sees it already follows you. That has its place — but <strong>it cannot introduce
+            you to anyone new</strong>.
+          </p>
+          <p>
+            Creator content arrives through someone else’s audience, with their credibility
+            attached. It puts you in front of people who have never heard of you, in a voice
+            they already trust.
+          </p>
+          <p>
+            And it only works if the content actually arrives. Most gifted collaborations run
+            on a handshake, which is why so many produce nothing. Every AMAVI partnership is
+            agreed in writing first — the deliverable, the format and the date — so what we
+            promise is what you get. Between April and August 2026, four brands set us a target
+            of 40 partnerships. <strong>We delivered 49.</strong>
+          </p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="section-head">
+          <h3 class="display display--md">What it looks like on real accounts</h3>
+          <p class="lead">
+            Four client accounts during their partnership period, by sector. On every one, the
+            large majority of accounts reached were not already following the brand.
+          </p>
+        </div>
+
+        <ReachMeters
+          level={4}
+          rows={accounts}
+          caption="Client account totals over the trailing 90 days, covering the period each partnership ran. These are account-level figures and are not attributable to creator content alone — they are not presented as campaign results. Client names withheld."
+        />
       </div>
     </div>
   </section>
@@ -68,8 +158,11 @@ const schema = {
     detail, no figures. Client types are the cleared roster's sectors; the
     brief's rule that Fettle is never a "therapy platform" is why this stays
     at "healthcare and wellbeing" rather than naming services.
+
+    TODO(client): copy under review. The text below is unchanged; it predates
+    the newer partners (a seafood bar among them), so it may need widening.
   */}
-  <section class="section surface-band clients">
+  <section class="section section--ruled clients">
     <div class="container">
       <div class="clients__copy">
         <h2 class="display display--md">Who we work with</h2>
@@ -100,15 +193,56 @@ const schema = {
 
   .services {
     display: grid;
-    gap: var(--space-xl) var(--space-l);
+    gap: var(--space-2xl) var(--space-l);
   }
   @media (min-width: 40em) { .services { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 64em) { .services { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
+  /* ---------- Programme: a numbered grid, not a stack of cards ---------- */
+  .programme {
+    list-style: none;
+    display: grid;
+    gap: var(--space-l) var(--space-xl);
+  }
+  @media (min-width: 40em) { .programme { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 64em) { .programme { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  .programme__step {
+    display: grid;
+    gap: var(--space-xs);
+    align-content: start;
+    padding-top: var(--space-m);
+    border-top: var(--stroke) solid var(--line);
+  }
+  .programme__number {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    font-variant-numeric: tabular-nums;
+  }
+  .programme__body { font-weight: var(--weight-secondary); max-width: 36ch; }
+
+  /* Each part after the steps opens on a hairline, with a section's worth of
+     room above it: they used to be sections of their own. */
+  .subsection {
+    margin-top: var(--section-y);
+    padding-top: var(--space-xl);
+    border-top: var(--stroke-hair) solid var(--line);
+  }
+
+  /* ---------- Why ---------- */
+  .why { display: grid; gap: var(--space-l); }
+  @media (min-width: 64em) {
+    .why { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
+  }
+  .why__heading { max-width: 16ch; }
+  /* Lead-sized and light; the two claims that matter step up to strong. */
+  .why__body { font-size: var(--text-lead); font-weight: var(--weight-secondary); line-height: 1.65; }
+
+  /* ---------- Who we work with ---------- */
   .clients__copy { display: grid; gap: var(--space-m); margin-bottom: var(--space-l); }
   @media (min-width: 64em) {
     .clients__copy { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-xl); align-items: start; }
   }
-  .clients__body { color: var(--fg-muted); }
-
+  .clients__body { font-weight: var(--weight-secondary); }
 </style>

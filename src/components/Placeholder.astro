@@ -3,9 +3,9 @@
  * Stand-in for photography.
  *
  * TODO(client): no approved imagery supplied, and the template preview photos
- * are not licensed for use. These are type-led colour compositions sized to
- * the aspect ratio the real photograph will occupy, so swapping one in is a
- * file replacement — `<Image />` from `astro:assets` with the same ratio — and
+ * are not licensed for use. These are black-outlined fields sized to the
+ * aspect ratio the real photograph will occupy, so swapping one in is a file
+ * replacement — `<Image />` from `astro:assets` with the same ratio — and
  * shifts nothing on the page.
  *
  * These carry no information: every placeholder sits beside text that already
@@ -15,19 +15,14 @@
  */
 interface Props {
   ratio?: '4/5' | '3/4' | '1/1' | '16/9' | '3/2';
-  tone?: 'accent' | 'line' | 'ink';
-  /** Short word set into the composition. Omit for a plain field. */
+  /** Short word set into the field. Omit for a plain outline. */
   caption?: string;
   class?: string;
 }
-const { ratio = '4/5', tone = 'line', caption, class: className } = Astro.props;
+const { ratio = '4/5', caption, class: className } = Astro.props;
 ---
 
-<div
-  class:list={['ph', `ph--${tone}`, className]}
-  style={`--ratio:${ratio}`}
-  aria-hidden="true"
->
+<div class:list={['ph', className]} style={`--ratio:${ratio}`} aria-hidden="true">
   {caption && <span class="ph__caption">{caption}</span>}
   <slot />
 </div>
@@ -40,35 +35,18 @@ const { ratio = '4/5', tone = 'line', caption, class: className } = Astro.props;
     display: grid;
     place-items: center;
     overflow: hidden;
+    border: var(--stroke) solid var(--line);
     border-radius: var(--radius-media);
-    background: var(--ph-base);
-  }
-
-  .ph--accent { --ph-base: var(--accent); }
-  .ph--line   { --ph-base: var(--line); }
-  .ph--ink    { --ph-base: var(--ink); }
-
-  /* A single hairline, echoing the section rules, so the block reads as a
-     designed field rather than a failed image. */
-  .ph::after {
-    content: '';
-    position: absolute;
-    inset: var(--space-s);
-    border: 1px solid rgb(255 255 255 / 0.22);
-    border-radius: calc(var(--radius-media) - 0.5rem);
-    pointer-events: none;
   }
 
   .ph > :global(*) { position: relative; }
 
   .ph__caption {
-    position: relative;
     font-family: var(--font-display);
     font-size: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
     letter-spacing: 0.02em;
     line-height: 1.2;
     text-align: center;
-    color: rgb(255 255 255 / 0.92);
     padding-inline: var(--space-l);
     max-width: 18ch;
   }

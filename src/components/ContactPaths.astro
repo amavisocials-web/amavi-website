@@ -20,9 +20,7 @@ const H = `h${level}` as 'h2' | 'h3';
 ---
 
 <div class:list={['paths', `paths--${size}`]}>
-  {/* On the contact page each path is its own block of colour; in the footer
-      band they sit on the band's indigo. */}
-  <div class:list={['path', size === 'page' && 'surface-accent']}>
+  <div class="path">
     <p class="label path__label">For brands</p>
     <H class="display display--sm path__title">Start a creator programme</H>
     <p class="path__body">
@@ -34,7 +32,7 @@ const H = `h${level}` as 'h2' | 'h3';
     </div>
   </div>
 
-  <div class:list={['path', size === 'page' && 'surface-ink']}>
+  <div class="path">
     <p class="label path__label">For creators</p>
     <H class="display display--sm path__title">Join the creator network</H>
     <p class="path__body">
@@ -55,7 +53,7 @@ const H = `h${level}` as 'h2' | 'h3';
 
   .path { display: grid; gap: var(--space-s); align-content: start; }
   .path__title { max-width: 18ch; }
-  .path__body { max-width: 40ch; color: var(--fg-muted); text-wrap: pretty; }
+  .path__body { max-width: 40ch; font-weight: var(--weight-secondary); text-wrap: pretty; }
 
   .path__actions {
     display: flex;
@@ -68,14 +66,16 @@ const H = `h${level}` as 'h2' | 'h3';
   .path__email {
     font-size: var(--text-sm);
     font-weight: 500;
-    color: var(--link);
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
     word-break: break-word;
   }
 
-  /* Contact page: two square-cornered blocks, indigo and black, side by side. */
-  .paths--page { gap: var(--space-s); }
+  /* Contact page: one black-outlined box, split by a rule — beneath each other
+     on a phone, side by side from tablet up. */
+  .paths--page { gap: 0; border: var(--stroke) solid var(--line); }
   .paths--page .path { padding: clamp(1.75rem, 1rem + 3.5vw, 3.5rem); }
+  .paths--page .path + .path { border-top: var(--stroke) solid var(--line); }
   .paths--page .path__title { font-size: var(--display-md); }
+  @media (min-width: 48em) {
+    .paths--page .path + .path { border-top: 0; border-left: var(--stroke) solid var(--line); }
+  }
 </style>

@@ -1,0 +1,63 @@
+---
+/**
+ * One step of the creator application: a large step number, a heading, one
+ * line of support, and the step's fields in the slot.
+ *
+ * The heading is the step's focus target — the script moves focus to it on
+ * every step change — and carries "Step n of N" for screen readers, since the
+ * number and progress bar beside it are visual only.
+ */
+interface Props {
+  index: number;
+  total: number;
+  title: string;
+  intro: string;
+}
+const { index, total, title, intro } = Astro.props;
+const n = index + 1;
+---
+
+<section class="step" data-step aria-labelledby={`step-${n}-title`}>
+  <header class="step__head">
+    <span class="step__number" aria-hidden="true">{String(n).padStart(2, '0')}</span>
+    <div class="step__titles">
+      <h2 class="display display--md step__title" id={`step-${n}-title`} tabindex="-1" data-step-title>
+        <span class="visually-hidden">Step {n} of {total}: </span>{title}
+      </h2>
+      <p class="step__intro">{intro}</p>
+    </div>
+  </header>
+  <div class="step__body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .step { padding: var(--space-l) var(--card-pad) var(--card-pad); }
+
+  .step__head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: start;
+    margin-bottom: var(--space-l);
+  }
+
+  /* The card's one flourish: a large accent numeral beside each heading. */
+  .step__number {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(2.75rem, 1.9rem + 3.4vw, 4.75rem);
+    line-height: 0.82;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+
+  .step__titles { display: grid; gap: var(--space-2xs); padding-top: 0.15em; }
+  /* A programmatic focus target, not a control: no ring. */
+  .step__title:focus { outline: none; }
+  .step__intro { font-weight: var(--weight-secondary); max-width: 44ch; text-wrap: pretty; }
+
+  .step__body { display: grid; gap: var(--space-m); }
+</style>

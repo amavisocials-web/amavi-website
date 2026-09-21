@@ -3,11 +3,21 @@ import { Image } from 'astro:assets';
 import { clearedLogos, opticalK, type ClientLogo } from '../logos';
 
 /**
- * Partner logo wall, centred.
+ * Partner logos: a static, wrapped row, or — with `marquee` — a continuous
+ * horizontal scroll.
  *
- * Logos are sized so a 6:1 wordmark and a 1:1 roundel carry comparable
- * optical weight (see opticalK in src/logos.ts), and their backgrounds were
- * cut at the asset level, so they sit on any band without a blend mode.
+ * Every logo is solid black on transparent — converted at the asset level by
+ * `npm run logos:mono`, so there are no colour versions to fall back to — and
+ * sized so a 6:1 wordmark and a 1:1 roundel carry comparable optical weight
+ * (see opticalK in src/logos.ts). A partner without a logo file yet has its
+ * name set in type at the same weight.
+ *
+ * The marquee repeats the row three times and moves each copy left by its own
+ * width, so the loop has no seam at any screen width up to twice the row's
+ * length. Only the first copy is exposed to assistive tech; the repeats are
+ * aria-hidden, so no logo is read twice. It pauses on hover and while it has
+ * keyboard focus, and under prefers-reduced-motion it does not move at all:
+ * it becomes the static, wrapped row.
  *
  * Only clients cleared for publication appear.
  */
@@ -18,70 +28,147 @@ interface Props {
   /** Heading level, to keep each page's outline valid. */
   level?: 2 | 3;
   logos?: ClientLogo[];
+  marquee?: boolean;
 }
-const { heading, intro, level = 2, logos = clearedLogos() } = Astro.props;
+const { heading, intro, level = 2, logos = clearedLogos(), marquee = false } = Astro.props;
 const H = `h${level}` as 'h2' | 'h3';
-const sized = logos.map((logo) => ({ ...logo, k: opticalK(logo) }));
+const sized = logos.map((logo) => ({ ...logo, k: opticalK(logo).toFixed(3) }));
+const COPIES = 3;
 ---
 
-<div class="logo-wall">
+<div class:list={['logo-wall', { 'logo-wall--marquee': marquee }]}>
   {(heading || intro) && (
-    <div class="logo-wall__head">
-      {heading && <H class="label logo-wall__heading">{heading}</H>}
+    <div class:list={['logo-wall__head', { container: marquee }]}>
+      {heading && <H class="display display--md logo-wall__heading">{heading}</H>}
       {intro && <p class="logo-wall__intro">{intro}</p>}
     </div>
   )}
-  <ul class="logo-wall__list" role="list">
-    {sized.map((logo) => (
-      <li class="logo-wall__item">
-        <Image
-          src={logo.src}
-          alt={`${logo.name} logo`}
-          height={140}
-          loading="lazy"
-          decoding="async"
-          class="logo-wall__img"
-          style={`--k:${logo.k.toFixed(3)}`}
-        />
-      </li>
-    ))}
-  </ul>
+
+  {marquee ? (
+    <div class="marquee" tabindex="0" role="region" aria-label={heading ? `${heading}: logos` : 'Partner logos'}>
+      <div class="marquee__track">
+        {Array.from({ length: COPIES }, (_, copy) => (
+          <ul class="marquee__set logo-wall__list" role="list" aria-hidden={copy > 0 ? 'true' : undefined}>
+            {sized.map((logo) => (
+              <li class="logo-wall__item">
+                {logo.src ? (
+                  <Image src={logo.src} alt={copy > 0 ? '' : `${logo.name} logo`} height={140}
+                         loading="eager" decoding="async" class="logo-wall__img" style={`--k:${logo.k}`} />
+                ) : (
+                  <span class="logo-wall__type" style={`--k:${logo.k}`}>{logo.name}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <ul class="logo-wall__list logo-wall__list--static" role="list">
+      {sized.map((logo) => (
+        <li class="logo-wall__item">
+          {logo.src ? (
+            <Image src={logo.src} alt={`${logo.name} logo`} height={140}
+                   loading="lazy" decoding="async" class="logo-wall__img" style={`--k:${logo.k}`} />
+          ) : (
+            <span class="logo-wall__type" style={`--k:${logo.k}`}>{logo.name}</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  )}
 </div>
 
 <style>
-  .logo-wall { text-align: center; }
+  .logo-wall {
+    --logo-base: clamp(2.5rem, 1.9rem + 1.6vw, 3.4rem);
+    --logo-gap: clamp(2.5rem, 5vw, 4.5rem);
+    text-align: center;
+  }
 
   .logo-wall__head {
     display: grid;
-    gap: var(--space-2xs);
+    gap: var(--space-s);
     justify-items: center;
     padding-bottom: var(--space-l);
-    border-bottom: 1px solid var(--hairline);
   }
-  .logo-wall__heading { color: var(--fg); }
-  .logo-wall__intro { color: var(--fg-muted); font-size: var(--text-sm); max-width: 46ch; }
+  /* The heading is display type; the line under it is small body text, so the
+     two are never close in size. */
+  .logo-wall__intro { font-size: var(--text-sm); font-weight: var(--weight-secondary); max-width: 46ch; }
 
   .logo-wall__list {
-    --logo-base: clamp(2.5rem, 1.9rem + 1.6vw, 3.4rem);
     list-style: none;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: var(--space-l) clamp(2rem, 5vw, 4.5rem);
-    padding-block: var(--space-xl) var(--space-s);
   }
-
-  .logo-wall__item { display: flex; align-items: center; justify-content: center; }
+  .logo-wall__item { flex: none; display: flex; align-items: center; justify-content: center; }
 
   .logo-wall__img {
     height: calc(var(--logo-base) * var(--k, 1));
     width: auto;
-    max-width: 100%;
+    max-width: none;
     object-fit: contain;
   }
 
+  /* A partner's name standing in for its logo: heavy, tight type, at the
+     optical weight of the marks around it. */
+  .logo-wall__type {
+    font-family: var(--font-body);
+    font-size: calc(var(--logo-base) * 0.4 * var(--k, 1));
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* --- Static row ---------------------------------------------------------- */
+  .logo-wall__list--static {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-l) var(--logo-gap);
+    padding-block: var(--space-xl) var(--space-s);
+  }
+  .logo-wall__list--static .logo-wall__img { max-width: 100%; }
+
+  /* --- Marquee ------------------------------------------------------------- */
+  .marquee {
+    --marquee-duration: 48s;
+    overflow: hidden;
+    padding-block: var(--space-l);
+  }
+  .marquee:focus-visible { outline-offset: -2px; }
+
+  .marquee__track { display: flex; width: max-content; }
+
+  /* Each copy carries its own trailing gap, so a copy is exactly one step of
+     the loop and the join is invisible. */
+  .marquee__set {
+    gap: var(--logo-gap);
+    padding-right: var(--logo-gap);
+    animation: marquee var(--marquee-duration) linear infinite;
+  }
+  @keyframes marquee {
+    to { transform: translateX(-100%); }
+  }
+
+  .marquee:hover .marquee__set,
+  .marquee:focus-within .marquee__set { animation-play-state: paused; }
+
+  /* Reduced motion: no animation, one copy, wrapped and centred. */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__track { width: auto; justify-content: center; padding-inline: var(--gutter); }
+    .marquee__set {
+      animation: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      row-gap: var(--space-l);
+      padding-right: 0;
+    }
+    .marquee__set[aria-hidden='true'] { display: none; }
+  }
+
   @media (max-width: 47.99em) {
-    .logo-wall__list { gap: var(--space-m) var(--space-l); }
+    .logo-wall { --logo-gap: var(--space-l); }
+    .logo-wall__list--static { gap: var(--space-m) var(--space-l); }
   }
 </style>

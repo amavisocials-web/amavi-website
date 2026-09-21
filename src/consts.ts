@@ -12,6 +12,32 @@ export const SITE_URL = 'https://www.amavisocials.co';
  */
 export const TAGLINE = 'Creator partnerships that reach the people you don’t already have.';
 
+/**
+ * The heading of the home page's creator-content section.
+ * TODO(client): copy under review — swap it here once the copy is signed off.
+ */
+export const CONTENT_TAGLINE = 'Made by creators. Seen by our target audience.';
+
+/**
+ * The home hero's background video, as one base path with no extension. The
+ * hero looks in /public for `<path>.webm`, `<path>.mp4` and `<path>.jpg` (the
+ * poster still) and leaves out any file that isn't there yet — so until the
+ * footage exists it shows the poster alone, and nothing 404s.
+ *
+ * TODO(client): replace with final Canon footage. Silent, 10–20 seconds and
+ * loopable; a compressed H.264 MP4 plus a WebM, each under ~5MB; and a
+ * 1920×1080 JPEG poster taken from the first frame. Keep these file names and
+ * no code changes at all; use other names and this is the one line to edit.
+ */
+export const HERO_VIDEO = '/media/hero';
+
+/**
+ * The Get in Touch band's background, in one place: 'dark' (black, white
+ * text) or 'soft' (light grey #F2F2F2, black text).
+ * TODO(client): final choice to be made once the copy is in.
+ */
+export const GET_IN_TOUCH_SURFACE: 'dark' | 'soft' = 'dark';
+
 export const SITE_DESCRIPTION =
   'AMAVI Socials is an influencer marketing agency working with brands across Ireland. We source and vet creators, handle the agreements, run the campaign and report on what it returned.';
 
@@ -41,8 +67,9 @@ export const BRAND_ENQUIRY_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURI
  *
  * TODO(client): the previous form (the Vercel app at www.amavisocials.co)
  * saved applications through its own /api/submit. New applications arrive in
- * Netlify Forms instead. Export anything the old form collected before DNS
- * moves, or those records stay behind with the old app.
+ * the Google Sheet instead (backed up in Netlify Forms). Export anything the
+ * old form collected before DNS moves, or those records stay behind with the
+ * old app.
  */
 export const CREATOR_PATH = '/become-a-creator/';
 

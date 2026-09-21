@@ -3,19 +3,31 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import LogoWall from '../components/LogoWall.astro';
 import ContentTiles, { type Tile } from '../components/ContentTiles.astro';
+import Stats, { type Stat } from '../components/Stats.astro';
 import {
-  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, CREATOR_PATH,
+  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, CONTENT_TAGLINE, CREATOR_PATH,
 } from '../consts';
 
 /** TODO(client): swap each placeholder for a reel or still — see ContentTiles. */
 const tiles: Tile[] = [
-  { kind: 'reel', tone: 'accent' },
-  { kind: 'image', tone: 'muted' },
-  { kind: 'reel', tone: 'accent' },
-  { kind: 'image', tone: 'muted' },
-  { kind: 'reel', tone: 'accent' },
+  { kind: 'reel' },
+  { kind: 'image' },
+  { kind: 'reel' },
+  { kind: 'image' },
+  { kind: 'reel' },
 ];
 
+/**
+ * The only figures this block may show, exactly as supplied — nothing
+ * recomputed, no other percentage, and no client named. From AMAVI's
+ * programme reporting, April to August 2026.
+ */
+const stats: Stat[] = [
+  { value: '23%', label: 'Above target on creator partnerships', detail: '49 delivered against a target of 40' },
+  { value: '47%', label: 'Above target for one healthcare client', detail: '22 against a target of 15' },
+  { value: '40%', label: 'Above target for two clients', detail: '14 against a target of 10, and 7 against 5' },
+  { value: '92%', label: 'Net-new audience reach', detail: 'Reached people who weren’t already following' },
+];
 
 const schema = {
   '@context': 'https://schema.org',
@@ -33,7 +45,6 @@ const schema = {
   title="Influencer Marketing Agency Ireland"
   description={SITE_DESCRIPTION}
   schema={schema}
-  nav="overlay"
 >
   <Hero
     title={TAGLINE}
@@ -45,21 +56,33 @@ const schema = {
     </Fragment>
   </Hero>
 
-  {/* ================= Partners ================= */}
-  <section class="section section--tight">
+  {/* ================= Partners =================
+      Straight after the dark hero, so no rule above it: the edge is the rule.
+      The marquee runs the full width of the screen. */}
+  <section class="section section--tight partners">
+    <LogoWall
+      marquee
+      heading="Our Partners"
+      intro="Trusted by brands across healthcare, wellbeing, home services and ecommerce."
+    />
+  </section>
+
+  {/* ================= Stats ================= */}
+  <section class="section section--ruled">
     <div class="container">
-      <LogoWall
-        heading="Our Partners"
-        intro="Trusted by brands across healthcare, wellbeing, home services and ecommerce."
-      />
+      <Stats heading="Results" stats={stats} source="Four client programmes, April to August 2026." />
     </div>
   </section>
 
   {/* ================= Content ================= */}
-  <section class="section surface-ink">
+  <section class="section section--ruled">
     <div class="container">
       <div class="section-head section-head--center">
-        <h2 class="display display--lg">Made by creators. Seen by new people.</h2>
+        {/* One line per sentence where there's room, so the break falls
+            between them rather than wherever the width happens to put it. */}
+        <h2 class="display display--lg content__tagline">
+          {CONTENT_TAGLINE.split(/(?<=\.)\s+/).map((sentence, i) => <>{i > 0 && ' '}<span>{sentence}</span></>)}
+        </h2>
       </div>
 
       <ContentTiles tiles={tiles}>
@@ -80,7 +103,8 @@ const schema = {
 </Base>
 
 <style>
+  .partners { padding-bottom: var(--space-s); }
+  .content__tagline span { display: block; }
   .summary__statement { max-width: 28ch; }
   .summary__lead { max-width: 46ch; }
-  .summary__lead strong { color: var(--fg); }
 </style>

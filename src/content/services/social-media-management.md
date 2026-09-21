@@ -1,14 +1,14 @@
 ---
 title: Social media management
 summary: >-
-  Day-to-day management of your own channels, so creator work has somewhere to
-  land rather than sitting apart from everything else you publish.
+  Your own channels run day to day, so creator content has somewhere to land.
 includes:
-  - Content planning and scheduling
-  - Community management and response handling
-  - Coordination between creator content and your own posting
+  - Planning, scheduling and community management
+  - Your posts and creator posts, in step
 provisional: true
 order: 5
+# TODO(client): image needed — 4:5, at least 960×1200. Save it beside this
+# file, e.g. ./images/social-media-management.jpg, then set `image:` and `imageAlt:` here.
 ---
 
 Creator partnerships work better when the account they point at is active.

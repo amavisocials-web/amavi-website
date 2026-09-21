@@ -1,7 +1,10 @@
 # Netlify build configuration.
 #
-# The site has no forms: brands are sent to email and creators to the
-# existing application form (see src/consts.ts). Netlify Forms is unused.
+# Brands are sent to email. Creators apply at /become-a-creator: each
+# application goes to a Google Sheet through an Apps Script web app, whose URL
+# is the PUBLIC_SHEETS_ENDPOINT environment variable (set it in the Netlify UI
+# — see README), and Netlify Forms keeps a backup copy of every one. The form
+# is detected automatically at deploy time.
 # The /creators redirect is defined in astro.config.mjs, not here, so the
 # destination URL is only ever written down once.
 

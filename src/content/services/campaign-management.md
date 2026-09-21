@@ -1,15 +1,15 @@
 ---
 title: Campaign management
 summary: >-
-  Once a creator is signed, someone has to run the thing. We brief, chase,
-  approve, schedule and keep the campaign moving so it lands as agreed.
+  Campaigns that land on time and as agreed, with every post approved by you
+  before it goes live.
 includes:
-  - Creator briefing against your campaign objectives
-  - Content approvals and revision rounds before anything goes live
-  - Scheduling and posting coordination across creators
-  - Paid boosting of creator content where it earns it
-  - Collaborator tagging so posts appear on your account as well as theirs
+  - Briefs written against your objectives
+  - Approval rounds before anything posts
+  - Collaborator tags, so posts appear on your account too
 order: 2
+# TODO(client): image needed — 4:5, at least 960×1200. Save it beside this
+# file, e.g. ./images/campaign-management.jpg, then set `image:` and `imageAlt:` here.
 ---
 
 The work between signing a creator and seeing the post is where campaigns

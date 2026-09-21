@@ -5,32 +5,29 @@ import autismcareIreland from './assets/logos/autismcare-ireland.png';
 import cleaningDoctorHub from './assets/logos/cleaning-doctor-hub.png';
 import fettle from './assets/logos/fettle.png';
 import myirelandbox from './assets/logos/myirelandbox.png';
+import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
 
-// TODO(client): not cleared for publication (brief §9). Their files sit in
-// ./assets/logos/pending/ and are deliberately NOT imported: Astro copies every
-// imported image into the public build, rendered or not, so importing them
-// here would put an uncleared client's logo on the live server. Once sign-off
-// lands, move the file up a folder, uncomment its import and manifest line
-// below, and set `published: true` in the matching case study.
-// import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
+// TODO(client): Beyond BMI is not cleared for publication (brief §9). Its file
+// sits in ./assets/logos/pending/ and is deliberately NOT imported: Astro
+// copies every imported image into the public build, rendered or not, so
+// importing it here would put an uncleared client's logo on the live server.
+// Once sign-off lands, move the file up a folder and uncomment its import and
+// manifest line below.
 // import beyondBmi from './assets/logos/beyond-bmi.png';
 
 /**
  * Client logos, supplied by AMAVI.
  *
- * Each file has been trimmed to its own artwork, so the surrounding canvas no
+ * Every file is solid black on transparent: `npm run logos:mono` converted the
+ * supplied colour artwork in place (the originals are in git history). Light
+ * areas enclosed by the artwork stay open — the knocked-out "IRELAND BOX"
+ * lettering, the ADHD Now roundel centre, the Cleaning Doctor disc — and The
+ * Humble Fishmonger, supplied light-on-navy, was inverted so its lettering is
+ * the black. There are no colour versions on the site.
+ *
+ * Each file is also trimmed to its own artwork, so the surrounding canvas no
  * longer varies from logo to logo and a shared display height sizes them by
  * their mark rather than by their export settings.
- *
- * The white background each logo shipped on has been cut at the asset level:
- * a flood fill inward from the border clears background white while leaving
- * white that is enclosed by artwork alone — the knocked-out "IRELAND BOX"
- * lettering, the ADHD Now roundel centre, the Cleaning Doctor disc. That is
- * why these sit on any surface without a blend mode, and why re-exporting one
- * of these files from an original means re-running that cut.
- *
- * The Humble Fishmonger is the exception: its artwork *is* a navy field, so it
- * renders as its own tile. Nothing to cut.
  *
  * Only clients already public on the related agency site may appear (brief
  * §9). Note what keeps a logo off the site: NOT importing it. `cleared: false`
@@ -41,7 +38,11 @@ import myirelandbox from './assets/logos/myirelandbox.png';
 export interface ClientLogo {
   /** The client's name, as used in the logo's alt text. */
   name: string;
-  src: ImageMetadata;
+  /**
+   * The logo file. Leave it out while none has been supplied, and the name is
+   * set in type in its place, at the same optical weight as the logos.
+   */
+  src?: ImageMetadata;
   /** Hides the logo from pages. Does NOT keep the file off the server — see above. */
   cleared: boolean;
   /** Per-logo optical nudge, where a mark reads heavy or light beside the rest. */
@@ -49,21 +50,38 @@ export interface ClientLogo {
 }
 
 /*
- * `scale` values below were set by eye against the rendered wall, on top of the
- * equal-area sizing. Equal area gets the geometry right but cannot see ink:
- * AutismCare is a saturated bold wordmark and reads heavy at its computed size,
- * while the ADHD Now roundel, the Cleaning Doctor circle and the pale Fettle
- * brushstroke all read light. These close that gap.
+ * `scale` evens out ink, on top of the equal-area sizing. Equal area gets the
+ * geometry right but cannot see how much of each box is black: the ADHD Now
+ * disc is 49% ink, the Cleaning Doctor ring 21%. Each value starts from the one
+ * that equalises measured ink and bounding area half and half, then was
+ * checked by eye against the rendered wall. MyIrelandBox sits above its
+ * computed 0.90: its ink is packed into the box, and smaller than this the
+ * knocked-out lettering closes up. The Humble Fishmonger is fine stipple and
+ * small caps, so it sits above its computed 1.21 for the same reason.
+ *
+ * A partner without a logo file has its name set in type; there `scale`
+ * multiplies the type size instead, set so each name's measured ink lands in
+ * the range of the logos around it — a long name smaller, a short one larger.
+ *
+ * Re-measure if a logo file changes: all of them are solid black on
+ * transparent (npm run logos:mono), so ink is simply total alpha.
  */
 export const CLIENT_LOGOS: ClientLogo[] = [
-  { name: 'ADHD Now',              src: adhdNow,             cleared: true,  scale: 1.18 },
-  { name: 'Fettle',                src: fettle,              cleared: true,  scale: 1.15 },
-  { name: 'AutismCare Ireland',    src: autismcareIreland,   cleared: true,  scale: 0.82 },
-  { name: 'Cleaning Doctor Hub',   src: cleaningDoctorHub,   cleared: true,  scale: 1.15 },
-  { name: 'MyIrelandBox',          src: myirelandbox,        cleared: true,  scale: 0.95 },
+  // In display order: the three partners set in type are spread between logos.
+  { name: 'ADHD Now',              src: adhdNow,             cleared: true,  scale: 0.96 },
+  // TODO(client): logo file needed — Line 98. Set in type until it arrives.
+  { name: 'Line 98',                                         cleared: true,  scale: 1.15 },
+  { name: 'Fettle',                src: fettle,              cleared: true,  scale: 1.06 },
+  { name: 'The Humble Fishmonger', src: theHumbleFishmonger, cleared: true,  scale: 1.4 },
+  { name: 'AutismCare Ireland',    src: autismcareIreland,   cleared: true,  scale: 0.93 },
+  // TODO(client): logo file needed — Pearls Collective. Set in type until it arrives.
+  { name: 'Pearls Collective',                               cleared: true,  scale: 0.9 },
+  { name: 'Cleaning Doctor Hub',   src: cleaningDoctorHub,   cleared: true,  scale: 1.19 },
+  // TODO(client): logo file needed — Le Olive. Set in type until it arrives.
+  { name: 'Le Olive',                                        cleared: true,  scale: 1.15 },
+  { name: 'MyIrelandBox',          src: myirelandbox,        cleared: true,  scale: 1.08 },
 
   // Pending sign-off — see the note on the imports above.
-  // { name: 'The Humble Fishmonger', src: theHumbleFishmonger, cleared: true },
   // { name: 'Beyond BMI',            src: beyondBmi,           cleared: true },
 ];
 
@@ -78,13 +96,15 @@ export const CLIENT_LOGOS: ClientLogo[] = [
  * 0.5 is exactly equal area, which over-shrinks very wide wordmarks until they
  * are hard to read. 0.45 keeps most of the correction and stays legible.
  *
- * Both the logo wall and the case-study lockups multiply their own base height
- * by this, so one logo is never two different sizes on the same page.
+ * The logo wall multiplies its base height by this, so a logo is the same
+ * size wherever the wall appears. For a partner set in type, it is the scale.
  */
 export const OPTICAL_EXP = 0.45;
 
 export const opticalK = (logo: ClientLogo) =>
-  (1 / Math.pow(logo.src.width / logo.src.height, OPTICAL_EXP)) * (logo.scale ?? 1);
+  logo.src
+    ? (1 / Math.pow(logo.src.width / logo.src.height, OPTICAL_EXP)) * (logo.scale ?? 1)
+    : (logo.scale ?? 1);
 
 /** The wall only ever shows cleared logos. */
 export const clearedLogos = () => CLIENT_LOGOS.filter((l) => l.cleared);

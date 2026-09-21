@@ -1,15 +1,15 @@
 ---
 title: Paid creator campaigns
 summary: >-
-  Fee-based partnerships where the brief, the rate and the usage rights are
-  negotiated properly and the output is held to what was agreed.
+  Paid partnerships at fair rates, with usage rights settled and delivery held
+  to the contract.
 includes:
-  - Rate negotiation benchmarked against audience and format
-  - Contracted deliverables with named formats and volumes
-  - Usage rights and whitelisting terms agreed before work begins
-  - Full campaign management through to delivery
-  - Reporting against the objectives the spend was signed off on
+  - Rates benchmarked against audience and format
+  - Usage rights and whitelisting agreed up front
+  - Reporting against what the spend was for
 order: 4
+# TODO(client): image needed — 4:5, at least 960×1200. Save it beside this
+# file, e.g. ./images/paid-campaigns.jpg, then set `image:` and `imageAlt:` here.
 ---
 
 Paid work raises the stakes on everything that is usually left informal. A rate

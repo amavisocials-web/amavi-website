@@ -1,15 +1,15 @@
 ---
 title: Reporting and campaign analysis
 summary: >-
-  What the campaign delivered, measured against what it was asked to deliver —
-  including how much of the reach was new.
+  A clear read on what your campaign delivered, including how much of its reach
+  was new.
 includes:
-  - Partnership delivery tracked against agreed targets
-  - Reach, views and content volume across the programme
-  - Non-follower reach, separating new audience from existing following
-  - Per-client reporting across the campaign period
-  - Plain reading of what the numbers mean for the next brief
+  - Delivery tracked against target
+  - Reach, views and content volume
+  - New audience separated from existing followers
 order: 6
+# TODO(client): image needed — 4:5, at least 960×1200. Save it beside this
+# file, e.g. ./images/reporting.jpg, then set `image:` and `imageAlt:` here.
 ---
 
 The question most brands cannot answer after a campaign is whether it reached

@@ -1,14 +1,13 @@
 ---
 title: Gifted and value-exchange collaborations
 summary: >-
-  Product or service in exchange for content, structured so both sides know
-  exactly what has been agreed — and so the content actually arrives.
+  Content in exchange for product, agreed in writing so it actually arrives.
 includes:
-  - Value-exchange terms set out in writing before dispatch
-  - Deliverables, formats and posting windows agreed up front
-  - Fulfilment coordination and follow-up
-  - Content tracking against what was agreed
+  - Terms in writing before anything ships
+  - Deliverables and posting windows agreed up front
 order: 3
+# TODO(client): image needed — 4:5, at least 960×1200. Save it beside this
+# file, e.g. ./images/gifted-collaborations.jpg, then set `image:` and `imageAlt:` here.
 ---
 
 Gifted collaborations have a reputation for producing nothing, and usually the

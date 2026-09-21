@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "brand:assets": "node scripts/brand-assets.mjs"
+    "brand:assets": "node scripts/brand-assets.mjs",
+    "logos:mono": "node scripts/logos-mono.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

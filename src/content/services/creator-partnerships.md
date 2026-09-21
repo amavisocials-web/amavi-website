@@ -1,16 +1,15 @@
 ---
 title: Influencer and creator partnerships
 summary: >-
-  The core of what we do. We find the creators worth working with, check they
-  are what they appear to be, approach them on your behalf, and hold the
-  relationship together once the work starts.
+  Creators who genuinely fit your brand, found, vetted and signed for you, with
+  every partnership agreed in writing.
 includes:
-  - Sourcing from our own creator database and fresh research per brief
-  - Vetting for audience, engagement quality and brand fit before you see a name
-  - Outreach and negotiation, handled in our name rather than yours
-  - Creator agreements drafted, issued and tracked to signature
-  - Ongoing relationship management across repeat collaborations
+  - A vetted shortlist from our own creator database
+  - Outreach and negotiation in our name, not yours
+  - Written agreements, tracked to signature
 order: 1
+# TODO(client): image needed — 4:5, at least 960×1200. Save it beside this
+# file, e.g. ./images/creator-partnerships.jpg, then set `image:` and `imageAlt:` here.
 ---
 
 Most brands do not have a creator problem. They have a *which creator* problem,

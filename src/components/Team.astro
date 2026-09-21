@@ -13,8 +13,6 @@ interface Member {
   name: string;
   role: string;
   bio: string;
-  /** Swap Placeholder for <Image /> once real portraits exist. */
-  tone?: 'accent' | 'line' | 'ink';
 }
 
 interface Props {
@@ -30,7 +28,8 @@ const { members, heading = 'The team' } = Astro.props;
     <ul class="team" role="list">
       {members.map((member) => (
         <li class="team__member">
-          <Placeholder ratio="3/4" tone={member.tone ?? 'line'} />
+          {/* Swap for <Image /> once real portraits exist. */}
+          <Placeholder ratio="3/4" />
           <h3 class="team__name">{member.name}</h3>
           <p class="team__role">{member.role}</p>
           <p class="team__bio">{member.bio}</p>
@@ -56,6 +55,6 @@ const { members, heading = 'The team' } = Astro.props;
     font-size: var(--display-sm);
     line-height: 1.15;
   }
-  .team__role { font-size: var(--text-sm); color: var(--fg-accent); margin-top: var(--space-3xs); }
-  .team__bio { font-size: var(--text-sm); color: var(--fg-muted); margin-top: var(--space-xs); }
+  .team__role { font-size: var(--text-sm); font-weight: var(--weight-strong); margin-top: var(--space-3xs); }
+  .team__bio { font-size: var(--text-sm); font-weight: var(--weight-secondary); margin-top: var(--space-xs); }
 </style>
