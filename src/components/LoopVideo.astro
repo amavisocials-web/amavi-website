@@ -1,0 +1,65 @@
+---
+import Placeholder from './Placeholder.astro';
+import { videoFiles } from '../lib/media';
+
+/**
+ * A silent, looping video in a fixed frame — or, when the file isn't in
+ * /public yet, an outlined "Add video" frame at the same ratio.
+ *
+ * Nothing is downloaded up front: no preload, and the poster and sources are
+ * only attached as the video nears the screen. It plays only while visible
+ * and pauses as it scrolls away. Under reduced motion it never plays — the
+ * poster is all there is. All of that is src/scripts/loop-videos.ts.
+ *
+ * Decorative by default (aria-hidden): whatever it shows should be said by
+ * the text around it.
+ */
+interface Props {
+  /** Base path under /public, no extension: plays `<src>.webm` / `<src>.mp4`. */
+  src: string;
+  /** Still for before it plays; defaults to `<src>.jpg`. */
+  poster?: string;
+  /** CSS aspect ratio of the frame, e.g. '2/3'. */
+  ratio?: string;
+  /** Shown in the placeholder when the video is missing. */
+  note?: string;
+  class?: string;
+}
+const { src, poster, ratio = '2/3', note, class: className } = Astro.props;
+const files = videoFiles(src, poster);
+if (!files.playable) {
+  console.warn(`[LoopVideo] TODO(client): video needed — no ${src}.mp4 or ${src}.webm in public/; showing "Add video".`);
+}
+---
+
+{files.playable ? (
+  <div class:list={['loop-video', className]} style={`aspect-ratio:${ratio}`}>
+    <video muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"
+           data-loop data-poster={files.poster}>
+      {files.webm && <source data-src={files.webm} type="video/webm" />}
+      {files.mp4 && <source data-src={files.mp4} type="video/mp4" />}
+    </video>
+  </div>
+) : (
+  <Placeholder kind="video" ratio={ratio} note={note} class={className} />
+)}
+
+<script>
+  import '../scripts/loop-videos';
+</script>
+
+<style>
+  .loop-video {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-frame);
+    background: var(--surface-dark);
+  }
+  .loop-video video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

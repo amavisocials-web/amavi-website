@@ -1,127 +1,253 @@
 ---
 /**
- * The opening: a full-bleed background video with the headline, one line of
- * support and both calls to action over it.
+ * The home page's full-screen opening: headline, subline and one line of
+ * positioning, over video, with two large entry points beneath — one for
+ * brands, one for creators.
  *
- * The footage is one constant, HERO_VIDEO in src/consts.ts — a base path the
- * hero turns into `.webm`, `.mp4` and `.jpg` (the poster). Each file is
- * checked for at build time and left out if it isn't in /public yet, so the
- * page never requests a file that doesn't exist: today only the placeholder
- * poster is there, and the hero shows that still.
+ * Two separate cuts of footage, both from HERO_VIDEO in src/consts.ts: the
+ * desktop cut (16:9) plays on landscape screens, the mobile cut (9:16) on
+ * portrait ones. Each is looked for at build time. Where a cut is missing,
+ * that orientation shows the hero as an outlined frame reading "Add video",
+ * with black text on white; where it's present, the footage fills the screen
+ * edge to edge under a flat black overlay, with white text, and the header
+ * sits over it (see Nav.astro).
  *
- * Motion is opt-in. Visitors who ask for reduced motion get the poster and
- * no video — the video is hidden, paused and never allowed to autoplay.
+ * The videos load and play only while on screen, never under reduced motion
+ * (src/scripts/loop-videos.ts), and a cut that isn't displayed never loads.
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { HERO_VIDEO } from '../consts';
+import { videoFiles } from '../lib/media';
+import { HERO_VIDEO, HERO_SUBLINE, CONTACT_PATH, CREATOR_PATH } from '../consts';
 
 interface Props {
   title: string;
-  subtitle?: string;
-  /** Base path under /public, without an extension. */
-  video?: string;
+  intro: string;
 }
-const { title, subtitle, video = HERO_VIDEO } = Astro.props;
+const { title, intro } = Astro.props;
 
-const inPublic = (file: string) => fs.existsSync(path.join(process.cwd(), 'public', file));
-const webm = inPublic(`${video}.webm`) ? `${video}.webm` : undefined;
-const mp4 = inPublic(`${video}.mp4`) ? `${video}.mp4` : undefined;
-const poster = inPublic(`${video}.jpg`) ? `${video}.jpg` : undefined;
+const desktop = videoFiles(HERO_VIDEO);
+const mobile = videoFiles(`${HERO_VIDEO}-portrait`);
+for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', mobile, '1080×1920']] as const) {
+  if (!cut.playable) console.warn(`[Hero] TODO(client): ${name} hero video needed (${size}) — showing "Add video".`);
+}
+
+const entries = [
+  { who: 'For Brands', what: 'Get in touch', href: CONTACT_PATH },
+  { who: 'For Creators', what: 'Become a creator', href: CREATOR_PATH },
+];
 ---
 
-<section class="hero surface-dark">
-  {/* Silent, captionless footage: decoration, so hidden from assistive tech. */}
-  <div class="hero__media" aria-hidden="true">
-    {poster && <img class="hero__poster" src={poster} alt="" width="1920" height="1080" fetchpriority="high" />}
-    {/* WebM first: smaller where it's supported; the MP4 (H.264) covers the rest. */}
-    <video class="hero__video" autoplay muted loop playsinline preload="metadata" poster={poster} data-hero-video>
-      {webm && <source src={webm} type="video/webm" />}
-      {mp4 && <source src={mp4} type="video/mp4" />}
-    </video>
-    {/* Runs as soon as the video is parsed, before it can start: autoplay
-        ignores prefers-reduced-motion on its own. Also follows the setting
-        if it changes while the page is open. */}
-    <script is:inline>
-      (function () {
-        var v = document.querySelector('[data-hero-video]');
-        var still = window.matchMedia('(prefers-reduced-motion: reduce)');
-        function apply() {
-          if (still.matches) {
-            v.removeAttribute('autoplay');
-            v.pause();
-          } else if (v.querySelector('source')) {
-            v.play().catch(function () {});
-          }
-        }
-        apply();
-        if (still.addEventListener) still.addEventListener('change', apply);
-      })();
-    </script>
-    <div class="hero__overlay"></div>
-  </div>
+<section
+  class="hero"
+  data-desktop={desktop.playable ? 'video' : 'frame'}
+  data-mobile={mobile.playable ? 'video' : 'frame'}
+>
+  <div class="hero__inner">
+    {/* Silent, captionless footage: decoration, hidden from assistive tech. */}
+    {(desktop.playable || mobile.playable) && (
+      <div class="hero__media" aria-hidden="true">
+        {desktop.playable && (
+          <video class="hero__video hero__video--desktop" muted loop playsinline preload="none"
+                 disablepictureinpicture data-loop data-poster={desktop.poster}>
+            {desktop.webm && <source data-src={desktop.webm} type="video/webm" />}
+            {desktop.mp4 && <source data-src={desktop.mp4} type="video/mp4" />}
+          </video>
+        )}
+        {mobile.playable && (
+          <video class="hero__video hero__video--mobile" muted loop playsinline preload="none"
+                 disablepictureinpicture data-loop data-poster={mobile.poster}>
+            {mobile.webm && <source data-src={mobile.webm} type="video/webm" />}
+            {mobile.mp4 && <source data-src={mobile.mp4} type="video/mp4" />}
+          </video>
+        )}
+        <div class="hero__overlay"></div>
+      </div>
+    )}
 
-  <div class="container hero__content">
-    <h1 class="display display--xl hero__title enter enter--1">{title}</h1>
-    {subtitle && <p class="lead hero__sub enter enter--2">{subtitle}</p>}
-    <div class="hero__actions enter enter--3"><slot name="actions" /></div>
+    {/* Stands in for whichever cut is missing on this screen. */}
+    <p class="hero__label" aria-hidden="true">
+      <span class="hero__label-text">Add video</span>
+      <span class="hero__label-note hero__label-note--desktop">Desktop cut · 16:9</span>
+      <span class="hero__label-note hero__label-note--mobile">Mobile cut · 9:16</span>
+    </p>
+
+    <div class="hero__body">
+      <h1 class="display display--xl hero__title enter enter--1">{title}</h1>
+      <p class="hero__subline enter enter--2">
+        {HERO_SUBLINE.map((word, i) => (
+          <>{i > 0 && ' '}<span class="hero__word">{word}<span class="hero__stop">.</span></span></>
+        ))}
+      </p>
+      <p class="hero__intro enter enter--2">{intro}</p>
+    </div>
+
+    <nav class="hero__entries enter enter--3" aria-label="Where to start">
+      {entries.map((entry) => (
+        <a class="entry" href={entry.href}>
+          <span class="entry__who">{entry.who}</span>
+          <span class="entry__what">{entry.what}</span>
+          <svg class="entry__arrow" viewBox="0 0 10 20" aria-hidden="true">
+            <path d="M1 1l8 9-8 9" fill="none" stroke="currentColor" stroke-width="1.25"
+                  vector-effect="non-scaling-stroke" />
+          </svg>
+        </a>
+      ))}
+    </nav>
   </div>
 </section>
 
-<style>
-  .hero {
-    /* How much the overlay darkens the footage. Retune once the real footage
-       is in: just enough that the white headline holds on its brightest
-       frame. */
-    --hero-overlay: 0.5;
+<script>
+  import '../scripts/loop-videos';
+</script>
 
+<style>
+  /* ---- Frame (default): no footage for this screen ----------------------- */
+  .hero {
+    --hero-fg: var(--ink);
+    --hero-rule: var(--line);
+    display: grid;
+    min-height: calc(100svh - var(--header-h));
+    padding: var(--space-s) var(--gutter) var(--gutter);
+  }
+
+  .hero__inner {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
     display: grid;
-    align-items: center;
-    min-height: clamp(32rem, 86svh, 56rem);
+    grid-template-rows: minmax(5rem, 1fr) auto auto;
+    overflow: hidden;
+    color: var(--hero-fg);
+    border: var(--stroke) solid var(--line);
+    border-radius: var(--radius-frame);
   }
 
-  .hero__media { position: absolute; inset: 0; z-index: -1; }
-  .hero__poster,
-  .hero__video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  /* The overlay is the one tint on the site: black, part-transparent, flat. */
-  .hero__overlay {
-    position: absolute;
-    inset: 0;
-    background: var(--surface-dark);
-    opacity: var(--hero-overlay);
-  }
+  .hero__media { position: absolute; inset: 0; z-index: -1; display: none; }
+  .hero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  /* Black, part-transparent, flat: enough that the white text holds on the
+     footage's brightest frames. Measured on the current footage (the café
+     clip), every 0.4s through both cuts, over the area the text covers: at
+     0.45, white holds at least 6.7:1 on 99% of pixels (4.5:1 needed).
+     Re-measure if the footage changes. */
+  .hero__overlay { position: absolute; inset: 0; background: var(--surface-dark); opacity: 0.45; }
 
-  /* Reduced motion: the poster, and no video at all. */
-  @media (prefers-reduced-motion: reduce) {
-    .hero__video { display: none; }
-  }
-
-  .hero__content {
+  .hero__label {
+    align-self: center;
+    justify-self: center;
     display: grid;
     justify-items: center;
+    gap: 0.35rem;
+    padding: var(--space-m);
     text-align: center;
-    gap: var(--space-m);
-    padding-block: var(--space-2xl);
+  }
+  .hero__label-text { font-size: var(--text-sm); font-weight: var(--weight-strong); }
+  .hero__label-note { font-size: var(--text-xs); font-weight: var(--weight-secondary); }
+  .hero__label-note--mobile { display: none; }
+
+  /* ---- Footage for this screen: full bleed, under the header ------------- */
+  @media (orientation: landscape) {
+    .hero[data-desktop='video'] { --hero-fg: var(--on-dark); --hero-rule: var(--on-dark); }
+    .hero[data-desktop='video'],
+    .hero[data-desktop='video'] .hero__inner { padding: 0; border-style: none; border-radius: 0; }
+    .hero[data-desktop='video'] { min-height: 100svh; margin-top: calc(var(--header-h) * -1); }
+    .hero[data-desktop='video'] .hero__inner { padding-top: var(--header-h); }
+    .hero[data-desktop='video'] .hero__media { display: block; }
+    .hero[data-desktop='video'] .hero__label { visibility: hidden; }
+    .hero[data-desktop='video'] .hero__stop { color: inherit; }
+    .hero__video--mobile { display: none; }
+  }
+  @media (orientation: portrait) {
+    .hero[data-mobile='video'] { --hero-fg: var(--on-dark); --hero-rule: var(--on-dark); }
+    .hero[data-mobile='video'],
+    .hero[data-mobile='video'] .hero__inner { padding: 0; border-style: none; border-radius: 0; }
+    .hero[data-mobile='video'] { min-height: 100svh; margin-top: calc(var(--header-h) * -1); }
+    .hero[data-mobile='video'] .hero__inner { padding-top: var(--header-h); }
+    .hero[data-mobile='video'] .hero__media { display: block; }
+    .hero[data-mobile='video'] .hero__label { visibility: hidden; }
+    .hero[data-mobile='video'] .hero__stop { color: inherit; }
+    .hero__video--desktop { display: none; }
+    .hero__label-note--desktop { display: none; }
+    .hero__label-note--mobile { display: inline; }
   }
 
-  .hero__title { max-width: 26ch; }
-  /* Regular rather than light: thin strokes break up over moving footage. */
-  .hero__sub { max-width: 44ch; font-weight: var(--weight-body); }
-
-  .hero__actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+  /* ---- Words -------------------------------------------------------------- */
+  .hero__body {
+    display: grid;
     gap: var(--space-s);
-    margin-top: var(--space-s);
+    padding: 0 var(--space-l) var(--space-l);
+    max-width: 72rem;
+  }
+  .hero__title { max-width: 24ch; font-size: clamp(2rem, 1.2rem + 3vw, 3.75rem); }
+
+  /* Four words, each closed by an accent full stop — white over footage,
+     where the accent on black would all but disappear. */
+  .hero__subline {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(0.875rem, 0.7rem + 0.9vw, 1.375rem);
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+  .hero__word { white-space: nowrap; }
+  .hero__stop { color: var(--accent); }
+
+  .hero__intro {
+    max-width: 46ch;
+    margin-top: var(--space-2xs);
+    font-size: var(--text-lead);
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  /* ---- The two ways in: large, split, a hairline between ------------------ */
+  .hero__entries {
+    display: grid;
+    border-top: var(--stroke) solid var(--hero-rule);
+  }
+  .entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'who arrow' 'what arrow';
+    align-items: center;
+    column-gap: var(--space-m);
+    padding: var(--space-s) var(--space-l);
+    color: var(--hero-fg);
+    text-decoration: none;
+    transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .entry + .entry { border-top: var(--stroke) solid var(--hero-rule); }
+  .entry__who {
+    grid-area: who;
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  .entry__what {
+    grid-area: what;
+    margin-top: var(--space-2xs);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .entry__arrow { grid-area: arrow; width: 0.9rem; height: 1.8rem; transition: transform var(--dur) var(--ease); }
+
+  /* Hover and press: the half fills with the accent, the words go white. */
+  .entry:hover,
+  .entry:active { background: var(--accent); color: var(--on-dark); }
+  .entry:hover .entry__arrow { transform: translateX(0.35rem); }
+  .entry:focus-visible { outline-offset: -6px; outline-color: currentColor; }
+
+  @media (min-width: 48em) {
+    .hero__entries { grid-template-columns: 1fr 1fr; }
+    .entry + .entry { border-top: 0; border-left: var(--stroke) solid var(--hero-rule); }
+  }
+
+  @media (max-width: 47.99em) {
+    .hero__body { padding: 0 var(--space-m) var(--space-l); }
+    .hero__intro { font-size: var(--text-base); }
+    .entry { padding: var(--space-s) var(--space-m); }
   }
 </style>

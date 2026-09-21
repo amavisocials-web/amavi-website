@@ -1,32 +1,27 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import Feature from '../components/Feature.astro';
+import StatTiles, { type Stat } from '../components/StatTiles.astro';
+import LoopVideo from '../components/LoopVideo.astro';
+import ProofLink from '../components/ProofLink.astro';
 import LogoWall from '../components/LogoWall.astro';
-import ContentTiles, { type Tile } from '../components/ContentTiles.astro';
-import Stats, { type Stat } from '../components/Stats.astro';
+import { TILES } from '../data/tiles';
+import { MEDIA } from '../data/media';
 import {
-  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, CONTENT_TAGLINE, CREATOR_PATH,
+  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, POSITIONING, CONTENT_TAGLINE,
 } from '../consts';
 
-/** TODO(client): swap each placeholder for a reel or still — see ContentTiles. */
-const tiles: Tile[] = [
-  { kind: 'reel' },
-  { kind: 'image' },
-  { kind: 'reel' },
-  { kind: 'image' },
-  { kind: 'reel' },
-];
-
 /**
- * The only figures this block may show, exactly as supplied — nothing
+ * The only figures the stat tiles may show, exactly as supplied — nothing
  * recomputed, no other percentage, and no client named. From AMAVI's
- * programme reporting, April to August 2026.
+ * programme reporting, April to August 2026. Tiles 1–4 play behind them.
  */
 const stats: Stat[] = [
-  { value: '23%', label: 'Above target on creator partnerships', detail: '49 delivered against a target of 40' },
-  { value: '47%', label: 'Above target for one healthcare client', detail: '22 against a target of 15' },
-  { value: '40%', label: 'Above target for two clients', detail: '14 against a target of 10, and 7 against 5' },
-  { value: '92%', label: 'Net-new audience reach', detail: 'Reached people who weren’t already following' },
+  { value: '23%', label: 'above target on creator partnerships' },
+  { value: '47%', label: 'above target for one healthcare client' },
+  { value: '40%', label: 'above target for two clients' },
+  { value: '92%', label: 'net-new audience reach' },
 ];
 
 const schema = {
@@ -42,24 +37,58 @@ const schema = {
 ---
 
 <Base
-  title="Influencer Marketing Agency Ireland"
+  title="Creator-Led Marketing and Partnerships Agency, Ireland"
   description={SITE_DESCRIPTION}
   schema={schema}
 >
-  <Hero
-    title={TAGLINE}
-    subtitle="Fully managed influencer and creator partnerships for brands across Ireland."
-  >
-    <Fragment slot="actions">
-      <a href="/services/" class="btn btn--primary">Work With Us</a>{' '}
-      <a href={CREATOR_PATH} class="btn btn--secondary">Join the Creator Network</a>
-    </Fragment>
-  </Hero>
+  <Hero title={TAGLINE} intro={POSITIONING} />
 
-  {/* ================= Partners =================
-      Straight after the dark hero, so no rule above it: the edge is the rule.
-      The marquee runs the full width of the screen. */}
-  <section class="section section--tight partners">
+  {/* ================= Under the hero ================= */}
+  <Feature labelledby="equation-heading">
+    <h2 id="equation-heading" class="display display--lg">Creators are one part of the equation.</h2>
+    <p class="feature__body">
+      We build campaigns around <strong>the right people, the right partnerships and the right
+      opportunities</strong> — whether that’s a creator, a community, a tourism operator or a brand
+      partnership.
+    </p>
+    <ProofLink href="/services/">49 partnerships delivered against a target of 40</ProofLink>
+    {/* Temporary fill: see src/data/media.ts. (Tile 5 isn't used here: its
+        burned-in captions read badly as a silent loop.) */}
+    <LoopVideo slot="media" src={MEDIA.home.creators.src} ratio="2/3" />
+  </Feature>
+
+  {/* ================= Stats on video tiles ================= */}
+  <section class="section section--ruled" aria-labelledby="stats-heading">
+    <div class="container">
+      {/* One line per sentence where there's room, so the break falls between
+          them. Which line leads — this or the hero's — is open: see
+          CONTENT_TAGLINE in src/consts.ts. */}
+      <h2 id="stats-heading" class="display display--lg stats__title">
+        {CONTENT_TAGLINE.split(/(?<=\.)\s+/).map((sentence, i) => <>{i > 0 && ' '}<span>{sentence}</span></>)}
+      </h2>
+      <StatTiles stats={stats} tiles={TILES.slice(0, 4)} />
+      <p class="meta stats__source">Four client programmes, April to August 2026.</p>
+    </div>
+  </section>
+
+  {/* ================= How we work =================
+      TODO(client): copy under review — new for this layout, built from what
+      the site already says about how AMAVI works. */}
+  <Feature reverse ruled labelledby="how-heading">
+    <h2 id="how-heading" class="eyebrow">How we work</h2>
+    <p class="feature__body">
+      From the first shortlist to the final report, we run <strong>every partnership end to
+      end</strong> — sourcing, agreements, campaign management and reporting. And <strong>every
+      one is agreed in writing</strong> before anything goes live, so what we promise is what
+      arrives.
+    </p>
+    <ProofLink href="/services/">Trusted by brands across Ireland</ProofLink>
+    {/* Temporary fill: see src/data/media.ts. */}
+    <LoopVideo slot="media" src={MEDIA.home.howWeWork.src} ratio="2/3" />
+  </Feature>
+
+  {/* ================= Partners ================= */}
+  <section class="section section--tight section--ruled">
     <LogoWall
       marquee
       heading="Our Partners"
@@ -67,44 +96,21 @@ const schema = {
     />
   </section>
 
-  {/* ================= Stats ================= */}
-  <section class="section section--ruled">
-    <div class="container">
-      <Stats heading="Results" stats={stats} source="Four client programmes, April to August 2026." />
-    </div>
-  </section>
-
-  {/* ================= Content ================= */}
-  <section class="section section--ruled">
-    <div class="container">
-      <div class="section-head section-head--center">
-        {/* One line per sentence where there's room, so the break falls
-            between them rather than wherever the width happens to put it. */}
-        <h2 class="display display--lg content__tagline">
-          {CONTENT_TAGLINE.split(/(?<=\.)\s+/).map((sentence, i) => <>{i > 0 && ' '}<span>{sentence}</span></>)}
-        </h2>
-      </div>
-
-      <ContentTiles tiles={tiles}>
-        <p class="display display--md summary__statement">
-          Asked for 40 partnerships. Delivered 49.
-        </p>
-        {/* The "top content" finding is per account, from each account's
-             trailing 90-day analytics in the report — hence "in our reporting"
-             rather than a claim about April–August specifically. */}
-        <p class="lead summary__lead">
-          Four client programmes, April to August 2026 — and on all four accounts,{' '}
-          <strong>the top-performing content in our reporting was made by creators</strong>.
-        </p>
-        <a href="/services/" class="btn btn--primary">Work With Us</a>
-      </ContentTiles>
+  {/* ================= Philosophy =================
+      TODO(client): confirm the philosophy line. */}
+  <section class="section section--ruled philosophy" aria-labelledby="philosophy-heading">
+    <div class="container container--narrow philosophy__inner">
+      <h2 id="philosophy-heading" class="eyebrow">Our philosophy</h2>
+      <p class="display display--md philosophy__line">The right people will always beat more people.</p>
     </div>
   </section>
 </Base>
 
 <style>
-  .partners { padding-bottom: var(--space-s); }
-  .content__tagline span { display: block; }
-  .summary__statement { max-width: 28ch; }
-  .summary__lead { max-width: 46ch; }
+  .stats__title { margin-bottom: var(--space-xl); }
+  .stats__title span { display: block; }
+  .stats__source { margin-top: var(--space-m); }
+
+  .philosophy__inner { display: grid; gap: var(--space-m); justify-items: center; text-align: center; }
+  .philosophy__line { max-width: 22ch; }
 </style>

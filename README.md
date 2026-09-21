@@ -1,12 +1,20 @@
 # AMAVI Socials
 
-Marketing site for AMAVI Socials — a boutique influencer marketing and creator
-partnerships agency working with brands across Ireland.
+Marketing site for AMAVI Socials — a creator-led marketing and partnerships
+agency working with brands across Ireland. Creator partnerships are the
+speciality, not the limit: AMAVI finds the creators, communities, businesses
+and partners that put a brand in front of the right audience.
 
 Built with [Astro](https://astro.build). Static output, no UI framework, no CSS
-framework. Two small scripts: ~20 lines for the mobile menu, and the creator
-application's steps, validation and submission. Creator applications land in a
-Google Sheet, with Netlify Forms keeping a backup copy.
+framework. Three small scripts: the menu, lazy visible-only video playback,
+and the creator application's steps, validation and submission. Creator
+applications land in a Google Sheet, with Netlify Forms keeping a backup copy.
+
+The layout takes its pacing and patterns from musetheagency.com — full-screen
+video hero, large split entry points, stats over looping video, proof lines
+that lead to Services, a clients marquee, and a footer of contact routes — as
+AMAVI's own implementation: original code, AMAVI's copy and media, nothing of
+MUSE's reused.
 
 ---
 
@@ -88,9 +96,9 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 
 | Path | What it is |
 |---|---|
-| `/` | Background-video hero, partners marquee, results, content tiles |
-| `/about` | A short introduction and one call to action: email us |
-| `/services` | "Work with us": the services, how a programme works, results by sector, who AMAVI works with |
+| `/` | Full-screen video hero with split entry points for brands and creators; "Creators are one part of the equation"; stats over looping video tiles; how we work; partners marquee; philosophy line |
+| `/about` | A short introduction, a row of images, and one call to action: email us |
+| `/services` | What AMAVI does: three areas and their services, sector examples, how a programme works, who AMAVI works with |
 | `/become-a-creator` | The creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Get in Touch: brands to email, creators to the application |
 | `/privacy` | Privacy policy |
@@ -101,25 +109,30 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 
 ```
 src/
-  consts.ts              Site-wide constants: email, nav, socials, tagline, paths
+  consts.ts              Site-wide constants: email, nav, socials, positioning,
+                         tagline, hero video path
   logos.ts               Client logo manifest and optical sizing
+  data/services.ts       The three service areas, their services, sector examples
+  data/tiles.ts          Creator videos: tiles 1–4 play behind the home stats
+  lib/media.ts           Build-time checks for files in public/
   assets/
     amavi-socials-logo.png   The supplied logo — favicon and share image only
     logos/                   Client logos, solid black on transparent
-  content.config.ts      Schema for the services collection
-  content/services/      One markdown file per service
   layouts/Base.astro     <head>, header, footer — every page uses this
-  components/            Logo, Nav, Footer, Hero, stats, content tiles, logo
-                         wall, contact paths, the creator form, Fonts.astro
+  components/            Nav (header and menu), Footer, Hero, Feature,
+                         StatTiles, LoopVideo, Placeholder, ProofLink, LogoWall,
+                         ContactPaths, the creator form, Logo, Fonts
+  scripts/loop-videos.ts   Lazy, visible-only playback for every video
   scripts/creator-form.ts  The application's steps, validation and submission
   pages/                 One file per route
-  styles/global.css      Tokens and the shared form styles
+  styles/global.css      Tokens and the shared styles
 scripts/brand-assets.mjs Generates the favicon and share image
 scripts/logos-mono.mjs   Converts client logos to solid black
+scripts/encode-video.swift  Encodes video files (macOS; see "Making the video files")
 scripts/google-sheets-handler.gs  The Apps Script that writes applications to
                          a Google Sheet (see "Creator applications → Google Sheets")
 public/                  favicon, share image, robots.txt
-public/media/            Hero video and poster (see Visual content)
+public/media/            The hero's videos (none yet); tiles/ holds the creator videos
 public/fonts/            ALT Rigatoni goes here once licensed (see Typefaces)
 .env.example             The one environment variable, PUBLIC_SHEETS_ENDPOINT
 ```
@@ -130,28 +143,23 @@ public/fonts/            ALT Rigatoni goes here once licensed (see Typefaces)
 
 ### Colour
 
-Black and white. `#341BCA` is an accent only. Seven colours, defined once in
-`src/styles/global.css`, and the only colour values anywhere in the codebase —
-four for the page, and three for its only non-white surfaces:
+White backgrounds, black text, black hairline rules, `#341BCA` for accents
+and highlights, and a black footer. Six colours, defined once in
+`src/styles/global.css`, and the only colour values anywhere in the codebase:
 
 | Token | Value | Use |
 |---|---|---|
 | `--bg` | `#FFFFFF` | Every background. No tinted, grey or alternating sections |
 | `--ink` | `#000000` | All text |
 | `--line` | `#000000` | Every rule, divider, border, field outline and table line |
-| `--accent` | `#341BCA` | Only: the logo, links, button fills and outlines, hover and pressed states, focus rings, and small marks such as the active nav underline and the application's step number and progress bar |
-| `--surface-dark` | `#000000` | The hero overlay, Get in Touch (by default) and the footer |
-| `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on those dark surfaces |
-| `--surface-soft` | `#F2F2F2` | Get in Touch, only if it is switched to grey |
+| `--accent` | `#341BCA` | Accents and highlights: the logo, links, button fills and outlines, hover and pressed states, focus rings, the hero's full stops, area and step numbers, the application's progress bar — wherever musetheagency.com uses its red |
+| `--surface-dark` | `#000000` | The footer, and the flat overlay under text on video |
+| `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on black and on video |
 
-**The three exceptions to white** are the hero's overlay, the Get in Touch
-band and the footer; nothing else sits on anything but `--bg`. They use the
-`.surface-dark` and `.surface-soft` classes, which flip text, links, the
-outline button and the focus ring to suit. Get in Touch is one switch,
-`GET_IN_TOUCH_SURFACE` in `src/consts.ts`: `'dark'` (the default) or `'soft'`.
-
-There are no greys, tints, gradients or shadows beyond those. The hero
-overlay is the one tint: black at part opacity over the footage.
+**The exceptions to white** are the footer (a black card) and text set over
+video — the hero, once it has footage, and the stat tiles — which sits on a
+flat black overlay. There are no greys, tints, gradients or shadows beyond
+those two overlays.
 
 **Separation without colour.** Depth comes from line weight, type scale and
 space. Where a section used to sit on a tint, it now takes `.section--ruled`:
@@ -176,9 +184,9 @@ at the body weight.
 | `--accent` on `--bg` | 9.74:1 | Links and the logo, at any size |
 | `--bg` on `--accent` | 9.74:1 | The label on a filled button |
 | `--ink` on `--accent` | 2.16:1 | **Fails** — so a filled button's label is white |
-| `--on-dark` on `--surface-dark` | 21.00:1 | Text on the dark surfaces |
-| `--ink` on `--surface-soft` | 18.76:1 | Text on a grey Get in Touch |
-| `--accent` on `--surface-dark` | 2.16:1 | **Hover only.** Footer and Get in Touch links turn `#341BCA` on hover, as specified; an underline appears too, so the state never rests on colour. Never used at rest on black, or for a focus ring there — those are white |
+| `--on-dark` on `--surface-dark` | 21.00:1 | Text on the footer |
+| White on the stat tiles | ≥ 5.0:1 | On 95% of the pixels behind each label, over a 0.5 black shade (measured on each tile's first frame) |
+| `--accent` on `--surface-dark` | 2.16:1 | **Hover only.** Footer links turn `#341BCA` on hover, with an underline so the state never rests on colour. Never used at rest on black, or for a focus ring there — those are white |
 
 That last row is the one exception to black text: the primary button is an
 accent fill with a white label, because black on `#341BCA` fails AA. On hover
@@ -204,7 +212,8 @@ Poppins Light (300), lowercase, right-aligned on two lines, tracking
 within ~2px at its own scale.
 
 ```astro
-<Logo />                   <!-- brand, #341BCA: the header -->
+<Logo />                   <!-- brand, #341BCA -->
+<Logo variant="current" /> <!-- the header: #341BCA on white, white over footage -->
 <Logo variant="white" />   <!-- the black footer -->
 <Logo variant="black" />
 ```
@@ -380,8 +389,8 @@ Logos live in `src/assets/logos/` and are declared once in **`src/logos.ts`**.
   Once sign-off lands, move the file up a folder and uncomment its two lines
   in `src/logos.ts`.
 - **No logo file yet?** Leave out `src` and the partner's name is set in type
-  in its place, at the same optical weight (Line 98, Pearls Collective and
-  Le Olive, for now). When the file arrives, import it and add `src`.
+  in its place, at the same optical weight (Le Olive, for now). When the file
+  arrives, import it and add `src`.
 - **`scale`** evens out optical weight: a solid black disc and a thin ring
   cover the same area but not the same amount of ink. The comment above the
   manifest explains how the current values were set.
@@ -396,10 +405,16 @@ npm run logos:mono
 It maps each pixel's lightness to black ink: dark artwork on a light ground
 becomes black, and light areas enclosed by the artwork — the knocked-out
 "IRELAND BOX" lettering, the ADHD Now roundel centre — stay open. Artwork
-supplied light-on-dark (The Humble Fishmonger) is detected and inverted, so its
-lettering is the black. Each file is then trimmed to its artwork. Run it on
-any new or re-exported logo; running it twice changes nothing. The colour
-originals are in git history.
+supplied light-on-dark (The Humble Fishmonger, Line 98) is detected and
+inverted, so its lettering is the black. Each file is then trimmed to its
+artwork. Run it on any new or re-exported logo; running it twice changes
+nothing. The colour originals are in git history, except for two.
+
+Line 98 and Pearls Co. were supplied as square social images (JPEG), which are
+not in the repo, so each was cut to its mark by hand first: the script
+converts everything it's given. Pearls Co. also had its full stop, a
+photographed pearl, redrawn as a flat dot; converted as it was, its shading
+would have become a broken crescent.
 
 Logos are sized to cover comparable *area*, not a shared height — see
 `opticalK()` — which is why a 6:1 wordmark and a 1:1 roundel are different
@@ -411,49 +426,126 @@ hidden from screen readers, so each partner is read once. With reduced motion
 on, it doesn't move: it's a static, wrapped row. On `/services` the same logos
 are a static row.
 
-## Adding a service
+## Layout
 
-A markdown file in `src/content/services/`:
+- **Header.** A menu button on the left, the wordmark centred, "Get in touch"
+  on the right; it stays at the top as the page scrolls. The menu is a
+  full-screen panel of the site's pages, set large, with the contact routes
+  beneath. Without JavaScript the menu button is a link to the footer's list
+  of pages. Over hero footage the header is see-through with white contents
+  until the hero has scrolled past.
+- **Hero** (`Hero.astro`). Full screen. Headline, the four-word subline with
+  accent full stops, one line of positioning, then two large entry points:
+  **For Brands** → Get in Touch, **For Creators** → Become a Creator.
+- **Feature blocks** (`Feature.astro`). One text column beside one portrait
+  piece of media, alternating sides. Key phrases in the body copy are bold;
+  each block ends on a **proof line** (`ProofLink.astro`) — a short claim in
+  capitals with a chevron — linking to Services.
+- **Stat tiles** (`StatTiles.astro`). The four figures, each over a looping
+  creator video: four across on a wide screen, two by two on a phone.
+- **Partners marquee** (`LogoWall.astro`), then the philosophy line.
+- **Footer** (`Footer.astro`). A black card inset from the page edges: Get in
+  touch, with one route each for brands (the pre-filled brand enquiry email),
+  creators (the application) and anything else (the inbox); then the pages,
+  socials and the small print.
 
-```markdown
----
-title: Service name
-summary: Plain-language description of what the client receives.
-includes:
-  - What's included, one line per item
-order: 7
-provisional: false   # true shows a "Scope to be confirmed" flag
-image: ./images/service-name.jpg   # optional; 4:5, at least 960×1200
-imageAlt: What the photograph shows   # required once image is set
----
-```
+### Placeholders
 
-Each service card has a fixed 4:5 image frame. Until `image` is set it shows an
-outlined placeholder; the real photograph fills the same frame, cropped to
-fit, so swapping it in moves nothing. The markdown body isn't shown on the
-page; it's kept for a longer format later.
+Wherever an image or a video is missing, the page shows an outlined frame at
+the exact aspect ratio the real media will take, with **"Add image"** or
+**"Add video"** in the middle (`Placeholder.astro`). Swapping in the real file
+moves nothing else on the page. Today every slot is filled with temporary
+media (see Visual content), so the frames only appear for a slot you empty.
+
+## Services
+
+The copy lives in **`src/data/services.ts`**: three areas, each a list of
+services (a name and one line on what the client gets), then the sector
+examples — a sector, the kind of work and at most one line on how it was
+done; no metrics and no client names. Add, reorder or edit entries there; the
+page lays itself out, including the index at the top that jumps to each area
+(`/services/#creator-marketing` and so on).
 
 ## Visual content
 
-No footage or content has been supplied. Both slots are built and waiting:
+Every slot is filled for now with **temporary media, "until further notice"**
+— the files supplied on 21 September 2026, cropped to each slot. Replace them
+as final photography and footage arrives. The image and video slots all live
+in **`src/data/media.ts`** (the hero in `src/consts.ts`), so each swap is one
+line; take a slot out and it goes back to its outlined "Add image" / "Add
+video" frame. Four of the supplied clips carry stock-library file names —
+flagged in `src/data/media.ts`, to be replaced first.
 
-- **Hero** — a full-bleed background video. Its source is one constant,
-  `HERO_VIDEO` in `src/consts.ts` (now `/media/hero`). The hero loads
-  `public/media/hero.webm`, `hero.mp4` and `hero.jpg` (the poster), and leaves
-  out any file that isn't there — so today it shows the placeholder poster
-  alone. To go live, export the footage as a compressed **H.264 MP4 plus a
-  WebM, each under ~5MB**, silent and loopable, with a 1920×1080 poster from
-  the first frame, and drop them in under those names: no code change. Other
-  names are a one-line change to the constant. It autoplays muted and
-  inline; visitors who ask for reduced motion get the poster and no video. A
-  black overlay (`--hero-overlay` in `Hero.astro`, 0.5) keeps the white
-  headline legible — retune it against the real footage.
-- **Content tiles** (home page): give a tile a `video` or an `image` plus
-  `alt`. Tiles are 9:16, the native reel ratio; until then each is a
-  black-outlined frame.
+- **Hero** — full-screen video in two separate cuts, both from one constant,
+  `HERO_VIDEO` in `src/consts.ts` (now `/media/hero`):
+
+  | Cut | Shown on | Files in `public/media/` |
+  |---|---|---|
+  | Desktop, 1920×1080 (16:9) | landscape screens | `hero.mp4`, `hero.webm`, poster `hero.jpg` |
+  | Mobile, 1080×1920 (9:16) | portrait screens | `hero-portrait.mp4`, `hero-portrait.webm`, poster `hero-portrait.jpg` |
+
+  **Now:** AMAVI's own café clip (`IMG_9245.mov`, 5.8s, shot 9:16): the
+  desktop cut is a 16:9 band across the laptop, the mobile cut the whole
+  frame, each with a 1s crossfade where it loops. The footage fills the screen
+  edge to edge, the text is white over a flat black overlay (0.45 in
+  `Hero.astro` — measured on this footage, white holds 6.7:1 or better), and
+  the header sits over it. To replace it, drop new files in under these names —
+  **H.264 MP4 plus a WebM, each under ~5MB**, silent and loopable, posters
+  from each cut's first frame — and rebuild. Remove a cut and that
+  orientation shows the "Add video" frame, with black text.
+- **Stat tiles** — tiles 1–4 of `src/data/tiles.ts` (`public/media/tiles/`),
+  creator videos from AMAVI's campaigns, behind the four figures. Tile 5 isn't
+  used: its burned-in captions read badly as a silent loop.
+- **Feature videos** (home, 2:3) — "Creators are one part of the equation"
+  plays a photo shoot (`16521739…mp4`); "How we work" a content studio
+  (`15636407…mp4`, first 12 seconds). In `public/media/features/`.
+- **Images** — the Services page (2:3 for the head and each area, 4:5 for each
+  sector example) and the About page's four (2:3): stills from the supplied
+  clips and the café photo, in `src/assets/media/`, served as responsive WebP.
+  Which image fills which slot is `src/data/media.ts`.
+
+**Every video** is lazy and visible-only (`src/scripts/loop-videos.ts`): no
+preload; the poster and sources are attached only as it nears the screen; it
+plays while at least a quarter is visible and pauses as it scrolls away; a cut
+that isn't displayed never loads; and under reduced motion it never plays —
+the poster is all there is.
 
 Get sign-off from the creator and the client before publishing any creator's
 content.
+
+### Making the video files
+
+There's no ffmpeg on the machine this was built on, so the video files come
+from `scripts/encode-video.swift`, which uses macOS's own AVFoundation: H.264
+MP4, no audio track, and no WebM (a WebM dropped in beside an MP4 is picked
+up automatically). Its header lists the options. For the hero, encode each
+cut to its size (`--size 1920x1080`, and `--size 1080x1920` for the mobile
+cut; `--fade 30` makes the loop seamless). The tile files were made with:
+
+| Output | Source | Options |
+|---|---|---|
+| `hero.mp4` | `IMG_9245.mov` | `--size 1920x1080 --crop 0,1159,2160,1215 --bitrate 3000000 --fade 30` |
+| `hero-portrait.mp4` | the same | `--size 1080x1920 --bitrate 2500000 --fade 30` |
+| `features/creators.mp4` | `16521739_1440_2560_60fps.mp4` | `--size 720x1080 --crop 0,200,1440,2160 --bitrate 1500000 --fade 45` |
+| `features/studio.mp4` | `15636407_1080_1920_30fps.mp4` | `--size 720x1080 --crop 0,150,1080,1620 --bitrate 1200000 --max 12 --fade 30` |
+| `tiles/tile-1.mp4` | `Video-20656.mp4` | `--size 360x640 --bitrate 700000 --max 12` |
+| `tiles/tile-2.mp4` | `Video-43037.mp4` | `--size 540x960 --bitrate 1100000 --max 12` |
+| `tiles/tile-3.mp4` | `Video-15280.mp4` | `--size 540x960 --bitrate 1100000 --max 12` |
+| `tiles/tile-4.mp4` | `Video-76499.mp4` | `--size 540x960 --bitrate 1200000` |
+| `tiles/tile-5.mp4` | `Video-81412.mp4` | `--size 540x960 --bitrate 1000000 --max 12` |
+
+```bash
+swift scripts/encode-video.swift Video-43037.mp4 public/media/tiles/tile-2.mp4 tile-2.png --size 540x960 --bitrate 1100000 --max 12
+```
+
+Each run also writes a PNG of the first frame. The posters are JPEGs made
+from those with sharp (`mozjpeg`, quality 75). The encoder can leave a temp
+copy beside its output (`*.sb-*`): delete it, or it will be published from
+`public/`.
+
+```bash
+node -e "require('sharp')('tile-2.png').jpeg({ quality: 75, mozjpeg: true }).toFile('public/media/tiles/tile-2.jpg')"
+```
 
 ---
 
@@ -500,18 +592,21 @@ grep -rn "TODO(client)" src/ public/
 The ones that matter most:
 
 - **ALT Rigatoni licence.** See Typefaces.
-- **Hero footage and content tiles.** See Visual content.
-- **The tagline is a working draft.** One constant, `TAGLINE`, in
-  `src/consts.ts`. The home content heading is another, `CONTENT_TAGLINE`,
-  under copy review.
-- **Get in Touch: black or grey.** `GET_IN_TOUCH_SURFACE` in `src/consts.ts`.
-- **Partner logos** for Line 98, Pearls Collective and Le Olive, and service
-  photographs (4:5) for each service.
+- **Final hero footage**, in two cuts: desktop 16:9 and mobile 9:16. The
+  café clip holds the place for now. See Visual content.
+- **Final media for every slot.** All are temporary fills for now, four of
+  them from clips with stock-library names. See `src/data/media.ts`.
+- **Creator handles and consent** for the creator videos, in
+  `src/data/tiles.ts`.
+- **Which line leads:** the hero headline (`TAGLINE`) or "Made by creators.
+  Seen by our target audience." (`CONTENT_TAGLINE`), now on the stats. Both
+  in `src/consts.ts`.
+- **New copy to confirm:** the "How we work" block and the philosophy line on
+  the home page.
+- **Partner logo** for Le Olive.
 - **The old creator form's email is dead.** It tells creators to write to
   `hello@amavi.social`, a domain with no DNS. This site uses
   `hello@amavisocials.com`, which is verified working.
-- **Services format.** Framed as "Work with us"; the nav label is still
-  "Services" — one line in `src/consts.ts` to rename.
 - **Analytics.** GA4 or Plausible. GA4 sets cookies and would need a consent
   banner; Plausible would not.
 

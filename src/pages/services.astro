@@ -1,18 +1,23 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import ServiceCard from '../components/ServiceCard.astro';
+import Frame from '../components/Frame.astro';
 import ReachMeters from '../components/ReachMeters.astro';
 import LogoWall from '../components/LogoWall.astro';
+import { SERVICE_AREAS, SECTOR_EXAMPLES } from '../data/services';
+import { MEDIA } from '../data/media';
 import { SITE_NAME, SITE_URL } from '../consts';
 
 /**
- * TODO(client): the Services format is still open. The page is framed as
- * "Work with us", per the current lean; the nav label stays "Services" so it
- * doesn't sit beside "Get in Touch" as two near-identical calls to action.
- * Renaming the tab is one line in src/consts.ts.
+ * What AMAVI does: three areas, each with its services, then short sector
+ * examples. The copy lives in src/data/services.ts.
+ *
+ * Laid out like the home page: an index up top that jumps to each area, then
+ * each area as text beside a portrait image, alternating sides.
+ *
+ * Images: one portrait (2:3) for the top of the page, one per area, and one
+ * (4:5) per sector example — all set in src/data/media.ts, where they are
+ * marked as temporary fills. A slot left empty there shows "Add image".
  */
-const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 
 /** The programme, in the order it runs. A real sequence, so it is numbered. */
 const programme = [
@@ -42,50 +47,96 @@ const accounts = [
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  itemListElement: services.map((service, i) => ({
-    '@type': 'ListItem',
-    position: i + 1,
-    item: {
-      '@type': 'Service',
-      name: service.data.title,
-      description: service.data.summary,
-      serviceType: 'Influencer marketing',
-      areaServed: { '@type': 'Country', name: 'Ireland' },
-      provider: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
-    },
-  })),
+  itemListElement: SERVICE_AREAS.flatMap((area) => area.services.map((service) => ({ area, service }))).map(
+    ({ area, service }, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Service',
+        name: service.name,
+        description: service.description,
+        category: area.title,
+        areaServed: { '@type': 'Country', name: 'Ireland' },
+        provider: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+      },
+    }),
+  ),
 };
 ---
 
 <Base
-  title="Work With Us"
-  description="Fully managed creator partnerships, campaign management, gifted and paid collaborations, social media management and reporting — what each includes."
+  title="Services"
+  description="Creator marketing, brand and campaign strategy, and growth partnerships: the creators, communities, businesses and partners that put a brand in front of the right audience."
   schema={schema}
 >
-  <section class="section page-head">
-    <div class="container">
-      <h1 class="display display--lg">Work with us</h1>
-      <p class="lead page-head__lead">
-        The whole programme, fully managed — or just the parts you need.
-      </p>
+  {/* ================= Head: the question, and an index ================= */}
+  <section class="section svc-head">
+    <div class="container svc-head__grid">
+      <div class="svc-head__text">
+        <h1 class="display display--lg">What we do depends on what you need.</h1>
+        <p class="lead svc-head__lead">
+          Creator partnerships are our speciality, not our limit. We find the people and
+          opportunities that put your brand in front of the right audience — <strong>creators,
+          communities, businesses and partners</strong>.
+        </p>
+        <ol class="svc-index" role="list">
+          {SERVICE_AREAS.map((area) => (
+            <li>
+              <a class="svc-index__link" href={`#${area.id}`}>
+                <span class="svc-index__number">{area.number}</span>
+                <span class="svc-index__title">{area.title}</span>
+                <svg viewBox="0 0 10 20" aria-hidden="true">
+                  <path d="M1 1l8 9-8 9" fill="none" stroke="currentColor" stroke-width="1.25" vector-effect="non-scaling-stroke" />
+                </svg>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <Frame slot={MEDIA.services.head} ratio="2/3" class="svc-head__media" />
     </div>
   </section>
 
-  <section class="section section--tight services-section">
-    <div class="container">
-      <div class="services">
-        {services.map((service) => (
-          <ServiceCard
-            title={service.data.title}
-            summary={service.data.summary}
-            includes={service.data.includes}
-            provisional={service.data.provisional}
-            image={service.data.image}
-            imageAlt={service.data.imageAlt}
-            id={service.id}
-          />
-        ))}
+  {/* ================= The three areas ================= */}
+  {SERVICE_AREAS.map((area, i) => (
+    <section class:list={['section', 'section--ruled', 'area', { 'area--reverse': i % 2 === 1 }]}
+             id={area.id} aria-labelledby={`${area.id}-heading`}>
+      <div class="container area__grid">
+        <div class="area__text">
+          <p class="area__number" aria-hidden="true">{area.number}</p>
+          <h2 id={`${area.id}-heading`} class="display display--md area__title">{area.title}</h2>
+          <ul class="area__services" role="list">
+            {area.services.map((service) => (
+              <li class="area__service">
+                <h3 class="area__service-name">{service.name}</h3>
+                <p class="area__service-desc">{service.description}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <Frame slot={MEDIA.services.areas[area.id]} ratio="2/3" class="area__media" />
       </div>
+    </section>
+  ))}
+
+  {/* ================= Sector examples =================
+      Short cards, not case studies: no metrics, no client names. */}
+  <section class="section section--ruled" id="sectors" aria-labelledby="sectors-heading">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="sectors-heading" class="display display--md">Sector examples</h2>
+        <p class="lead">What the work has looked like in practice.</p>
+      </div>
+      <ul class="sectors" role="list">
+        {SECTOR_EXAMPLES.map((example, i) => (
+          <li class="sector">
+            <Frame slot={MEDIA.services.sectors[i]} ratio="4/5" sizes="(min-width: 64em) 14rem, 70vw" />
+            <p class="label sector__name">{example.sector}</p>
+            <h3 class="sector__work">{example.work}</h3>
+            {example.how && <p class="sector__how">{example.how}</p>}
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
@@ -186,17 +237,109 @@ const schema = {
 </Base>
 
 <style>
-  .page-head { padding-bottom: var(--space-l); }
-  .page-head__lead { margin-top: var(--space-m); }
-
-  .services-section { padding-top: 0; }
-
-  .services {
-    display: grid;
-    gap: var(--space-2xl) var(--space-l);
+  /* ---------- Head ---------- */
+  .svc-head__grid { display: grid; gap: var(--space-xl); }
+  .svc-head__text { display: grid; gap: var(--space-m); align-content: start; }
+  .svc-head__lead { max-width: 52ch; }
+  .svc-head__lead strong { font-weight: 700; }
+  .svc-head :global(.svc-head__media) { width: min(100%, 16rem); }
+  @media (min-width: 48em) {
+    .svc-head__grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-2xl); }
+    .svc-head :global(.svc-head__media) { width: min(100%, 22rem); justify-self: end; }
   }
-  @media (min-width: 40em) { .services { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 64em) { .services { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  /* The index: each area a row, a hairline under each, a chevron that steps on hover. */
+  .svc-index { list-style: none; margin-top: var(--space-m); border-top: var(--stroke) solid var(--line); }
+  .svc-index__link {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-s);
+    padding-block: var(--space-s);
+    border-bottom: var(--stroke) solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+  }
+  .svc-index__number { font-size: var(--text-sm); font-weight: var(--weight-strong); color: var(--accent); }
+  .svc-index__title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .svc-index__link svg { width: 0.7rem; height: 1.4rem; transition: transform var(--dur) var(--ease); }
+  .svc-index__link:hover { color: var(--accent); }
+  .svc-index__link:hover svg { transform: translateX(0.3rem); }
+
+  /* ---------- Areas: text beside a portrait image, alternating ---------- */
+  .area { scroll-margin-top: var(--header-h); }
+  .area__grid { display: grid; gap: var(--space-xl); }
+  .area :global(.area__media) { width: min(100%, 16rem); }
+  @media (min-width: 48em) {
+    .area__grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-2xl); align-items: start; }
+    .area :global(.area__media) { width: min(100%, 22rem); justify-self: end; }
+    .area--reverse .area__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+    .area--reverse :global(.area__media) { order: -1; justify-self: start; }
+  }
+
+  .area__text { display: grid; gap: var(--space-m); align-content: start; }
+  /* The area's number: the page's one large accent mark. */
+  .area__number {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(2.75rem, 1.9rem + 3.4vw, 4.75rem);
+    line-height: 0.85;
+    color: var(--accent);
+  }
+  .area__services { list-style: none; margin-top: var(--space-s); border-top: var(--stroke) solid var(--line); }
+  .area__service {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-m);
+    border-bottom: var(--stroke-hair) solid var(--line);
+  }
+  @media (min-width: 64em) {
+    .area__service { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-l); align-items: baseline; }
+  }
+  .area__service-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .area__service-desc { font-weight: var(--weight-secondary); }
+
+  /* ---------- Sector examples: five short cards ---------- */
+  .sectors {
+    list-style: none;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(14rem, 70%);
+    gap: var(--space-m);
+    margin-inline: calc(var(--gutter) * -1);
+    padding: var(--space-2xs) var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .sectors::-webkit-scrollbar { display: none; }
+  @media (min-width: 40em) { .sectors { grid-auto-columns: minmax(14rem, 40%); } }
+  @media (min-width: 64em) {
+    .sectors {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-inline: 0;
+      padding: 0;
+      overflow: visible;
+    }
+  }
+  .sector { display: grid; gap: var(--space-2xs); align-content: start; scroll-snap-align: start; }
+  .sector__name { margin-top: var(--space-s); }
+  .sector__work { font-size: var(--text-base); font-weight: 700; line-height: 1.35; }
+  .sector__how { font-size: var(--text-sm); font-weight: var(--weight-secondary); line-height: 1.5; }
 
   /* ---------- Programme: a numbered grid, not a stack of cards ---------- */
   .programme {

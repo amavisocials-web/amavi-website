@@ -7,39 +7,59 @@ export const SITE_NAME = 'AMAVI Socials';
 export const SITE_URL = 'https://www.amavisocials.co';
 
 /**
- * TODO(client): working tagline, flagged as not final. Used as the home hero
- * headline and the About page statement — refine it here and both update.
+ * Positioning, used throughout the copy: AMAVI is a creator-led marketing and
+ * partnerships agency, not a pure influencer agency. Creator partnerships are
+ * the speciality, not the limit. What AMAVI sells is finding the people and
+ * opportunities that put a brand in front of the right audience — creators,
+ * communities, businesses and partners.
  */
-export const TAGLINE = 'Creator partnerships that reach the people you don’t already have.';
 
 /**
- * The heading of the home page's creator-content section.
- * TODO(client): copy under review — swap it here once the copy is signed off.
+ * The home hero headline and the About page statement.
+ * TODO(client): working tagline, flagged as not final — refine it here and
+ * both update.
+ */
+export const TAGLINE = 'We find the people who can move your brand forward.';
+
+/** The line under the headline: four words, each with its own full stop. */
+export const HERO_SUBLINE = ['Creators', 'Communities', 'Partners', 'Opportunities'];
+
+/** One sentence of positioning, under the hero and wherever AMAVI is introduced. */
+export const POSITIONING =
+  'AMAVI is a creator-led marketing and partnerships agency helping brands find new audiences through the people and relationships that matter.';
+
+/**
+ * Leads the home stats section, on the video tiles.
+ * TODO(client): confirm which line leads — this or the hero headline (TAGLINE).
+ * Copy under review; swap it here once signed off.
  */
 export const CONTENT_TAGLINE = 'Made by creators. Seen by our target audience.';
 
 /**
- * The home hero's background video, as one base path with no extension. The
- * hero looks in /public for `<path>.webm`, `<path>.mp4` and `<path>.jpg` (the
- * poster still) and leaves out any file that isn't there yet — so until the
- * footage exists it shows the poster alone, and nothing 404s.
+ * The home hero's full-screen video: two separate cuts, one base path.
  *
- * TODO(client): replace with final Canon footage. Silent, 10–20 seconds and
- * loopable; a compressed H.264 MP4 plus a WebM, each under ~5MB; and a
- * 1920×1080 JPEG poster taken from the first frame. Keep these file names and
- * no code changes at all; use other names and this is the one line to edit.
+ *   desktop (landscape screens)  public<path>.mp4 / .webm, poster <path>.jpg
+ *   mobile  (portrait screens)   public<path>-portrait.mp4 / .webm / .jpg
+ *
+ * Each file is looked for at build time and left out if it isn't there, so
+ * nothing 404s; a cut with no video file shows an outlined "Add video" frame
+ * instead.
+ *
+ * Now: AMAVI's own café clip (IMG_9245.mov, 5.8s, shot 9:16), with a 1s
+ * crossfade where it loops. The desktop cut is a 16:9 band across the laptop
+ * (1920×1080, 1.9MB); the mobile cut is the whole frame (1080×1920, 1.6MB).
+ * MP4 only — see README, "Making the video files".
+ *
+ * TODO(client): temporary fill "until further notice" — replace with the
+ * final footage when it's ready: silent, 10–20 seconds and loopable; a
+ * compressed H.264 MP4 plus a WebM, each under ~5MB; and a JPEG poster from
+ * each cut's first frame. Keep these file names and no code changes; use
+ * other names and this is the one line to edit.
  */
 export const HERO_VIDEO = '/media/hero';
 
-/**
- * The Get in Touch band's background, in one place: 'dark' (black, white
- * text) or 'soft' (light grey #F2F2F2, black text).
- * TODO(client): final choice to be made once the copy is in.
- */
-export const GET_IN_TOUCH_SURFACE: 'dark' | 'soft' = 'dark';
-
 export const SITE_DESCRIPTION =
-  'AMAVI Socials is an influencer marketing agency working with brands across Ireland. We source and vet creators, handle the agreements, run the campaign and report on what it returned.';
+  'AMAVI Socials is a creator-led marketing and partnerships agency. We find the creators, communities and partners that put brands across Ireland in front of new audiences.';
 
 /**
  * The working mailbox. Verified: amavisocials.com has Google Workspace MX

@@ -1,61 +1,75 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import fs from 'node:fs';
+import path from 'node:path';
+import type { ContentTile } from '../data/tiles';
 
 /**
- * A row of creator content — reels and stills — with a single summary and
- * call to action beneath the row rather than a caption under each tile.
+ * A row of creator content, with one summary and call to action beneath the
+ * row rather than a caption under each tile. The tiles themselves are data:
+ * src/data/tiles.ts.
  *
- * TODO(client): no content supplied yet. Give a tile a `video` (path under
- * /public) or an `image` (an import from src/assets) plus `alt`, and its
- * placeholder is replaced. Tiles are 9:16, the native reel ratio, so a reel
- * drops in uncropped. Before publishing any creator's content, get sign-off
- * from the creator and the client (brief §5).
+ * Each tile is one link to its original Instagram post, opening in a new tab.
+ * The media is self-hosted, never embedded: a looping video with its first
+ * frame as the poster, or a still for a photo post. Every frame is a fixed
+ * 9:16 whatever is in it, so nothing on the page moves as media loads.
+ *
+ * Videos load nothing up front (preload="none") and play only while at least
+ * half on screen, pausing as they scroll away, to spare battery and data.
+ * Under reduced motion they never play: the poster is all there is.
  */
-export interface Tile {
-  kind: 'reel' | 'image';
-  video?: string;
-  image?: ImageMetadata;
-  alt?: string;
-}
-
 interface Props {
-  tiles: Tile[];
-  /** Names the scrolling row for screen readers once it holds real media. */
+  tiles: ContentTile[];
+  /** Names the scrolling row for screen readers. */
   label?: string;
 }
 const { tiles, label = 'Creator content' } = Astro.props;
 
-// Placeholders carry no information, so while every tile is one the whole row
-// is decoration: hidden from assistive tech, and not a keyboard stop.
-const decorative = tiles.every((t) => !t.video && !t.image);
+const inPublic = (file: string) => fs.existsSync(path.join(process.cwd(), 'public', file));
+const resolved = tiles.map((tile) => {
+  const webm = inPublic(`${tile.src}.webm`) ? `${tile.src}.webm` : undefined;
+  const mp4 = inPublic(`${tile.src}.mp4`) ? `${tile.src}.mp4` : undefined;
+  const poster = inPublic(tile.poster) ? tile.poster : undefined;
+  if (!webm && !mp4 && !poster) {
+    // TODO(client): media file needed. Until it's in, the tile is an empty frame.
+    console.warn(`[ContentTiles] TODO(client): media file needed for ${tile.href}: ` +
+      `no ${tile.src}.mp4, ${tile.src}.webm or ${tile.poster} in public/`);
+  }
+  const whose = tile.credit ? `${tile.credit}’s post` : 'this creator post';
+  return {
+    ...tile, webm, mp4, poster,
+    kind: webm || mp4 ? 'video' : poster ? 'image' : 'missing',
+    label: `${tile.alt}. View ${whose} on Instagram, opens in a new tab`,
+  };
+});
 ---
 
 <div class="tiles-block">
-  <div
-    class="tiles-scroller"
-    aria-hidden={decorative ? 'true' : undefined}
-    role={decorative ? undefined : 'region'}
-    aria-label={decorative ? undefined : label}
-    tabindex={decorative ? undefined : 0}
-  >
+  <div class="tiles-scroller" role="region" aria-label={label}>
     <ul class="tiles" role="list">
-      {tiles.map((tile) => (
-        <li class:list={['tile', { 'has-media': tile.video || tile.image }]}>
-          {tile.video ? (
-            <video class="tile__media" src={tile.video} muted loop playsinline
-                   preload="metadata" aria-label={tile.alt}></video>
-          ) : tile.image ? (
-            <Image class="tile__media" src={tile.image} alt={tile.alt ?? ''} width={480} loading="lazy" />
-          ) : (
-            tile.kind === 'reel' && (
-              <svg class="tile__play" viewBox="0 0 48 48" aria-hidden="true">
-                <circle cx="24" cy="24" r="23.5" fill="none" stroke="currentColor" stroke-width="1"
-                        vector-effect="non-scaling-stroke" />
-                <path d="M20 16.5v15l12-7.5z" fill="currentColor" />
-              </svg>
-            )
-          )}
+      {resolved.map((tile) => (
+        <li class="tiles__item">
+          <a class="tile" href={tile.href} target="_blank" rel="noopener noreferrer" aria-label={tile.label}>
+            {/* The link's label says what the media shows, so the media itself is silent. */}
+            <div class="tile__frame">
+              {tile.kind === 'video' ? (
+                <video class="tile__media" muted loop playsinline preload="none" poster={tile.poster}
+                       disablepictureinpicture aria-hidden="true" data-tile-video>
+                  {tile.webm && <source src={tile.webm} type="video/webm" />}
+                  {tile.mp4 && <source src={tile.mp4} type="video/mp4" />}
+                </video>
+              ) : tile.kind === 'image' ? (
+                <img class="tile__media" src={tile.poster} alt="" width="540" height="960"
+                     loading="lazy" decoding="async" />
+              ) : (
+                <svg class="tile__play" viewBox="0 0 48 48" aria-hidden="true">
+                  <circle cx="24" cy="24" r="23.5" fill="none" stroke="currentColor" stroke-width="1"
+                          vector-effect="non-scaling-stroke" />
+                  <path d="M20 16.5v15l12-7.5z" fill="currentColor" />
+                </svg>
+              )}
+            </div>
+            {tile.credit && <span class="tile__credit">{tile.credit}</span>}
+          </a>
         </li>
       ))}
     </ul>
@@ -66,21 +80,47 @@ const decorative = tiles.every((t) => !t.video && !t.image);
   </div>
 </div>
 
+<script>
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const videos = document.querySelectorAll<HTMLVideoElement>('[data-tile-video]');
+  const onScreen = new Set<HTMLVideoElement>();
+
+  const sync = (video: HTMLVideoElement) => {
+    if (onScreen.has(video) && !still.matches) video.play().catch(() => {});
+    else if (!video.paused) video.pause();
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      const video = entry.target as HTMLVideoElement;
+      if (entry.intersectionRatio >= 0.5) onScreen.add(video);
+      else onScreen.delete(video);
+      sync(video);
+    }
+  }, { threshold: [0, 0.5] });
+
+  videos.forEach((video) => observer.observe(video));
+  still.addEventListener('change', () => videos.forEach(sync));
+</script>
+
 <style>
   .tiles-block { display: grid; gap: var(--space-xl); }
 
-  /* Desktop: the full row. Mobile: a swipeable strip that bleeds to the
-     viewport edge, the way a feed does — no carousel script needed. */
+  /* Desktop: the full row. Tablet and mobile: a swipeable strip that bleeds to
+     the viewport edge, the way a feed does, with the next tile showing — no
+     carousel script needed. The block padding leaves room for a tile's focus
+     ring, which the scrolling box would otherwise clip; the negative margin
+     takes it back out of the layout. */
   .tiles-scroller {
-    margin-inline: calc(var(--gutter) * -1);
-    padding-inline: var(--gutter);
+    margin: calc(var(--space-2xs) * -1) calc(var(--gutter) * -1);
+    padding: var(--space-2xs) var(--gutter);
     overflow-x: auto;
+    overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
   }
   .tiles-scroller::-webkit-scrollbar { display: none; }
-  .tiles-scroller:focus-visible { outline-offset: -2px; }
 
   .tiles {
     list-style: none;
@@ -89,38 +129,61 @@ const decorative = tiles.every((t) => !t.video && !t.image);
     grid-auto-columns: minmax(12rem, 58%);
     gap: var(--space-s);
   }
+  .tiles__item { scroll-snap-align: start; }
 
   @media (min-width: 40em) {
     .tiles { grid-auto-columns: minmax(12rem, 36%); }
   }
 
   @media (min-width: 64em) {
-    .tiles-scroller { margin-inline: 0; padding-inline: 0; overflow: visible; }
+    .tiles-scroller { margin: 0; padding: 0; overflow: visible; }
     .tiles { grid-auto-flow: row; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    /* A stagger across the row. Desktop only: on the swipe strip it would
+       just look misaligned. */
+    .tiles__item:nth-child(even) { transform: translateY(var(--space-l)); }
   }
 
-  /* An empty tile is a black outline on white; a reel carries a play mark. */
   .tile {
+    display: grid;
+    gap: var(--space-2xs);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .tile__frame {
+    position: relative;
     aspect-ratio: 9 / 16;
     border: var(--stroke) solid var(--line);
     border-radius: var(--radius-media);
     overflow: hidden;
-    scroll-snap-align: start;
     display: grid;
     place-items: center;
-    color: var(--ink);
+    transition: border-color 0.2s var(--ease);
   }
-  /* Real media fills its tile edge to edge; the outline was only a stand-in. */
-  .tile.has-media { border: 0; }
-
-  /* A stagger across the row. Desktop only: on the swipe strip it would just
-     look misaligned. */
-  @media (min-width: 64em) {
-    .tile:nth-child(even) { transform: translateY(var(--space-l)); }
+  .tile__media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--ease);
   }
-
-  .tile__media { width: 100%; height: 100%; object-fit: cover; }
   .tile__play { width: 2.75rem; height: 2.75rem; }
+
+  /* Hover: the frame takes the accent and the media leans in, slightly. */
+  .tile:hover .tile__frame { border-color: var(--accent); }
+  .tile:hover .tile__media { transform: scale(1.03); }
+
+  /* Focus: the site's accent ring, drawn around the frame it opens. */
+  .tile:focus-visible { outline: none; }
+  .tile:focus-visible .tile__frame { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
+
+  .tile__credit { font-size: var(--text-sm); font-weight: var(--weight-secondary); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tile__media { transition: none; }
+    .tile:hover .tile__media { transform: none; }
+  }
 
   .tiles-summary {
     display: grid;

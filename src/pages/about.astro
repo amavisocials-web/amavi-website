@@ -1,14 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
+import Frame from '../components/Frame.astro';
+import { MEDIA } from '../data/media';
 import { TAGLINE, BRAND_ENQUIRY_MAILTO } from '../consts';
 
 /**
- * Deliberately short: who AMAVI is, and one way to get in touch. The
- * programme detail and the per-account figures that used to live here are on
- * /services.
+ * Deliberately short: who AMAVI is, a row of pictures, and one way to get in
+ * touch — the email button is the page's only call to action. The programme
+ * detail and the per-account figures are on /services.
  *
- * The site-wide Get in Touch band is left off this page (see Footer.astro), so
- * the email button below is its only call to action.
+ * The four portraits (2:3) are set in src/data/media.ts, marked there as
+ * temporary fills; a slot left empty shows "Add image".
  *
  * TODO(client): no team photos or bios supplied, so this page ships without a
  * team section rather than with stock portraits (brief §9).
@@ -18,27 +20,48 @@ import { TAGLINE, BRAND_ENQUIRY_MAILTO } from '../consts';
 
 <Base
   title="About"
-  description="AMAVI Socials runs influencer and creator partnership programmes end to end for brands across Ireland — sourcing, vetting, agreements, campaign management and reporting."
+  description="AMAVI Socials is a creator-led marketing and partnerships agency: we find the creators, communities, businesses and partners that put a brand in front of the right audience."
 >
   <section class="section about">
-    <div class="container container--narrow about__inner">
-      <h1 class="label">About AMAVI</h1>
+    <div class="container container--narrow about__intro">
+      <h1 class="eyebrow">About AMAVI</h1>
       <p class="display display--lg about__statement">{TAGLINE}</p>
       <p class="lead about__lead">
-        AMAVI Socials is a boutique influencer marketing agency working with brands across
-        Ireland. We run creator partnership programmes from the first shortlist to the final
-        report — so you get the reach without managing twenty creator relationships yourself.
+        AMAVI Socials is a <strong>creator-led marketing and partnerships agency</strong> working
+        with brands across Ireland. Creator partnerships are our speciality, not our limit: we find
+        the people and opportunities that put a brand in front of the right audience —{' '}
+        <strong>creators, communities, businesses and partners</strong>.
       </p>
       <a href={BRAND_ENQUIRY_MAILTO} class="btn btn--primary about__cta">Email us</a>
+    </div>
+
+    <div class="container">
+      <ul class="about__images" role="list">
+        {MEDIA.about.map((slot) => (
+          <li><Frame slot={slot} ratio="2/3" sizes="(min-width: 64em) 17rem, 45vw" /></li>
+        ))}
+      </ul>
     </div>
   </section>
 </Base>
 
 <style>
   /* Space does the work here: very little text, a lot of room around it. */
-  .about { padding-block: clamp(6rem, 3rem + 12vw, 14rem); }
-  .about__inner { display: grid; justify-items: start; }
-  .about__statement { margin-top: var(--space-m); }
-  .about__lead { margin-top: var(--space-l); max-width: 50ch; }
-  .about__cta { margin-top: var(--space-xl); }
+  .about { padding-block: clamp(4rem, 2rem + 8vw, 9rem) var(--section-y); }
+  .about__intro { display: grid; justify-items: center; text-align: center; gap: var(--space-m); }
+  .about__statement { max-width: 20ch; }
+  .about__lead { max-width: 54ch; }
+  .about__lead strong { font-weight: 700; }
+  .about__cta { margin-top: var(--space-s); }
+
+  .about__images {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-s);
+    margin-top: clamp(4rem, 2rem + 6vw, 7rem);
+  }
+  @media (min-width: 64em) {
+    .about__images { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m); }
+  }
 </style>

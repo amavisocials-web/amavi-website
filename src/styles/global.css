@@ -4,14 +4,14 @@
    Black and white. #341BCA is an accent only.
 
    BRAND HANDOVER: every colour, typeface, size and spacing value the site
-   uses is a custom property in the :root block below. These seven colours —
-   four for the white page, three for its only dark or grey surfaces — are the
-   only colour values anywhere in the codebase.
+   uses is a custom property in the :root block below. These six colours —
+   four for the white page, two for its only dark surfaces — are the only
+   colour values anywhere in the codebase.
    ========================================================================== */
 
 :root {
   /* --- Colour ------------------------------------------------------------ */
-  --bg:     #FFFFFF;   /* every background, bar the three surfaces below */
+  --bg:     #FFFFFF;   /* every background, bar the dark surfaces below */
   --ink:    #000000;   /* all text */
   --line:   #000000;   /* every rule, divider, border, field outline, table line */
   /* The accent appears only on: the logo, links, button fills and outlines,
@@ -19,11 +19,11 @@
      nav indicator. Nowhere else. */
   --accent: #341BCA;
 
-  /* The only exceptions to the white background: the hero's overlay, the
-     Get in Touch band and the footer. See "Surfaces" below. */
+  /* The only exceptions to the white background: the footer, and the flat
+     black overlay that keeps text legible over video (the hero and the stat
+     tiles). See "Surfaces" below. */
   --surface-dark:  #000000;
   --on-dark:       #FFFFFF;   /* text, links, outlines and focus on black */
-  --surface-soft:  #F2F2F2;   /* only if Get in Touch is switched to grey */
 
   /* Contrast, measured:
        ink on bg       21.00:1   passes everything
@@ -31,8 +31,7 @@
        bg on accent     9.74:1   the label on a filled button — the one place
                                  on white that text is not black, because
                                  black on #341BCA is only 2.16:1 and fails AA
-       on-dark on dark 21.00:1   text on the three dark surfaces
-       ink on soft     18.76:1   text on the grey Get in Touch, if chosen
+       on-dark on dark 21.00:1   text on the footer
        accent on dark   2.16:1   hover only, on dark links: never at rest,
                                  and never for a focus ring (needs 3:1) */
 
@@ -95,8 +94,12 @@
   --gutter: clamp(1.25rem, 0.6rem + 3.2vw, 4rem);
   --measure: 64ch;
 
-  --radius-media: 0.25rem;
+  --radius-media: 0.25rem;   /* small UI: chips, fields */
+  --radius-frame: 0.75rem;   /* media frames, placeholders, the footer card */
   --radius-pill: 999px;
+
+  /* The fixed header's height, which full-screen sections subtract. */
+  --header-h: 4rem;
 
   /* --- Motion ----------------------------------------------------------- */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -108,6 +111,9 @@
 /* On dense screens a hairline is one device pixel; elsewhere it stays 1px. */
 @media (min-resolution: 2dppx) {
   :root { --stroke-hair: 0.5px; }
+}
+@media (min-width: 48em) {
+  :root { --header-h: 5rem; }
 }
 
 /* --- Reset ------------------------------------------------------------- */
@@ -181,6 +187,16 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
   font-size: var(--text-sm);
   font-weight: var(--weight-secondary);
   line-height: 1.55;
+}
+
+/* A section's name: small, bold capitals over a lot of space. */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: clamp(0.9375rem, 0.85rem + 0.35vw, 1.125rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-transform: uppercase;
 }
 
 /* Small Montserrat capitals, for a section that genuinely needs naming. */
@@ -274,15 +290,36 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
 }
 .link-action:hover { color: var(--accent); border-color: var(--accent); }
 
-/* --- Surfaces: the three exceptions to white ----------------------------
-   The hero overlay, Get in Touch and the footer. Nothing else on the site
-   sits on anything but --bg.
+/* A short line of proof that leads somewhere: capitals, an underline, and a
+   chevron that steps forward on hover. See ProofLink.astro. */
+.proof-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.1em;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-thickness: var(--stroke);
+  text-underline-offset: 0.4em;
+  transition: color var(--dur) var(--ease);
+}
+.proof-link svg { flex: none; width: 0.7em; height: 1.4em; transition: transform var(--dur) var(--ease); }
+.proof-link:hover { color: var(--accent); text-decoration-thickness: var(--stroke); }
+.proof-link:hover svg { transform: translateX(0.3em); }
+
+/* --- Surfaces: the exceptions to white ---------------------------------
+   The footer, and text laid over video (the hero, the stat tiles), which
+   sits on a flat black overlay. Nothing else on the site sits on anything
+   but --bg.
 
    On black, text, links, outlines and rules turn white. The accent keeps the
    primary button's fill and marks hover. Focus rings turn white too: the
    accent is only 2.16:1 against black, and a focus ring needs 3:1. */
 .surface-dark { background: var(--surface-dark); color: var(--on-dark); }
-.surface-soft { background: var(--surface-soft); color: var(--ink); }
 
 .surface-dark a:not(.btn) { color: var(--on-dark); }
 .surface-dark a:not(.btn):hover { color: var(--accent); }
@@ -291,6 +328,8 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
 .surface-dark .btn--secondary:hover,
 .surface-dark .btn--secondary:active { color: var(--on-dark); border-color: var(--accent); background: var(--accent); }
 .surface-dark .link-action:hover { color: var(--accent); border-color: var(--accent); }
+.surface-dark .proof-link { color: var(--on-dark); }
+.surface-dark .proof-link:hover { color: var(--accent); }
 .surface-dark .rule { border-color: var(--on-dark); }
 .surface-dark :focus-visible { outline-color: var(--on-dark); }
 

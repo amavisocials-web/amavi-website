@@ -4,7 +4,9 @@ import adhdNow from './assets/logos/adhd-now.png';
 import autismcareIreland from './assets/logos/autismcare-ireland.png';
 import cleaningDoctorHub from './assets/logos/cleaning-doctor-hub.png';
 import fettle from './assets/logos/fettle.png';
+import line98 from './assets/logos/line-98.png';
 import myirelandbox from './assets/logos/myirelandbox.png';
+import pearlsCollective from './assets/logos/pearls-collective.png';
 import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
 
 // TODO(client): Beyond BMI is not cleared for publication (brief §9). Its file
@@ -22,8 +24,15 @@ import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
  * supplied colour artwork in place (the originals are in git history). Light
  * areas enclosed by the artwork stay open — the knocked-out "IRELAND BOX"
  * lettering, the ADHD Now roundel centre, the Cleaning Doctor disc — and The
- * Humble Fishmonger, supplied light-on-navy, was inverted so its lettering is
- * the black. There are no colour versions on the site.
+ * Humble Fishmonger, supplied light-on-navy, and Line 98, white-on-maroon, were
+ * inverted so their lettering is the black. There are no colour versions on
+ * the site.
+ *
+ * Line 98 and Pearls Co. came as square social images, so each was cut to its
+ * wordmark before the conversion. Pearls Co.'s full stop is a photographed
+ * pearl, which would convert to a broken crescent of shading; it was redrawn
+ * as a flat dot the size of the pearl, as a one-colour version of the logo
+ * would have it. The "ESTD 2021" line under that image is not part of the mark.
  *
  * Each file is also trimmed to its own artwork, so the surrounding canvas no
  * longer varies from logo to logo and a shared display height sizes them by
@@ -67,15 +76,13 @@ export interface ClientLogo {
  * transparent (npm run logos:mono), so ink is simply total alpha.
  */
 export const CLIENT_LOGOS: ClientLogo[] = [
-  // In display order: the three partners set in type are spread between logos.
+  // In display order.
   { name: 'ADHD Now',              src: adhdNow,             cleared: true,  scale: 0.96 },
-  // TODO(client): logo file needed — Line 98. Set in type until it arrives.
-  { name: 'Line 98',                                         cleared: true,  scale: 1.15 },
+  { name: 'Line 98',               src: line98,              cleared: true,  scale: 1.15 },
   { name: 'Fettle',                src: fettle,              cleared: true,  scale: 1.06 },
   { name: 'The Humble Fishmonger', src: theHumbleFishmonger, cleared: true,  scale: 1.4 },
   { name: 'AutismCare Ireland',    src: autismcareIreland,   cleared: true,  scale: 0.93 },
-  // TODO(client): logo file needed — Pearls Collective. Set in type until it arrives.
-  { name: 'Pearls Collective',                               cleared: true,  scale: 0.9 },
+  { name: 'Pearls Collective',     src: pearlsCollective,    cleared: true,  scale: 1.11 },
   { name: 'Cleaning Doctor Hub',   src: cleaningDoctorHub,   cleared: true,  scale: 1.19 },
   // TODO(client): logo file needed — Le Olive. Set in type until it arrives.
   { name: 'Le Olive',                                        cleared: true,  scale: 1.15 },

@@ -1,156 +1,270 @@
 ---
 import Logo from './Logo.astro';
-import { NAV_LINKS, CONTACT_PATH } from '../consts';
+import { NAV_LINKS, CONTACT_PATH, CREATOR_PATH, BRAND_ENQUIRY_MAILTO, CONTACT_EMAIL, SOCIALS } from '../consts';
 
+/**
+ * The header: a menu button on the left, the wordmark in the centre, Get in
+ * touch on the right. It stays at the top of the screen as the page scrolls.
+ * Over hero footage it has no background and white contents until the hero
+ * has scrolled past; everywhere else it is white with a hairline under it.
+ *
+ * The menu is a full-screen panel with the site's pages set large, and the
+ * contact routes beneath. Without JavaScript the menu button is a link to the
+ * footer, which lists every page.
+ */
 const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const isCurrent = (href: string) => path === href;
+const links = [{ label: 'Home', href: '/' }, ...NAV_LINKS, { label: 'Get in Touch', href: CONTACT_PATH }];
 ---
 
-{/* Runs during parse: marks the nav collapsible before it is ever painted,
-     so there is no flash of the expanded list on mobile. */}
-<script is:inline>document.documentElement.dataset.navReady = 'true';</script>
-
-<header class="site-header">
-  <div class="container header-inner">
-    <a href="/" class="brand" aria-label="AMAVI Socials — home">
-      <Logo variant="brand" />
+<header class="site-header" data-header>
+  <div class="header-inner">
+    <a href="#footer-nav" class="menu-toggle" data-menu-toggle aria-controls="site-menu">
+      <span class="menu-toggle__bars" aria-hidden="true"><span></span><span></span></span>
+      <span class="menu-toggle__label">Menu</span>
     </a>
 
-    {/*
-      JS justification: a disclosure button with a real aria-expanded state is
-      the accessible pattern for a mobile menu. ~20 lines, and every link is in
-      the DOM regardless, so nothing is unreachable without it.
-    */}
-    <button class="nav-toggle" type="button" aria-expanded="false"
-            aria-controls="primary-nav" data-nav-toggle>
-      <span class="nav-toggle__bars" aria-hidden="true"><span></span><span></span></span>
-      <span class="visually-hidden">Menu</span>
-    </button>
+    <a href="/" class="brand" aria-label="AMAVI Socials — home">
+      <Logo variant="current" />
+    </a>
 
-    <nav id="primary-nav" class="nav" aria-label="Primary" data-nav>
-      <ul class="nav__list">
-        {NAV_LINKS.map((link) => (
-          <li>
-            <a
-              href={link.href}
-              class="nav__link"
-              aria-current={!link.external && isCurrent(link.href) ? 'page' : undefined}
-            >{link.label}</a>
-          </li>
-        ))}
-        <li class="nav__cta">
-          <a href={CONTACT_PATH} class="btn btn--primary"
-             aria-current={isCurrent(CONTACT_PATH) ? 'page' : undefined}>Get in Touch</a>
-        </li>
-      </ul>
-    </nav>
+    <a href={CONTACT_PATH} class="header-cta" aria-current={isCurrent(CONTACT_PATH) ? 'page' : undefined}>
+      Get in touch
+    </a>
   </div>
 </header>
 
-<script>
-  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
-  const nav = document.querySelector<HTMLElement>('[data-nav]');
+<div id="site-menu" class="menu" data-menu hidden>
+  <nav class="container menu__inner" aria-label="Primary">
+    <ul class="menu__list">
+      {links.map((link) => (
+        <li>
+          <a href={link.href} class="menu__link" aria-current={isCurrent(link.href) ? 'page' : undefined}>
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
 
-  if (toggle && nav) {
-    const setOpen = (open: boolean) => {
+    <div class="menu__routes">
+      <div class="menu__route">
+        <p class="label">Brands</p>
+        <a href={BRAND_ENQUIRY_MAILTO}>Email us</a>
+      </div>
+      <div class="menu__route">
+        <p class="label">Creators</p>
+        <a href={CREATOR_PATH}>Apply to join</a>
+      </div>
+      <div class="menu__route">
+        <p class="label">General</p>
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </div>
+      <div class="menu__route">
+        <p class="label">Follow</p>
+        <p class="menu__socials">
+          {SOCIALS.map((s, i) => (
+            <>{i > 0 && ' '}<a href={s.url} target="_blank" rel="noopener noreferrer">
+              {s.name}<span class="visually-hidden"> (opens in a new tab)</span>
+            </a></>
+          ))}
+        </p>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLAnchorElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+  const hero = document.querySelector<HTMLElement>('.hero');
+
+  // Over hero footage, the header turns solid once the hero is behind it.
+  if (header && hero) {
+    const height = () => header.getBoundingClientRect().height;
+    const observer = new IntersectionObserver(
+      ([entry]) => header.classList.toggle('is-past-hero', !entry.isIntersecting),
+      { rootMargin: `-${Math.round(height())}px 0px 0px 0px` },
+    );
+    observer.observe(hero);
+  } else {
+    header?.classList.add('is-past-hero');
+  }
+
+  // JS justification: a disclosure button with a real aria-expanded state is
+  // the accessible pattern for a menu. Without it, the toggle stays a link to
+  // the footer's list of pages.
+  if (header && toggle && menu) {
+    toggle.setAttribute('role', 'button');
+    toggle.setAttribute('aria-expanded', 'false');
+    const outside = [...document.querySelectorAll<HTMLElement>('main, footer, .skip-link')];
+
+    const setOpen = (open: boolean, { restoreFocus = false } = {}) => {
       toggle.setAttribute('aria-expanded', String(open));
-      nav.dataset.open = String(open);
-      document.body.style.overflow = open ? 'hidden' : '';
+      menu.hidden = !open;
+      header.classList.toggle('is-menu-open', open);
+      document.documentElement.classList.toggle('menu-open', open);
+      outside.forEach((el) => (el.inert = open));
+      if (open) menu.querySelector<HTMLElement>('.menu__link')?.focus();
+      else if (restoreFocus) toggle.focus();
     };
-    toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
-    nav.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).closest('a')) setOpen(false);
+
+    toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
     });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
-        setOpen(false);
-        toggle.focus();
+    toggle.addEventListener('keydown', (event) => {
+      if (event.key === ' ') {
+        event.preventDefault();
+        toggle.click();
+      }
+    });
+    menu.addEventListener('click', (event) => {
+      if ((event.target as HTMLElement).closest('a')) setOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false, { restoreFocus: true });
       }
     });
   }
 </script>
 
 <style>
-  /* One header everywhere: white, a black hairline beneath, the accent
-     wordmark. */
   .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: var(--header-h);
     background: var(--bg);
     color: var(--ink);
     border-bottom: var(--stroke-hair) solid var(--line);
+    transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+  }
+
+  /* Over hero footage — and only while the hero is still behind it — the
+     header drops its background and its contents turn white. Which cut is on
+     screen depends on orientation, so this does too. */
+  @media (orientation: landscape) {
+    :global(body:has(.hero[data-desktop='video'])) .site-header:not(.is-past-hero):not(.is-menu-open) {
+      background: none;
+      color: var(--on-dark);
+      border-bottom-style: none;
+    }
+  }
+  @media (orientation: portrait) {
+    :global(body:has(.hero[data-mobile='video'])) .site-header:not(.is-past-hero):not(.is-menu-open) {
+      background: none;
+      color: var(--on-dark);
+      border-bottom-style: none;
+    }
   }
 
   .header-inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-m);
-    padding-block: var(--space-s);
+    gap: var(--space-s);
+    height: 100%;
+    padding-inline: var(--gutter);
   }
 
-  .brand { text-decoration: none; display: inline-flex; align-items: center; }
-
-  .nav__list {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: clamp(1.1rem, 2.2vw, 2.25rem);
+  /* The wordmark takes the accent on white; over footage it follows the
+     header's white. */
+  .brand { justify-self: center; display: inline-flex; color: var(--accent); text-decoration: none; }
+  @media (orientation: landscape) {
+    :global(body:has(.hero[data-desktop='video'])) .site-header:not(.is-past-hero):not(.is-menu-open) .brand { color: inherit; }
+  }
+  @media (orientation: portrait) {
+    :global(body:has(.hero[data-mobile='video'])) .site-header:not(.is-past-hero):not(.is-menu-open) .brand { color: inherit; }
   }
 
-  /* Links are ink. The accent is only the mark: an underline on hover and on
-     the current page. The reserved border is white on white until then. */
-  .nav__link {
+  .menu-toggle,
+  .header-cta {
     font-size: 0.75rem;
     font-weight: var(--weight-strong);
     letter-spacing: var(--tracking-caps);
     text-transform: uppercase;
+    color: inherit;
     text-decoration: none;
-    color: var(--ink);
-    padding-block: 0.35em;
-    border-bottom: var(--stroke-mark) solid var(--bg);
-    transition: border-color var(--dur) var(--ease);
   }
-  .nav__link:hover,
-  .nav__link[aria-current='page'] { border-color: var(--accent); }
 
-  .nav__cta .btn { padding: 0.9em 1.5em; }
-
-  /* --- Toggle (mobile only) --- */
-  .nav-toggle {
-    display: none;
-    position: relative;
-    z-index: 60; /* above the open menu, so it doubles as the close button */
+  .menu-toggle {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: 2.75rem;
     cursor: pointer;
-    padding: var(--space-2xs);
-    margin-right: calc(var(--space-2xs) * -1);
-    color: var(--ink);
   }
-  .nav-toggle__bars { display: grid; gap: 6px; width: 26px; }
-  .nav-toggle__bars span {
+  .menu-toggle__bars { display: grid; gap: 6px; width: 24px; }
+  .menu-toggle__bars span {
     height: var(--stroke-mark);
     background: currentColor;
     transition: transform var(--dur) var(--ease);
   }
-  [aria-expanded='true'] .nav-toggle__bars span:first-child { transform: translateY(4px) rotate(45deg); }
-  [aria-expanded='true'] .nav-toggle__bars span:last-child { transform: translateY(-4px) rotate(-45deg); }
+  [aria-expanded='true'] .menu-toggle__bars span:first-child { transform: translateY(4px) rotate(45deg); }
+  [aria-expanded='true'] .menu-toggle__bars span:last-child { transform: translateY(-4px) rotate(-45deg); }
+  .menu-toggle:hover { color: var(--accent); }
 
-  @media (max-width: 63.99em) {
-    .nav-toggle { display: block; }
-
-    :global([data-nav-ready='true']) .nav {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: grid;
-      place-items: center;
-      z-index: 50;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity var(--dur) var(--ease), visibility var(--dur);
-    }
-    :global([data-nav-ready='true']) .nav[data-open='true'] { opacity: 1; visibility: visible; }
-
-    .nav__list { flex-direction: column; gap: var(--space-m); text-align: center; }
-    .nav__link { font-size: 1.125rem; letter-spacing: 0.08em; }
-    .nav__cta { margin-top: var(--space-s); }
+  .header-cta {
+    justify-self: end;
+    padding-block: 0.35em;
+    border-bottom: var(--stroke) solid currentColor;
   }
+  .header-cta:hover,
+  .header-cta[aria-current='page'] { color: var(--accent); }
+
+  /* On a phone the corner links are icon-sized: the menu has everything. */
+  @media (max-width: 47.99em) {
+    .menu-toggle__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .header-cta { display: none; }
+  }
+
+  /* ---- The menu ------------------------------------------------------------ */
+  .menu {
+    position: fixed;
+    inset: var(--header-h) 0 0 0;
+    z-index: 45;
+    overflow-y: auto;
+    background: var(--bg);
+    color: var(--ink);
+    border-top: var(--stroke-hair) solid var(--line);
+  }
+  .menu[hidden] { display: none; }
+  :global(html.menu-open) { overflow: hidden; }
+
+  .menu__inner {
+    display: grid;
+    align-content: space-between;
+    gap: var(--space-xl);
+    min-height: 100%;
+    padding-block: var(--space-xl) var(--space-l);
+  }
+
+  .menu__list { list-style: none; display: grid; gap: var(--space-2xs); }
+  .menu__link {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: var(--display-lg);
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: var(--stroke-mark) solid var(--bg);
+  }
+  .menu__link:hover,
+  .menu__link[aria-current='page'] { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .menu__routes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-m) var(--space-l);
+    padding-top: var(--space-m);
+    border-top: var(--stroke-hair) solid var(--line);
+  }
+  .menu__route { display: grid; gap: var(--space-3xs); align-content: start; font-size: var(--text-sm); }
+  .menu__socials { display: flex; gap: var(--space-s); }
 </style>

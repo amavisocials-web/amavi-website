@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "preview",
+      "runtimeExecutable": "/Users/lirikabulliqi/.nvm/versions/node/v22.23.2/bin/node",
+      "runtimeArgs": [
+        "node_modules/.bin/astro",
+        "preview",
+        "--port",
+        "4322"
+      ],
+      "port": 4322
+    },
+    {
+      "name": "dist-static-4324",
+      "runtimeExecutable": "/Users/lirikabulliqi/.nvm/versions/node/v22.23.2/bin/node",
+      "runtimeArgs": [
+        "/private/tmp/claude-501/-Users-lirikabulliqi-Desktop-amavi-web/41372d2c-dbef-44bc-8b78-7d4d27dad12b/scratchpad/serve-dist.mjs",
+        "dist",
+        "4324"
+      ],
+      "port": 4324
+    }
+  ]
+}

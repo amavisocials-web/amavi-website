@@ -1,0 +1,19 @@
+---
+/**
+ * A short line of proof that leads to the page that backs it up: capitals,
+ * underlined, with a chevron. Keep the line short — a claim, not a sentence —
+ * and only ever one AMAVI can stand behind.
+ */
+interface Props {
+  href: string;
+  class?: string;
+}
+const { href, class: className } = Astro.props;
+---
+
+<a class:list={['proof-link', className]} href={href}>
+  <span><slot /></span>
+  <svg viewBox="0 0 10 20" aria-hidden="true">
+    <path d="M1 1l8 9-8 9" fill="none" stroke="currentColor" stroke-width="1.25" vector-effect="non-scaling-stroke" />
+  </svg>
+</a>

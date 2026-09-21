@@ -1,53 +1,43 @@
 ---
 /**
- * Stand-in for photography.
+ * Stands in for a missing image or video: a frame at the exact aspect ratio
+ * the real media will take, with a thin black border and "Add image" or
+ * "Add video" in the middle. Swapping in the real file changes nothing else on
+ * the page. Stock imagery is never used in its place.
  *
- * TODO(client): no approved imagery supplied, and the template preview photos
- * are not licensed for use. These are black-outlined fields sized to the
- * aspect ratio the real photograph will occupy, so swapping one in is a file
- * replacement — `<Image />` from `astro:assets` with the same ratio — and
- * shifts nothing on the page.
- *
- * These carry no information: every placeholder sits beside text that already
- * says what it stands for, so they are hidden from assistive tech rather than
- * announced as "placeholder image" on top of the heading next to them. The
- * real photographs that replace them DO need descriptive alt text.
+ * Hidden from assistive tech: it carries no information, and the real media
+ * that replaces it gets its own description.
  */
 interface Props {
-  ratio?: '4/5' | '3/4' | '1/1' | '16/9' | '3/2';
-  /** Short word set into the field. Omit for a plain outline. */
-  caption?: string;
+  kind?: 'image' | 'video';
+  /** CSS aspect ratio, e.g. '2/3' or '16/9'. Omit when the parent sizes it. */
+  ratio?: string;
+  /** A second, smaller line, e.g. which cut of a video goes here. */
+  note?: string;
   class?: string;
 }
-const { ratio = '4/5', caption, class: className } = Astro.props;
+const { kind = 'image', ratio, note, class: className } = Astro.props;
 ---
 
-<div class:list={['ph', className]} style={`--ratio:${ratio}`} aria-hidden="true">
-  {caption && <span class="ph__caption">{caption}</span>}
-  <slot />
+<div class:list={['ph', className]} style={ratio ? `aspect-ratio:${ratio}` : undefined} aria-hidden="true">
+  <span class="ph__text">{kind === 'video' ? 'Add video' : 'Add image'}</span>
+  {note && <span class="ph__note">{note}</span>}
 </div>
 
 <style>
   .ph {
-    aspect-ratio: var(--ratio);
     width: 100%;
-    position: relative;
     display: grid;
-    place-items: center;
-    overflow: hidden;
-    border: var(--stroke) solid var(--line);
-    border-radius: var(--radius-media);
-  }
-
-  .ph > :global(*) { position: relative; }
-
-  .ph__caption {
-    font-family: var(--font-display);
-    font-size: clamp(1.25rem, 0.9rem + 1.6vw, 2rem);
-    letter-spacing: 0.02em;
-    line-height: 1.2;
+    place-content: center;
+    justify-items: center;
+    gap: 0.35rem;
+    padding: var(--space-s);
     text-align: center;
-    padding-inline: var(--space-l);
-    max-width: 18ch;
+    color: var(--ink);
+    background: var(--bg);
+    border: var(--stroke) solid var(--line);
+    border-radius: var(--radius-frame);
   }
+  .ph__text { font-size: var(--text-sm); font-weight: var(--weight-strong); }
+  .ph__note { font-size: var(--text-xs); font-weight: var(--weight-secondary); }
 </style>
