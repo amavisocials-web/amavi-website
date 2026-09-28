@@ -72,6 +72,18 @@ export const SITE_DESCRIPTION =
 export const CONTACT_EMAIL = 'hello@amavisocials.com';
 
 /**
+ * Where creator applications land: the Apps Script emails every application
+ * here (scripts/google-sheets-handler.gs), and it is the address the
+ * application form offers if a submission can't be sent.
+ *
+ * TODO(client): confirm partnerships@amavisocials.com exists as a Workspace
+ * user or alias and is monitored — amavisocials.com has Google Workspace MX
+ * records, but an address that was never created bounces. It is set in two
+ * places: here, and NOTIFY_EMAIL in scripts/google-sheets-handler.gs.
+ */
+export const APPLICATIONS_EMAIL = 'partnerships@amavisocials.com';
+
+/**
  * Brands are sent to email rather than a form. The subject and a short
  * prompt are pre-filled so enquiries arrive with the basics in them.
  */

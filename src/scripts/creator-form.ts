@@ -13,11 +13,13 @@
  *
  * Sending (JS justification, brief §7: a visible success state, a visible
  * error state, never a silent failure): the application is POSTed to the
- * Google Apps Script web app in data-sheets-endpoint (one row per application
- * — scripts/google-sheets-handler.gs) and, at the same time, to Netlify Forms.
- * Success shows only once at least one of them has confirmed it has the
- * application: a 2xx from Netlify, or {"result":"success"} from the script.
- * Otherwise the error state shows and everything typed stays in place.
+ * Google Apps Script web app in data-sheets-endpoint, which appends the row to
+ * the creators database and emails AMAVI a copy
+ * (scripts/google-sheets-handler.gs), and, at the same time, to Netlify Forms,
+ * which keeps the backup copy. Success shows only once one of them has
+ * confirmed it has the application: {"success":true} from the script, or a 2xx
+ * from Netlify. Otherwise the error state shows, everything typed stays in
+ * place, and the applicant is given an address to send it to instead.
  */
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -209,8 +211,13 @@ async function post(url: string, body: URLSearchParams, confirm: (response: Resp
 const toSheets = (endpoint: string, body: URLSearchParams) =>
   post(endpoint, body, async (response) => {
     if (!response.ok) throw new Error(`Sheets responded ${response.status}`);
-    const reply = (await response.json()) as { result?: string; message?: string };
-    if (reply.result !== 'success') throw new Error(`Sheets refused: ${reply.message ?? 'no reason given'}`);
+    // {"success":true}. Deployments of the script from before the email
+    // notification replied {"result":"success"}, so both are accepted: an old
+    // deployment left in place keeps working until it is updated.
+    const reply = (await response.json()) as { success?: boolean; error?: string; result?: string; message?: string };
+    if (reply.success !== true && reply.result !== 'success') {
+      throw new Error(`Sheets refused: ${reply.error ?? reply.message ?? 'no reason given'}`);
+    }
   });
 
 const toNetlify = (action: string, body: URLSearchParams) =>

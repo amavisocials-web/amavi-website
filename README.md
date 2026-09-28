@@ -308,78 +308,44 @@ adapted to a checkbox — word for word; keep it that way.
 Each application is sent to two places at once:
 
 - **A Google Sheet** — one row per application, via a Google Apps Script web
-  app. This is the working copy. Setup below.
+  app, which also **emails a copy to partnerships@amavisocials.com**. This is the
+  working copy: the creators database. Setup below.
 - **Netlify Forms** — a backup copy of every application, under **Site
   configuration → Forms → creator-application**. Netlify detects the form at
   deploy time; nothing to configure.
 
+The row is written before the email is sent, each in its own try/catch, so a
+bounced or rate-limited notification can never cost you the row.
+
 The success message appears **only after a confirmed response**: the Apps
-Script replied `{"result":"success"}`, or Netlify accepted the submission. If
+Script replied `{"success":true}`, or Netlify accepted the submission. If
 neither confirms — offline, a 20-second timeout, a server error — the error
-state shows instead, everything typed stays in place to retry, and the email
-address is offered as a fallback. If only one of the two fails, the applicant
-still sees success (the application is safe in the other) and the failure is
-logged to the browser console for you to diagnose.
+state shows instead, everything typed stays in place to retry, and the
+applicant is asked to email their application to **partnerships@amavisocials.com**
+(`APPLICATIONS_EMAIL` in `src/consts.ts`). If only one of the two fails, the
+applicant still sees success (the application is safe in the other) and the
+failure is logged to the browser console for you to diagnose.
 
 ## Creator applications → Google Sheets
 
-The script is `scripts/google-sheets-handler.gs`. Its header has the same
-steps as below, in more detail.
+**Setup: [`scripts/README.md`](scripts/README.md)** — create the sheet, paste
+in `scripts/google-sheets-handler.gs`, deploy it as a web app with access set
+to "Anyone", copy the `/exec` URL into Netlify as `PUBLIC_SHEETS_ENDPOINT`,
+redeploy. That file also lists every column in the creators database, how to
+test a dummy application, and how to change the script later without changing
+its URL.
 
-### 1. Deploy the script
+Two settings worth knowing here:
 
-1. Sign in to Google as **AMAVI's Workspace account** (hello@amavisocials.com),
-   not a personal Gmail — the sheet holds applicants' personal data, and the
-   privacy policy says it's kept in Google Workspace.
-2. Create a Google Sheet, e.g. "AMAVI creator applications".
-3. In the sheet: **Extensions → Apps Script**. Replace the sample code with the
-   whole of `scripts/google-sheets-handler.gs`, and save.
-4. **Deploy → New deployment** → gear icon → **Web app**.
-
-### 2. Set its access
-
-| Setting | Value | Why |
+| Where | Setting | What it does |
 |---|---|---|
-| Execute as | **Me** | The script writes to your sheet as you |
-| Who has access | **Anyone** | Applicants aren't signed in to Google. This lets anyone *send* an application — as the form does — but not read the sheet, which stays private |
+| Netlify → Environment variables | `PUBLIC_SHEETS_ENDPOINT` | The Apps Script `/exec` URL. Missing, and applications go to Netlify Forms only |
+| `scripts/google-sheets-handler.gs` | `NOTIFY_EMAIL` | Where the notification email goes |
 
-Click **Deploy** and authorise it. Google warns that it "hasn't verified this
-app" because it's your own script: **Advanced → Go to … (unsafe) → Allow**.
-
-Copy the **Web app URL** — it ends in `/exec`. Open it in a browser to check:
-you should see `{"result":"ok", …}`.
-
-### 3. Add the URL to Netlify
-
-**Site configuration → Environment variables → Add a variable:**
-
-| Key | Value |
-|---|---|
-| `PUBLIC_SHEETS_ENDPOINT` | the `/exec` URL |
-
-Then **Deploys → Trigger deploy → Deploy site**. The URL is built into the
-page, so it only takes effect on the next deploy. Submit a test application:
-a row appears in the sheet's **Applications** tab, which the script creates
-with a header row on first use.
-
-The build checks the value: if it isn't a `https://script.google.com/…/exec`
-URL — the script editor's address is the usual mistake — the deploy fails with
-a message saying so, and the previous deploy stays live. If the variable is
-missing, the build warns and applications go to Netlify Forms only.
-
-For local development, copy `.env.example` to `.env` and set the same value.
-
-### Later changes
-
-- **Changing the script:** Deploy → Manage deployments → pencil → Version:
-  **New version** → Deploy. That keeps the URL. A *new deployment* makes a new
-  URL, which Netlify would then need.
-- **Columns** are matched by header text, so you can reorder them or add your
-  own (status, notes) freely. Don't rename the script's headers.
-- **Adding a field** to the form means adding it to `FIELDS` in the script, then
-  deploying a new version.
-- Values that start with `=`, `+`, `-` or `@` are stored as text, never run as
-  formulas.
+The build checks the endpoint: if it isn't a `https://script.google.com/…/exec`
+URL, the deploy fails with a message saying so, and the previous deploy stays
+live. For local development, copy `.env.example` to `.env` and set the same
+value.
 
 ---
 

@@ -11,10 +11,11 @@
  * Every step is in the markup as one ordinary form, so without JavaScript it
  * is a single long page that posts natively to Netlify Forms.
  * src/scripts/creator-form.ts turns it into steps, validates each one, builds
- * the review, and sends the application to Google Sheets and Netlify Forms.
+ * the review, and sends the application to the Apps Script (which writes the
+ * row and emails AMAVI) with Netlify Forms as the backup capture.
  */
 import FormStep from './FormStep.astro';
-import { CONTACT_EMAIL } from '../consts';
+import { APPLICATIONS_EMAIL } from '../consts';
 
 const FORM_NAME = 'creator-application';
 
@@ -347,8 +348,11 @@ const total = STEPS.length;
       <div class="form-status" data-form-error tabindex="-1" hidden>
         <strong>Your application didn’t send.</strong>{' '}
         <span data-form-error-reason>Something went wrong on the way.</span>{' '}
-        Nothing you’ve entered has been lost — please try again. If it keeps failing, email us at{' '}
-        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        Nothing you’ve entered has been lost — please try again. If it keeps failing, email your
+        application to{' '}
+        <a href={`mailto:${APPLICATIONS_EMAIL}?subject=${encodeURIComponent('Creator application')}`}>
+          {APPLICATIONS_EMAIL}
+        </a>{' '}and we’ll add you ourselves.
       </div>
     </div>
 
