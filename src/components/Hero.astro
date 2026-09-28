@@ -1,8 +1,9 @@
 ---
 /**
- * The home page's full-screen opening: headline, subline and one line of
- * positioning, over video, with two large entry points beneath — one for
- * brands, one for creators.
+ * The home page's full-screen opening: headline, subline, one line of
+ * positioning, the two buttons (the `actions` slot) and a short line of
+ * services, over video — with two large entry points beneath, one for brands
+ * and one for creators. The copy comes from the page (src/pages/index.astro).
  *
  * Two separate cuts of footage, both from HERO_VIDEO in src/consts.ts: the
  * desktop cut (16:9) plays on landscape screens, the mobile cut (9:16) on
@@ -15,14 +16,28 @@
  * The videos load and play only while on screen, never under reduced motion
  * (src/scripts/loop-videos.ts), and a cut that isn't displayed never loads.
  */
+import Lines from './Lines.astro';
 import { videoFiles } from '../lib/media';
-import { HERO_VIDEO, HERO_SUBLINE, CONTACT_PATH, CREATOR_PATH } from '../consts';
+import { HERO_VIDEO, HERO_SUBLINE } from '../consts';
+
+export interface Entry {
+  who: string;
+  /** One short line on what's there. */
+  line: string;
+  /** The link's call to action. */
+  cta: string;
+  href: string;
+}
 
 interface Props {
+  /** "\n" marks a line break. */
   title: string;
   intro: string;
+  /** Short list of services, set in small capitals under the buttons. */
+  services?: string[];
+  entries: Entry[];
 }
-const { title, intro } = Astro.props;
+const { title, intro, services = [], entries } = Astro.props;
 
 const desktop = videoFiles(HERO_VIDEO);
 const mobile = videoFiles(`${HERO_VIDEO}-portrait`);
@@ -30,10 +45,6 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
   if (!cut.playable) console.warn(`[Hero] TODO(client): ${name} hero video needed (${size}) — showing "Add video".`);
 }
 
-const entries = [
-  { who: 'For Brands', what: 'Get in touch', href: CONTACT_PATH },
-  { who: 'For Creators', what: 'Become a creator', href: CREATOR_PATH },
-];
 ---
 
 <section
@@ -71,20 +82,23 @@ const entries = [
     </p>
 
     <div class="hero__body">
-      <h1 class="display display--xl hero__title enter enter--1">{title}</h1>
+      <h1 class="display display--xl hero__title enter enter--1"><Lines text={title} /></h1>
       <p class="hero__subline enter enter--2">
         {HERO_SUBLINE.map((word, i) => (
           <>{i > 0 && ' '}<span class="hero__word">{word}<span class="hero__stop">.</span></span></>
         ))}
       </p>
       <p class="hero__intro enter enter--2">{intro}</p>
+      <div class="hero__actions enter enter--3"><slot name="actions" /></div>
+      {services.length > 0 && <p class="label hero__services enter enter--3">{services.join(' · ')}</p>}
     </div>
 
     <nav class="hero__entries enter enter--3" aria-label="Where to start">
       {entries.map((entry) => (
         <a class="entry" href={entry.href}>
           <span class="entry__who">{entry.who}</span>
-          <span class="entry__what">{entry.what}</span>
+          <span class="entry__line">{entry.line}</span>
+          <span class="entry__what">{entry.cta}</span>
           <svg class="entry__arrow" viewBox="0 0 10 20" aria-hidden="true">
             <path d="M1 1l8 9-8 9" fill="none" stroke="currentColor" stroke-width="1.25"
                   vector-effect="non-scaling-stroke" />
@@ -175,7 +189,7 @@ const entries = [
     padding: 0 var(--space-l) var(--space-l);
     max-width: 72rem;
   }
-  .hero__title { max-width: 24ch; font-size: clamp(2rem, 1.2rem + 3vw, 3.75rem); }
+  .hero__title { max-width: 24ch; font-size: clamp(1.5625rem, 0.95rem + 2.37vw, 2.9375rem); }
 
   /* Four words, each closed by an accent full stop — white over footage,
      where the accent on black would all but disappear. */
@@ -183,7 +197,7 @@ const entries = [
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
     font-weight: 600;
-    font-size: clamp(0.875rem, 0.7rem + 0.9vw, 1.375rem);
+    font-size: clamp(0.6875rem, 0.55rem + 0.71vw, 1.0625rem);
     line-height: 1.35;
     text-transform: uppercase;
   }
@@ -198,6 +212,10 @@ const entries = [
     text-wrap: pretty;
   }
 
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-2xs); }
+  .hero__actions:empty { display: none; }
+  .hero__services { margin-top: var(--space-2xs); line-height: 1.6; }
+
   /* ---- The two ways in: large, split, a hairline between ------------------ */
   .hero__entries {
     display: grid;
@@ -206,7 +224,7 @@ const entries = [
   .entry {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: 'who arrow' 'what arrow';
+    grid-template-areas: 'who arrow' 'line arrow' 'what arrow';
     align-items: center;
     column-gap: var(--space-m);
     padding: var(--space-s) var(--space-l);
@@ -220,14 +238,20 @@ const entries = [
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
     font-weight: 600;
-    font-size: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    font-size: clamp(1.1875rem, 0.79rem + 1.58vw, 1.9375rem);
     line-height: 1.05;
     text-transform: uppercase;
+  }
+  .entry__line {
+    grid-area: line;
+    margin-top: var(--space-3xs);
+    font-size: var(--text-sm);
+    line-height: 1.45;
   }
   .entry__what {
     grid-area: what;
     margin-top: var(--space-2xs);
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;

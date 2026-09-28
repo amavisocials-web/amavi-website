@@ -97,8 +97,8 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 | Path | What it is |
 |---|---|
 | `/` | Full-screen video hero with split entry points for brands and creators; "Creators are one part of the equation"; stats over looping video tiles; how we work; partners marquee; philosophy line |
-| `/about` | A short introduction, a row of images, and one call to action: email us |
-| `/services` | What AMAVI does: three areas and their services, sector examples, how a programme works, who AMAVI works with |
+| `/about` | A point of view more than an introduction: who AMAVI is, what it believes, the approach (four services), why AMAVI, one example beyond creators, the philosophy, AMAVI by the numbers |
+| `/services` | What AMAVI does, goal first: four areas and their services, six sectors, how we work (six stages), why creator-led, results (client · objective · approach · result), who AMAVI works with |
 | `/become-a-creator` | The creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Get in Touch: brands to email, creators to the application |
 | `/privacy` | Privacy policy |
@@ -112,7 +112,7 @@ src/
   consts.ts              Site-wide constants: email, nav, socials, positioning,
                          tagline, hero video path
   logos.ts               Client logo manifest and optical sizing
-  data/services.ts       The three service areas, their services, sector examples
+  data/services.ts       The four service areas, the sectors, and the results
   data/tiles.ts          Creator videos: tiles 1–4 play behind the home stats
   lib/media.ts           Build-time checks for files in public/
   assets/
@@ -156,7 +156,7 @@ and highlights, and a black footer. Six colours, defined once in
 | `--surface-dark` | `#000000` | The footer, and the flat overlay under text on video |
 | `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on black and on video |
 
-**The exceptions to white** are the footer (a black card) and text set over
+**The exceptions to white** are the footer (full bleed, edge to edge) and text set over
 video — the hero, once it has footage, and the stat tiles — which sits on a
 flat black overlay. There are no greys, tints, gradients or shadows beyond
 those two overlays.
@@ -238,6 +238,15 @@ browser tabs and share previews, not on the page.
 - **Poppins Light** — the wordmark only.
 
 Montserrat and Poppins are open source and self-hosted from npm.
+
+**The scale steps by 1.125.** On 24 September 2026 the client asked for every
+size to come down two steps and the wordmark to go up two, so the tokens in
+`:root` already hold the reduced values — don't "correct" them back. Body copy
+is 13px, the lead 13–16px, section heads 17–28px and the home hero 25–47px.
+Three things keep their own sizes deliberately: **buttons** (`.btn`, 13px, and
+their padding), **form controls** (16px, or iOS zooms on focus) and the
+**wordmark** (27px in the header). The floor for text is 11px. The menu links
+match the wordmark, on 44px rows.
 
 **ALT Rigatoni** is commercial — by Giulia Boggio, sold by
 [ALT.tf](https://alt-tf.com/products/alt-rigatoni) — and needs a **Web**
@@ -389,8 +398,8 @@ Logos live in `src/assets/logos/` and are declared once in **`src/logos.ts`**.
   Once sign-off lands, move the file up a folder and uncomment its two lines
   in `src/logos.ts`.
 - **No logo file yet?** Leave out `src` and the partner's name is set in type
-  in its place, at the same optical weight (Le Olive, for now). When the file
-  arrives, import it and add `src`.
+  in its place, at the same optical weight. Every cleared partner has a file
+  now; when a new one arrives, import it and add `src`.
 - **`scale`** evens out optical weight: a solid black disc and a thin ring
   cover the same area but not the same amount of ink. The comment above the
   manifest explains how the current values were set.
@@ -406,8 +415,9 @@ It maps each pixel's lightness to black ink: dark artwork on a light ground
 becomes black, and light areas enclosed by the artwork — the knocked-out
 "IRELAND BOX" lettering, the ADHD Now roundel centre — stay open. Artwork
 supplied light-on-dark (The Humble Fishmonger, Line 98) is detected and
-inverted, so its lettering is the black. Each file is then trimmed to its
-artwork. Run it on any new or re-exported logo; running it twice changes
+inverted, so its lettering is the black. Le Olive, supplied on 24 September as
+a gold gradient on white, reads as ink at every stop and converted in one
+pass. Each file is then trimmed to its artwork. Run it on any new or re-exported logo; running it twice changes
 nothing. The colour originals are in git history, except for two.
 
 Line 98 and Pearls Co. were supplied as square social images (JPEG), which are
@@ -444,32 +454,47 @@ are a static row.
 - **Stat tiles** (`StatTiles.astro`). The four figures, each over a looping
   creator video: four across on a wide screen, two by two on a phone.
 - **Partners marquee** (`LogoWall.astro`), then the philosophy line.
-- **Footer** (`Footer.astro`). A black card inset from the page edges: Get in
-  touch, with one route each for brands (the pre-filled brand enquiry email),
-  creators (the application) and anything else (the inbox); then the pages,
-  socials and the small print.
+- **Footer** (`Footer.astro`). Full-bleed black: edge to edge and down to the
+  bottom of the page, its own padding holding the content off the edges. It opens
+  on the page's closing call to action, with one route each for brands (the
+  pre-filled brand enquiry email), creators (the application) and anything
+  else (the inbox); then the pages, socials, the sign-off and the small print.
+  The call to action's wording is a default on every page except About and
+  Services, which set their own through `footerCta` on `Base.astro` — anything
+  a page leaves out keeps the default.
 
 ### Placeholders
 
 Wherever an image or a video is missing, the page shows an outlined frame at
 the exact aspect ratio the real media will take, with **"Add image"** or
 **"Add video"** in the middle (`Placeholder.astro`). Swapping in the real file
-moves nothing else on the page. Today every slot is filled with temporary
-media (see Visual content), so the frames only appear for a slot you empty.
+moves nothing else on the page. Today every slot but one is filled with
+temporary media (see Visual content); the Tech & Startups sector on Services
+shows "Add image" until a picture arrives.
 
 ## Services
 
-The copy lives in **`src/data/services.ts`**: three areas, each a list of
-services (a name and one line on what the client gets), then the sector
-examples — a sector, the kind of work and at most one line on how it was
-done; no metrics and no client names. Add, reorder or edit entries there; the
-page lays itself out, including the index at the top that jumps to each area
-(`/services/#creator-marketing` and so on).
+The copy lives in **`src/data/services.ts`**:
+
+- **Four areas**, each a short intro, a list of services (a name and one line
+  on what the client gets) and a closing line.
+- **Six sectors**, each a sector and the kind of work there. No metrics and no
+  client names.
+- **Results**, as client · objective · approach · result. They use only the
+  verified figures in brief §5, written out as counts rather than
+  percentages. Clients are described, never named.
+
+Add, reorder or edit entries there and the page lays itself out, including the
+index at the top that jumps to each area (`/services/#creator-marketing` and so
+on). Sector images are keyed by sector name in `src/data/media.ts`, so a
+renamed sector needs its key renamed there too. The six stages of "How we
+work" and the "Why creator-led" text are in `src/pages/services.astro`
+itself.
 
 ## Visual content
 
-Every slot is filled for now with **temporary media, "until further notice"**
-— the files supplied on 21 September 2026, cropped to each slot. Replace them
+Every slot but one is filled for now with **temporary media, "until further
+notice"**: the files supplied on 21 September 2026, cropped to each slot. Replace them
 as final photography and footage arrives. The image and video slots all live
 in **`src/data/media.ts`** (the hero in `src/consts.ts`), so each swap is one
 line; take a slot out and it goes back to its outlined "Add image" / "Add
@@ -500,9 +525,12 @@ flagged in `src/data/media.ts`, to be replaced first.
   plays a photo shoot (`16521739…mp4`); "How we work" a content studio
   (`15636407…mp4`, first 12 seconds). In `public/media/features/`.
 - **Images** — the Services page (2:3 for the head and each area, 4:5 for each
-  sector example) and the About page's four (2:3): stills from the supplied
-  clips and the café photo, in `src/assets/media/`, served as responsive WebP.
-  Which image fills which slot is `src/data/media.ts`.
+  sector) and the About page's four (2:3): stills from the supplied clips and
+  the café photo, in `src/assets/media/`, served as responsive WebP. Which
+  image fills which slot is `src/data/media.ts`. Content & Social's still was
+  added on 22 September, from the studio clip (`15636407…mp4`, 6s). Nothing
+  supplied suits Tech & Startups without repeating a picture already on the
+  page, so that slot shows "Add image".
 
 **Every video** is lazy and visible-only (`src/scripts/loop-videos.ts`): no
 preload; the poster and sources are attached only as it nears the screen; it
@@ -598,12 +626,26 @@ The ones that matter most:
   them from clips with stock-library names. See `src/data/media.ts`.
 - **Creator handles and consent** for the creator videos, in
   `src/data/tiles.ts`.
-- **Which line leads:** the hero headline (`TAGLINE`) or "Made by creators.
-  Seen by our target audience." (`CONTENT_TAGLINE`), now on the stats. Both
-  in `src/consts.ts`.
-- **New copy to confirm:** the "How we work" block and the philosophy line on
-  the home page.
-- **Partner logo** for Le Olive.
+- **About: client and industry counts.** "AMAVI by the numbers" shows only
+  600+ creators and 125+ live posts until the current counts are confirmed.
+  Set them in `src/pages/about.astro` and they appear. For reference, the logo
+  wall shows 9 cleared partners.
+- **"Restaurant" or "seafood bar".** Brief §2 says The Humble Fishmonger is a
+  seafood bar, never a restaurant. The About page's example uses the supplied
+  copy ("One restaurant. A whole new audience."), while Services calls it a
+  seafood bar. If the example is the Fishmonger, About should say seafood bar
+  too.
+- **The home page's 92%.** The brief lists "92% net-new audience reach" but
+  not how it is measured, so Services doesn't repeat it. Its results are
+  written out as counts instead. Confirm the basis, or drop the figure.
+- **A measured outcome for the seafood bar** result on Services, if there is
+  one, and **an image for Tech & Startups**.
+- **TikTok link** for the footer (`SOCIALS` in `src/consts.ts`).
+- **A Work page.** The footer's "Work" leads to the sectors on Services until
+  there is one.
+- **Menu labels.** The header menu still reads About / Services / Become a
+  Creator / Get in Touch; the footer uses the new names (Creator Network,
+  Contact). Say which set to keep.
 - **The old creator form's email is dead.** It tells creators to write to
   `hello@amavi.social`, a domain with no DNS. This site uses
   `hello@amavisocials.com`, which is verified working.

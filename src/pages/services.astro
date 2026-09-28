@@ -1,32 +1,37 @@
 ---
 import Base from '../layouts/Base.astro';
 import Frame from '../components/Frame.astro';
+import Lines from '../components/Lines.astro';
 import ReachMeters from '../components/ReachMeters.astro';
 import LogoWall from '../components/LogoWall.astro';
-import { SERVICE_AREAS, SECTOR_EXAMPLES } from '../data/services';
+import type { FooterCta } from '../components/Footer.astro';
+import { SERVICE_AREAS, SECTORS, CASE_STUDIES } from '../data/services';
 import { MEDIA } from '../data/media';
 import { SITE_NAME, SITE_URL } from '../consts';
 
 /**
- * What AMAVI does: three areas, each with its services, then short sector
- * examples. The copy lives in src/data/services.ts.
+ * What AMAVI does: the goal comes first, and the mix — creators, strategy,
+ * content, partnerships — is built around it. Creator marketing leads; the
+ * other areas make clear it's never the limit. The copy lives in
+ * src/data/services.ts; the closing call to action is the footer's, worded
+ * for this page (footerCta below).
  *
  * Laid out like the home page: an index up top that jumps to each area, then
  * each area as text beside a portrait image, alternating sides.
  *
  * Images: one portrait (2:3) for the top of the page, one per area, and one
- * (4:5) per sector example — all set in src/data/media.ts, where they are
- * marked as temporary fills. A slot left empty there shows "Add image".
+ * (4:5) per sector — all set in src/data/media.ts, where they are marked as
+ * temporary fills. A slot left empty there shows "Add image".
  */
 
-/** The programme, in the order it runs. A real sequence, so it is numbered. */
-const programme = [
-  { title: 'Sourcing', body: 'A shortlist built from our own creator database and fresh research against your brief.' },
-  { title: 'Vetting', body: 'Audience quality, real engagement and brand fit — checked before a name ever reaches you.' },
-  { title: 'Outreach', body: 'We approach creators in our name, not yours, so a “no” costs you nothing.' },
-  { title: 'Agreements', body: 'Deliverables, formats, usage rights and timings, in writing, before anything is posted.' },
-  { title: 'Campaign management', body: 'Briefing, approvals, scheduling, boosting and tagging. You see content before it goes live.' },
-  { title: 'Reporting', body: 'Delivery against target, content and reach — and how much of that reach was new.' },
+/** The process, in the order it runs. A real sequence, so it is numbered. */
+const stages = [
+  { title: 'Discovery', body: 'We understand the business, audience, objectives and opportunity.' },
+  { title: 'Strategy', body: 'We determine the right mix of creators, content, partnerships and channels.' },
+  { title: 'Sourcing', body: 'We find the people and opportunities that fit the strategy.' },
+  { title: 'Activation', body: 'We manage outreach, briefs, agreements, timelines and execution.' },
+  { title: 'Amplification', body: 'Where relevant, we identify opportunities to extend the reach of the work.' },
+  { title: 'Reporting', body: 'We measure what happened, what worked and what we can build on next.' },
 ];
 
 /**
@@ -43,6 +48,19 @@ const accounts = [
   { client: 'Autism assessment and aftercare service', views: '281,664', nonFollower: 95.9 },
   { client: 'Mental health concierge platform', views: '204K+', nonFollower: 93.4 },
 ];
+
+const clientSectors = [
+  'Food & Hospitality', 'Healthcare & Wellness', 'Fashion & Beauty', 'Travel & Lifestyle', 'Tech & Startups',
+];
+
+/** The footer's call to action, worded for this page; the creators route keeps its default. */
+const footerCta: Partial<FooterCta> = {
+  heading: 'Have a goal?\nLet’s find the way there.',
+  brands: {
+    line: 'Tell us what you’re trying to achieve. We’ll figure out the people, partnerships and opportunities that can help you get there.',
+    cta: 'Let’s talk',
+  },
+};
 
 const schema = {
   '@context': 'https://schema.org',
@@ -66,19 +84,24 @@ const schema = {
 
 <Base
   title="Services"
-  description="Creator marketing, brand and campaign strategy, and growth partnerships: the creators, communities, businesses and partners that put a brand in front of the right audience."
+  description="AMAVI starts with your goal, then builds the right mix around it: creator marketing, campaign strategy, content and social, and growth partnerships."
   schema={schema}
+  footerCta={footerCta}
 >
-  {/* ================= Head: the question, and an index ================= */}
+  {/* ================= Head: the goal first, and an index ================= */}
   <section class="section svc-head">
     <div class="container svc-head__grid">
       <div class="svc-head__text">
-        <h1 class="display display--lg">What we do depends on what you need.</h1>
-        <p class="lead svc-head__lead">
-          Creator partnerships are our speciality, not our limit. We find the people and
-          opportunities that put your brand in front of the right audience — <strong>creators,
-          communities, businesses and partners</strong>.
-        </p>
+        <p class="eyebrow">What we do</p>
+        <h1 class="display display--lg"><Lines text={'Your goal\ncomes first.'} /></h1>
+        <div class="svc-head__lead">
+          <p class="lead">We don’t believe every brand needs the same marketing mix.</p>
+          <p class="lead">
+            We start with <strong>what you want to achieve</strong>, then find the right people,
+            partnerships, content and opportunities to get you there.
+          </p>
+        </div>
+        <p class="label">Creators&nbsp;· Campaigns&nbsp;· Content&nbsp;· Partnerships</p>
         <ol class="svc-index" role="list">
           {SERVICE_AREAS.map((area) => (
             <li>
@@ -97,7 +120,7 @@ const schema = {
     </div>
   </section>
 
-  {/* ================= The three areas ================= */}
+  {/* ================= The four areas ================= */}
   {SERVICE_AREAS.map((area, i) => (
     <section class:list={['section', 'section--ruled', 'area', { 'area--reverse': i % 2 === 1 }]}
              id={area.id} aria-labelledby={`${area.id}-heading`}>
@@ -105,6 +128,9 @@ const schema = {
         <div class="area__text">
           <p class="area__number" aria-hidden="true">{area.number}</p>
           <h2 id={`${area.id}-heading`} class="display display--md area__title">{area.title}</h2>
+          <div class="area__intro">
+            {area.intro.map((line) => <p class="lead">{line}</p>)}
+          </div>
           <ul class="area__services" role="list">
             {area.services.map((service) => (
               <li class="area__service">
@@ -113,121 +139,151 @@ const schema = {
               </li>
             ))}
           </ul>
+          <p class="eyebrow">{area.closing}</p>
         </div>
         <Frame slot={MEDIA.services.areas[area.id]} ratio="2/3" class="area__media" />
       </div>
     </section>
   ))}
 
-  {/* ================= Sector examples =================
-      Short cards, not case studies: no metrics, no client names. */}
+  {/* ================= Sectors =================
+      A sector and the kind of work there — no metrics, no client names. */}
   <section class="section section--ruled" id="sectors" aria-labelledby="sectors-heading">
     <div class="container">
       <div class="section-head">
-        <h2 id="sectors-heading" class="display display--md">Sector examples</h2>
-        <p class="lead">What the work has looked like in practice.</p>
+        <p class="eyebrow">Where we work</p>
+        <h2 id="sectors-heading" class="display display--md"><Lines text={'Different industries.\nSame approach.'} /></h2>
+        <p class="lead">
+          We adapt the strategy to the audience, the objective and the opportunity — not the other
+          way around.
+        </p>
       </div>
       <ul class="sectors" role="list">
-        {SECTOR_EXAMPLES.map((example, i) => (
+        {SECTORS.map((sector) => (
           <li class="sector">
-            <Frame slot={MEDIA.services.sectors[i]} ratio="4/5" sizes="(min-width: 64em) 14rem, 70vw" />
-            <p class="label sector__name">{example.sector}</p>
-            <h3 class="sector__work">{example.work}</h3>
-            {example.how && <p class="sector__how">{example.how}</p>}
+            <Frame slot={MEDIA.services.sectors[sector.name]} ratio="4/5" sizes="(min-width: 64em) 12rem, 70vw" />
+            <h3 class="label sector__name">{sector.name}</h3>
+            <p class="sector__work">{sector.focus.join('\u00a0· ')}</p>
           </li>
         ))}
       </ul>
     </div>
   </section>
 
-  {/*
-    TODO(client): moved here from About, as it was. Kept for now; to be
-    reviewed and cut down after copy review.
-  */}
-  <section class="section section--ruled" aria-labelledby="programme-heading">
+  {/* ================= How we work, why creator-led, and results ================= */}
+  <div class="section section--ruled" id="how-we-work">
     <div class="container">
-      <div class="section-head">
-        <h2 id="programme-heading" class="display display--md">How a programme works</h2>
-        <p class="lead">Six stages, in this order. Each one depends on the one before it.</p>
-      </div>
+      <section aria-labelledby="how-heading">
+        <div class="section-head">
+          <p class="eyebrow">How we work</p>
+          <h2 id="how-heading" class="display display--md"><Lines text={'From objective\nto execution.'} /></h2>
+        </div>
 
-      <ol class="programme">
-        {programme.map((step, i) => (
-          <li class="programme__step">
-            <span class="programme__number" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <h3 class="display display--sm programme__title">{step.title}</h3>
-            <p class="programme__body">{step.body}</p>
-          </li>
-        ))}
-      </ol>
+        <ol class="programme">
+          {stages.map((step, i) => (
+            <li class="programme__step">
+              <span class="programme__number" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="display display--sm programme__title">{step.title}</h3>
+              <p class="programme__body">{step.body}</p>
+            </li>
+          ))}
+        </ol>
 
-      <div class="subsection why">
-        <h3 class="display display--md why__heading">Why creator-led beats posting more</h3>
+        <p class="eyebrow programme__closing">One objective. One strategy. The right people around it.</p>
+      </section>
+
+      <section class="subsection why" aria-labelledby="why-heading">
+        <div class="why__head">
+          <p class="eyebrow">Why creator-led</p>
+          <h2 id="why-heading" class="display display--md why__heading"><Lines text={'People create\nthe connection.'} /></h2>
+        </div>
 
         <div class="prose why__body">
+          <p>Brands don’t build relationships with algorithms. People do.</p>
           <p>
-            Posting more on your own channel reaches the same people, more often. Everyone who
-            sees it already follows you. That has its place — but <strong>it cannot introduce
-            you to anyone new</strong>.
+            Creators bring context, personality and trust to the brands they work with — helping
+            businesses enter conversations that traditional advertising can’t always create.
           </p>
+          <p><strong>But creators are only one part of the picture.</strong></p>
           <p>
-            Creator content arrives through someone else’s audience, with their credibility
-            attached. It puts you in front of people who have never heard of you, in a voice
-            they already trust.
-          </p>
-          <p>
-            And it only works if the content actually arrives. Most gifted collaborations run
-            on a handshake, which is why so many produce nothing. Every AMAVI partnership is
-            agreed in writing first — the deliverable, the format and the date — so what we
-            promise is what you get. Between April and August 2026, four brands set us a target
-            of 40 partnerships. <strong>We delivered 49.</strong>
+            We combine creator marketing with content, strategy and partnerships to build campaigns
+            around <strong>the audience — not just the platform</strong>.
           </p>
         </div>
-      </div>
+      </section>
 
-      <div class="subsection">
+      <section class="subsection" id="results" aria-labelledby="results-heading">
         <div class="section-head">
-          <h3 class="display display--md">What it looks like on real accounts</h3>
-          <p class="lead">
-            Four client accounts during their partnership period, by sector. On every one, the
-            large majority of accounts reached were not already following the brand.
-          </p>
+          <p class="eyebrow">What it looks like in practice</p>
+          <h2 id="results-heading" class="display display--md"><Lines text={'The work should\nmove something.'} /></h2>
         </div>
 
-        <ReachMeters
-          level={4}
-          rows={accounts}
-          caption="Client account totals over the trailing 90 days, covering the period each partnership ran. These are account-level figures and are not attributable to creator content alone — they are not presented as campaign results. Client names withheld."
-        />
-      </div>
+        <ul class="cases" role="list">
+          {CASE_STUDIES.map((study) => (
+            <li class="case">
+              <div class="case__client">
+                <p class="label">Client</p>
+                <h3 class="case__name">{study.client}</h3>
+              </div>
+              <dl class="case__facts">
+                <div class="case__fact">
+                  <dt class="label">Objective</dt>
+                  <dd>{study.objective}</dd>
+                </div>
+                <div class="case__fact">
+                  <dt class="label">Approach</dt>
+                  <dd>{study.approach}</dd>
+                </div>
+                <div class="case__fact case__fact--result">
+                  <dt class="label">Result</dt>
+                  <dd>{study.result}</dd>
+                </div>
+              </dl>
+            </li>
+          ))}
+        </ul>
+        <p class="meta cases__source">
+          Partnership figures from AMAVI’s creator-programme report, April–August 2026. Client names
+          withheld.
+        </p>
+
+        <div class="reach-block">
+          <h3 class="eyebrow">Reach on client accounts</h3>
+          <p class="lead">
+            Four client accounts during their partnership period. On every one, most of the
+            accounts reached weren’t already following the brand.
+          </p>
+          <ReachMeters
+            level={4}
+            rows={accounts}
+            caption="Client account totals over the trailing 90 days, covering the period each partnership ran. These are account-level figures and are not attributable to creator content alone — they are not presented as campaign results. Client names withheld."
+          />
+        </div>
+      </section>
     </div>
-  </section>
+  </div>
 
-  {/*
-    Who AMAVI works with, carried over from the retired Work page. Types of
-    client and the kind of outcome only: no case studies, no per-client
-    detail, no figures. Client types are the cleared roster's sectors; the
-    brief's rule that Fettle is never a "therapy platform" is why this stays
-    at "healthcare and wellbeing" rather than naming services.
-
-    TODO(client): copy under review. The text below is unchanged; it predates
-    the newer partners (a seafood bar among them), so it may need widening.
-  */}
-  <section class="section section--ruled clients">
+  {/* ================= Who we work with =================
+      Types of client, not names; the logos below are the cleared roster. The
+      brief's rule that Fettle is never a "therapy platform" still applies to
+      anything added here. */}
+  <section class="section section--ruled clients" aria-labelledby="clients-heading">
     <div class="container">
       <div class="clients__copy">
-        <h2 class="display display--md">Who we work with</h2>
+        <div class="clients__head">
+          <p class="eyebrow">Who we work with</p>
+          <h2 id="clients-heading" class="display display--md"><Lines text={'Brands with\nsomething to say.'} /></h2>
+        </div>
         <div class="prose clients__body">
           <p>
-            Healthcare and wellbeing providers, home-services networks and direct-to-consumer
-            brands across Ireland — businesses where trust decides the sale, and a
-            recommendation from the right person does more than another ad.
+            We work with ambitious brands that want to reach new audiences, build relevance and
+            create relationships that last beyond a single campaign.
           </p>
           <p>
-            What a creator programme gives them is reach their own channel can’t: people who
-            weren’t already following, hearing about the brand from someone they already
-            trust — in content that was agreed in writing, so it actually arrives.
+            From emerging businesses to established brands, we’re most useful when there’s a clear
+            objective — and room to think differently about how to reach it.
           </p>
+          <p class="label clients__sectors">{clientSectors.join('\u00a0· ')}</p>
         </div>
       </div>
 
@@ -240,7 +296,7 @@ const schema = {
   /* ---------- Head ---------- */
   .svc-head__grid { display: grid; gap: var(--space-xl); }
   .svc-head__text { display: grid; gap: var(--space-m); align-content: start; }
-  .svc-head__lead { max-width: 52ch; }
+  .svc-head__lead { display: grid; gap: var(--space-2xs); max-width: 52ch; }
   .svc-head__lead strong { font-weight: 700; }
   .svc-head :global(.svc-head__media) { width: min(100%, 16rem); }
   @media (min-width: 48em) {
@@ -263,7 +319,7 @@ const schema = {
   }
   .svc-index__number { font-size: var(--text-sm); font-weight: var(--weight-strong); color: var(--accent); }
   .svc-index__title {
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -273,7 +329,6 @@ const schema = {
   .svc-index__link:hover svg { transform: translateX(0.3rem); }
 
   /* ---------- Areas: text beside a portrait image, alternating ---------- */
-  .area { scroll-margin-top: var(--header-h); }
   .area__grid { display: grid; gap: var(--space-xl); }
   .area :global(.area__media) { width: min(100%, 16rem); }
   @media (min-width: 48em) {
@@ -289,10 +344,11 @@ const schema = {
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
     font-weight: 600;
-    font-size: clamp(2.75rem, 1.9rem + 3.4vw, 4.75rem);
+    font-size: clamp(2.1875rem, 1.5rem + 2.69vw, 3.75rem);
     line-height: 0.85;
     color: var(--accent);
   }
+  .area__intro { display: grid; gap: var(--space-2xs); }
   .area__services { list-style: none; margin-top: var(--space-s); border-top: var(--stroke) solid var(--line); }
   .area__service {
     display: grid;
@@ -304,14 +360,14 @@ const schema = {
     .area__service { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-l); align-items: baseline; }
   }
   .area__service-name {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
   .area__service-desc { font-weight: var(--weight-secondary); }
 
-  /* ---------- Sector examples: five short cards ---------- */
+  /* ---------- Sectors: six short cards ---------- */
   .sectors {
     list-style: none;
     display: grid;
@@ -330,7 +386,7 @@ const schema = {
   @media (min-width: 64em) {
     .sectors {
       grid-auto-flow: row;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       margin-inline: 0;
       padding: 0;
       overflow: visible;
@@ -339,9 +395,8 @@ const schema = {
   .sector { display: grid; gap: var(--space-2xs); align-content: start; scroll-snap-align: start; }
   .sector__name { margin-top: var(--space-s); }
   .sector__work { font-size: var(--text-base); font-weight: 700; line-height: 1.35; }
-  .sector__how { font-size: var(--text-sm); font-weight: var(--weight-secondary); line-height: 1.5; }
 
-  /* ---------- Programme: a numbered grid, not a stack of cards ---------- */
+  /* ---------- Process: a numbered grid, not a stack of cards ---------- */
   .programme {
     list-style: none;
     display: grid;
@@ -364,28 +419,57 @@ const schema = {
     font-variant-numeric: tabular-nums;
   }
   .programme__body { font-weight: var(--weight-secondary); max-width: 36ch; }
+  .programme__closing { margin-top: var(--space-xl); }
 
-  /* Each part after the steps opens on a hairline, with a section's worth of
-     room above it: they used to be sections of their own. */
+  /* Each part after the process opens on a hairline, with a section's worth
+     of room above it. */
   .subsection {
     margin-top: var(--section-y);
     padding-top: var(--space-xl);
     border-top: var(--stroke-hair) solid var(--line);
   }
 
-  /* ---------- Why ---------- */
+  /* ---------- Why creator-led ---------- */
   .why { display: grid; gap: var(--space-l); }
   @media (min-width: 64em) {
     .why { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
   }
+  .why__head { display: grid; gap: var(--space-m); align-content: start; }
   .why__heading { max-width: 16ch; }
   /* Lead-sized and light; the two claims that matter step up to strong. */
   .why__body { font-size: var(--text-lead); font-weight: var(--weight-secondary); line-height: 1.65; }
+
+  /* ---------- Results: client, objective, approach, result — ruled rows ---------- */
+  .cases { list-style: none; border-top: var(--stroke) solid var(--line); }
+  .case {
+    display: grid;
+    gap: var(--space-s);
+    padding-block: var(--space-m);
+    border-bottom: var(--stroke-hair) solid var(--line);
+  }
+  @media (min-width: 64em) {
+    .case { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-l); }
+  }
+  .case__client { display: grid; gap: var(--space-3xs); align-content: start; }
+  .case__name { font-size: var(--text-base); font-weight: 700; line-height: 1.35; }
+  .case__facts { display: grid; gap: var(--space-s); }
+  .case__fact { display: grid; gap: var(--space-3xs); }
+  @media (min-width: 40em) {
+    .case__fact { grid-template-columns: 7rem minmax(0, 1fr); gap: var(--space-s); align-items: baseline; }
+  }
+  .case__fact dd { font-weight: var(--weight-secondary); }
+  .case__fact--result dd { font-weight: 700; }
+  .cases__source { margin-top: var(--space-m); }
+
+  .reach-block { display: grid; gap: var(--space-s); margin-top: var(--space-xl); }
+  .reach-block .lead { margin-bottom: var(--space-m); }
 
   /* ---------- Who we work with ---------- */
   .clients__copy { display: grid; gap: var(--space-m); margin-bottom: var(--space-l); }
   @media (min-width: 64em) {
     .clients__copy { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-xl); align-items: start; }
   }
+  .clients__head { display: grid; gap: var(--space-m); align-content: start; }
   .clients__body { font-weight: var(--weight-secondary); }
+  .prose .clients__sectors { margin-top: var(--space-m); }
 </style>

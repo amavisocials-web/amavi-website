@@ -4,6 +4,7 @@ import adhdNow from './assets/logos/adhd-now.png';
 import autismcareIreland from './assets/logos/autismcare-ireland.png';
 import cleaningDoctorHub from './assets/logos/cleaning-doctor-hub.png';
 import fettle from './assets/logos/fettle.png';
+import leOlive from './assets/logos/le-olive.png';
 import line98 from './assets/logos/line-98.png';
 import myirelandbox from './assets/logos/myirelandbox.png';
 import pearlsCollective from './assets/logos/pearls-collective.png';
@@ -27,6 +28,10 @@ import theHumbleFishmonger from './assets/logos/the-humble-fishmonger.png';
  * Humble Fishmonger, supplied light-on-navy, and Line 98, white-on-maroon, were
  * inverted so their lettering is the black. There are no colour versions on
  * the site.
+ *
+ * Le Olive came as a gold gradient on white (supplied 24 September 2026); the
+ * gradient reads as ink at every stop, so it converted to a solid black script
+ * in one pass.
  *
  * Line 98 and Pearls Co. came as square social images, so each was cut to its
  * wordmark before the conversion. Pearls Co.'s full stop is a photographed
@@ -84,8 +89,7 @@ export const CLIENT_LOGOS: ClientLogo[] = [
   { name: 'AutismCare Ireland',    src: autismcareIreland,   cleared: true,  scale: 0.93 },
   { name: 'Pearls Collective',     src: pearlsCollective,    cleared: true,  scale: 1.11 },
   { name: 'Cleaning Doctor Hub',   src: cleaningDoctorHub,   cleared: true,  scale: 1.19 },
-  // TODO(client): logo file needed — Le Olive. Set in type until it arrives.
-  { name: 'Le Olive',                                        cleared: true,  scale: 1.15 },
+  { name: 'Le Olive',              src: leOlive,             cleared: true,  scale: 1.08 },
   { name: 'MyIrelandBox',          src: myirelandbox,        cleared: true,  scale: 1.08 },
 
   // Pending sign-off — see the note on the imports above.

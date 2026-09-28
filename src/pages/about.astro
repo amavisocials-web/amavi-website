@@ -1,13 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
 import Frame from '../components/Frame.astro';
+import Lines from '../components/Lines.astro';
+import type { FooterCta } from '../components/Footer.astro';
 import { MEDIA } from '../data/media';
-import { TAGLINE, BRAND_ENQUIRY_MAILTO } from '../consts';
 
 /**
- * Deliberately short: who AMAVI is, a row of pictures, and one way to get in
- * touch — the email button is the page's only call to action. The programme
- * detail and the per-account figures are on /services.
+ * About: who AMAVI is and how it thinks — a point of view more than an
+ * introduction. Creator marketing is the core speciality; the page makes
+ * clear it's never the limit. The closing call to action is the footer's,
+ * worded for this page (footerCta below).
  *
  * The four portraits (2:3) are set in src/data/media.ts, marked there as
  * temporary fills; a slot left empty shows "Add image".
@@ -16,23 +18,72 @@ import { TAGLINE, BRAND_ENQUIRY_MAILTO } from '../consts';
  * team section rather than with stock portraits (brief §9).
  * src/components/Team.astro is scaffolded and ready to import.
  */
+
+const approach = [
+  {
+    name: 'Creator Partnerships',
+    body: 'We identify, source and manage creators who make sense for your brand — from one-off campaigns to long-term ambassador relationships.',
+  },
+  {
+    name: 'Campaign Strategy',
+    body: 'We turn a business objective into a clear campaign idea, audience strategy and plan for execution.',
+  },
+  {
+    name: 'Content',
+    body: 'From creator-led concepts to short-form video, we create content designed to feel native to the platforms where people actually spend their time.',
+  },
+  {
+    name: 'Brand Partnerships',
+    body: 'We look beyond creators to find businesses, communities and organisations that already have access to the people you want to reach.',
+  },
+];
+
+/**
+ * AMAVI by the numbers — verified figures only. A figure with no value isn't
+ * shown, so nothing unconfirmed is ever published.
+ */
+const figures: { value?: string; label: string }[] = [
+  { value: '600+', label: 'creators in our network' },
+  // TODO(client): the current client count — not published until confirmed.
+  { value: undefined, label: 'clients' },
+  // TODO(client): the current number of industries — not published until confirmed.
+  { value: undefined, label: 'industries' },
+  { value: '125+', label: 'live posts' },
+];
+const shown = figures.filter((f) => f.value);
+
+const footerCta: FooterCta = {
+  heading: 'Have a goal?\nLet’s find the opportunity.',
+  brands: {
+    line: 'Tell us what you’re trying to achieve. We’ll figure out who and what can help you get there.',
+    cta: 'Let’s talk',
+  },
+  creators: { line: 'Want to work with brands that value great creative?', cta: 'Join the AMAVI network' },
+};
 ---
 
 <Base
   title="About"
-  description="AMAVI Socials is a creator-led marketing and partnerships agency: we find the creators, communities, businesses and partners that put a brand in front of the right audience."
+  description="AMAVI is a creator-led marketing and partnerships agency. We start with the objective, then find the creators, communities and partnerships that reach the audience."
+  footerCta={footerCta}
 >
+  {/* ================= Intro ================= */}
   <section class="section about">
     <div class="container container--narrow about__intro">
       <h1 class="eyebrow">About AMAVI</h1>
-      <p class="display display--lg about__statement">{TAGLINE}</p>
-      <p class="lead about__lead">
-        AMAVI Socials is a <strong>creator-led marketing and partnerships agency</strong> working
-        with brands across Ireland. Creator partnerships are our speciality, not our limit: we find
-        the people and opportunities that put a brand in front of the right audience —{' '}
-        <strong>creators, communities, businesses and partners</strong>.
-      </p>
-      <a href={BRAND_ENQUIRY_MAILTO} class="btn btn--primary about__cta">Email us</a>
+      <p class="display display--lg about__statement"><Lines text={'We find the\npeople behind\nthe impact.'} /></p>
+      <div class="about__lead">
+        <p class="lead">
+          AMAVI is a <strong>creator-led marketing and partnerships agency</strong> working with
+          brands across Ireland and Europe.
+        </p>
+        <p class="lead">
+          We believe growth starts with people. The right creator, community, business or
+          partnership can open the door to an audience a brand hasn’t reached before.
+        </p>
+        <p class="lead">Our job is to find that door — and build the strategy to get you through it.</p>
+      </div>
+      <a href="/services/" class="btn btn--primary about__cta">Work with us</a>
     </div>
 
     <div class="container">
@@ -43,14 +94,128 @@ import { TAGLINE, BRAND_ENQUIRY_MAILTO } from '../consts';
       </ul>
     </div>
   </section>
+
+  {/* ================= What we believe ================= */}
+  <section class="section section--ruled" aria-labelledby="believe-heading">
+    <div class="container split">
+      <div class="split__head">
+        <p class="eyebrow">What we believe</p>
+        <h2 id="believe-heading" class="display display--md"><Lines text={'Not more noise.\nBetter connections.'} /></h2>
+      </div>
+      <div class="split__body">
+        <p>
+          The internet doesn’t have a shortage of content. It has a shortage of things worth paying
+          attention to.
+        </p>
+        <p>That’s why we don’t start with platforms, follower counts or a predefined list of deliverables.</p>
+        <p><strong>We start with the objective.</strong></p>
+        <p>Then we find the people, partnerships, communities and opportunities that can make it happen.</p>
+      </div>
+    </div>
+  </section>
+
+  {/* ================= Our approach ================= */}
+  <section class="section section--ruled" aria-labelledby="approach-heading">
+    <div class="container split">
+      <div class="split__head">
+        <p class="eyebrow">Our approach</p>
+        <h2 id="approach-heading" class="display display--md"><Lines text={'Creators are one part\nof the equation.'} /></h2>
+        <p class="lead">We build the right mix around the problem we’re solving.</p>
+      </div>
+      <ul class="approach" role="list">
+        {approach.map((item) => (
+          <li class="approach__item">
+            <h3 class="approach__name">{item.name}</h3>
+            <p class="approach__body">{item.body}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {/* ================= Why AMAVI ================= */}
+  <section class="section section--ruled" aria-labelledby="why-heading">
+    <div class="container split">
+      <div class="split__head">
+        <p class="eyebrow">Why AMAVI</p>
+        <h2 id="why-heading" class="display display--md"><Lines text={'Start with the\nopportunity.\nNot the deliverable.'} /></h2>
+      </div>
+      <div class="split__body">
+        <p>A campaign doesn’t always need another influencer.</p>
+        <p>Sometimes it needs a creator.</p>
+        <p>Sometimes it needs a community.</p>
+        <p>Sometimes it needs a partnership that puts your brand directly in front of the right audience.</p>
+        <p><strong>We look at the bigger picture, then build the right mix around it.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  {/* ================= In practice ================= */}
+  <section class="section section--ruled" aria-labelledby="example-heading">
+    <div class="container split">
+      <div class="split__head">
+        <p class="eyebrow">Thinking beyond creators</p>
+        <h2 id="example-heading" class="display display--md"><Lines text={'One restaurant.\nA whole new audience.'} /></h2>
+      </div>
+      <div class="split__body">
+        <p>A restaurant wanted to reach more visitors travelling through the area.</p>
+        <p>
+          Instead of relying solely on influencer marketing, we looked at who was already bringing
+          those people through the door.
+        </p>
+        <p>
+          We researched and sourced relevant tour operators, bus companies and other potential local
+          partners — creating new routes to the audience beyond social media.
+        </p>
+        <p class="eyebrow split__highlight">
+          A broader partnership strategy built around the actual business objective.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ================= Philosophy ================= */}
+  <section class="section section--ruled philosophy" aria-labelledby="philosophy-heading">
+    <div class="container container--narrow philosophy__inner">
+      <p class="eyebrow">Our philosophy</p>
+      <h2 id="philosophy-heading" class="display display--md philosophy__line">
+        <Lines text={'The right people\nbeat more people.'} />
+      </h2>
+      <div class="philosophy__body">
+        <p class="lead">Reach is easy to buy.</p>
+        <p class="lead">Relevance isn’t.</p>
+        <p class="lead">
+          We care about finding the people who already have trust, attention and influence within
+          the audiences that matter to your brand.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ================= By the numbers ================= */}
+  {shown.length > 0 && (
+    <section class="section section--ruled" aria-labelledby="numbers-heading">
+      <div class="container">
+        <h2 id="numbers-heading" class="eyebrow numbers__heading">AMAVI by the numbers</h2>
+        <ul class="numbers" role="list" style={`--cols:${shown.length}`}>
+          {shown.map((figure) => (
+            <li class="number">
+              <p class="number__value">{figure.value}</p>
+              <p class="number__label">{figure.label}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
 </Base>
 
 <style>
-  /* Space does the work here: very little text, a lot of room around it. */
+  /* ---------- Intro: space does the work ---------- */
   .about { padding-block: clamp(4rem, 2rem + 8vw, 9rem) var(--section-y); }
   .about__intro { display: grid; justify-items: center; text-align: center; gap: var(--space-m); }
   .about__statement { max-width: 20ch; }
-  .about__lead { max-width: 54ch; }
+  .about__lead { display: grid; gap: var(--space-s); justify-items: center; max-width: 54ch; }
   .about__lead strong { font-weight: 700; }
   .about__cta { margin-top: var(--space-s); }
 
@@ -64,4 +229,73 @@ import { TAGLINE, BRAND_ENQUIRY_MAILTO } from '../consts';
   @media (min-width: 64em) {
     .about__images { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m); }
   }
+
+  /* ---------- Heading beside its text, as on Services ---------- */
+  .split { display: grid; gap: var(--space-l); }
+  @media (min-width: 64em) {
+    .split { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
+  }
+  .split__head { display: grid; gap: var(--space-m); align-content: start; }
+  .split__body {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--measure);
+    font-size: var(--text-lead);
+    font-weight: var(--weight-secondary);
+    line-height: 1.65;
+  }
+  .split__body strong { font-weight: 700; }
+  .split__highlight {
+    margin-top: var(--space-s);
+    padding-top: var(--space-m);
+    border-top: var(--stroke) solid var(--line);
+  }
+
+  /* ---------- Approach: a ruled list, as the areas are on Services ---------- */
+  .approach { list-style: none; border-top: var(--stroke) solid var(--line); }
+  .approach__item {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-m);
+    border-bottom: var(--stroke-hair) solid var(--line);
+  }
+  .approach__name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .approach__body { font-weight: var(--weight-secondary); }
+
+  /* ---------- Philosophy: centred, as on the home page ---------- */
+  .philosophy__inner { display: grid; gap: var(--space-m); justify-items: center; text-align: center; }
+  .philosophy__line { max-width: 22ch; }
+  .philosophy__body { display: grid; gap: var(--space-2xs); justify-items: center; }
+
+  /* ---------- Numbers: the figure large, a hairline above ----------
+     On wide screens the figures share the row between them, however many
+     are confirmed. */
+  .numbers__heading { margin-bottom: var(--space-xl); }
+  .numbers {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-xl) var(--space-m);
+  }
+  @media (min-width: 64em) { .numbers { grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr)); } }
+  .number {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+    padding-top: var(--space-m);
+    border-top: var(--stroke) solid var(--line);
+  }
+  .number__value {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(1.75rem, 1.1rem + 2.53vw, 3.1875rem);
+    line-height: 0.95;
+  }
+  .number__label { font-size: var(--text-sm); font-weight: var(--weight-strong); }
 </style>

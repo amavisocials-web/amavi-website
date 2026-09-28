@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import Lines from './Lines.astro';
 import { clearedLogos, opticalK, type ClientLogo } from '../logos';
 
 /**
@@ -22,6 +23,9 @@ import { clearedLogos, opticalK, type ClientLogo } from '../logos';
  * Only clients cleared for publication appear.
  */
 interface Props {
+  /** A small line of capitals above the heading. */
+  eyebrow?: string;
+  /** "\n" marks a line break. */
   heading?: string;
   /** One line beneath the heading. */
   intro?: string;
@@ -30,7 +34,7 @@ interface Props {
   logos?: ClientLogo[];
   marquee?: boolean;
 }
-const { heading, intro, level = 2, logos = clearedLogos(), marquee = false } = Astro.props;
+const { eyebrow, heading, intro, level = 2, logos = clearedLogos(), marquee = false } = Astro.props;
 const H = `h${level}` as 'h2' | 'h3';
 const sized = logos.map((logo) => ({ ...logo, k: opticalK(logo).toFixed(3) }));
 const COPIES = 3;
@@ -39,13 +43,14 @@ const COPIES = 3;
 <div class:list={['logo-wall', { 'logo-wall--marquee': marquee }]}>
   {(heading || intro) && (
     <div class:list={['logo-wall__head', { container: marquee }]}>
-      {heading && <H class="display display--md logo-wall__heading">{heading}</H>}
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      {heading && <H class="display display--md logo-wall__heading"><Lines text={heading} /></H>}
       {intro && <p class="logo-wall__intro">{intro}</p>}
     </div>
   )}
 
   {marquee ? (
-    <div class="marquee" tabindex="0" role="region" aria-label={heading ? `${heading}: logos` : 'Partner logos'}>
+    <div class="marquee" tabindex="0" role="region" aria-label={heading ? `${heading.replace(/\n/g, ' ')}: logos` : 'Partner logos'}>
       <div class="marquee__track">
         {Array.from({ length: COPIES }, (_, copy) => (
           <ul class="marquee__set logo-wall__list" role="list" aria-hidden={copy > 0 ? 'true' : undefined}>

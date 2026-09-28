@@ -243,12 +243,16 @@ const links = [{ label: 'Home', href: '/' }, ...NAV_LINKS, { label: 'Get in Touc
   }
 
   .menu__list { list-style: none; display: grid; gap: var(--space-2xs); }
+  /* Set at the wordmark's size, so the menu reads as a list rather than a
+     stack of headings. The row stays 44px tall for the tap target. */
   .menu__link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
     font-weight: 600;
-    font-size: var(--display-lg);
+    font-size: 1.6875rem;
     line-height: 1.1;
     text-transform: uppercase;
     color: var(--ink);

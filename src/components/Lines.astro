@@ -1,0 +1,17 @@
+---
+/**
+ * Display copy with its line breaks where the copy puts them: each "\n" in
+ * `text` starts a new line. A line too long for the screen still wraps within
+ * itself. Screen readers get one sentence — the lines are joined by spaces.
+ */
+interface Props {
+  text: string;
+}
+const lines = Astro.props.text.split('\n');
+---
+
+{lines.map((line, i) => <>{i > 0 && ' '}<span class="line">{line}</span></>)}
+
+<style>
+  .line { display: block; }
+</style>

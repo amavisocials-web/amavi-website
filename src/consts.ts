@@ -8,32 +8,32 @@ export const SITE_URL = 'https://www.amavisocials.co';
 
 /**
  * Positioning, used throughout the copy: AMAVI is a creator-led marketing and
- * partnerships agency, not a pure influencer agency. Creator partnerships are
- * the speciality, not the limit. What AMAVI sells is finding the people and
- * opportunities that put a brand in front of the right audience — creators,
- * communities, businesses and partners.
+ * partnerships agency — not a traditional influencer agency, a PR agency or a
+ * social media manager. Creator marketing is the core speciality; the work
+ * also spans campaign strategy, content, brand partnerships, audience
+ * development and creative outreach. The brand idea: "Creators are one part
+ * of the equation." AMAVI starts from the goal and finds the people and
+ * opportunities that reach it — a creator, a community, a tour operator, a
+ * hotel, a brand partner, a media opportunity.
+ *
+ * Voice: premium, editorial, confident, minimal. Short lines. No agency
+ * clichés ("next level", "game-changing", "full-service", "digital
+ * solutions").
  */
 
 /**
- * The home hero headline and the About page statement.
- * TODO(client): working tagline, flagged as not final — refine it here and
- * both update.
+ * The home hero headline and the About page statement. A line break ("\n")
+ * sets where display type breaks; anywhere it's plain text it reads as a
+ * space.
  */
-export const TAGLINE = 'We find the people who can move your brand forward.';
+export const TAGLINE = 'We find the people\nwho move your\nbusiness forward.';
 
 /** The line under the headline: four words, each with its own full stop. */
-export const HERO_SUBLINE = ['Creators', 'Communities', 'Partners', 'Opportunities'];
+export const HERO_SUBLINE = ['Creators', 'Communities', 'Opportunities'];
 
 /** One sentence of positioning, under the hero and wherever AMAVI is introduced. */
 export const POSITIONING =
-  'AMAVI is a creator-led marketing and partnerships agency helping brands find new audiences through the people and relationships that matter.';
-
-/**
- * Leads the home stats section, on the video tiles.
- * TODO(client): confirm which line leads — this or the hero headline (TAGLINE).
- * Copy under review; swap it here once signed off.
- */
-export const CONTENT_TAGLINE = 'Made by creators. Seen by our target audience.';
+  'AMAVI Socials is a creator-led marketing and partnerships agency helping brands reach new audiences through the right people, relationships and opportunities.';
 
 /**
  * The home hero's full-screen video: two separate cuts, one base path.
@@ -59,7 +59,7 @@ export const CONTENT_TAGLINE = 'Made by creators. Seen by our target audience.';
 export const HERO_VIDEO = '/media/hero';
 
 export const SITE_DESCRIPTION =
-  'AMAVI Socials is a creator-led marketing and partnerships agency. We find the creators, communities and partners that put brands across Ireland in front of new audiences.';
+  'AMAVI Socials is a creator-led marketing and partnerships agency helping brands reach new audiences through the right people, relationships and opportunities';
 
 /**
  * The working mailbox. Verified: amavisocials.com has Google Workspace MX
@@ -93,10 +93,13 @@ export const BRAND_ENQUIRY_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURI
  */
 export const CREATOR_PATH = '/become-a-creator/';
 
-/** Verified live. The previous LinkedIn URL returned 404. */
+/** Both supplied by the client on 24 September 2026. */
 export const SOCIALS = [
-  { name: 'Instagram', handle: '@amavi.agency', url: 'https://www.instagram.com/amavi.agency/' },
-  { name: 'LinkedIn', handle: 'AMAVI Socials', url: 'https://www.linkedin.com/company/amavi-socials' },
+  { name: 'Instagram', handle: '@amavi.socials', url: 'https://www.instagram.com/amavi.socials/' },
+  { name: 'LinkedIn', handle: 'AMAVI Socials', url: 'https://www.linkedin.com/company/amavi-socials/' },
+  // TODO(client): TikTok is in the footer copy, but no account link was
+  // supplied. Add it here — e.g. { name: 'TikTok', handle: '@…', url: 'https://www.tiktok.com/@…' }
+  // — and it appears wherever the socials are listed.
 ] as const;
 
 /** TODO(client): confirm the response-time commitment. */

@@ -1,27 +1,43 @@
 ---
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
+import Hero, { type Entry } from '../components/Hero.astro';
 import Feature from '../components/Feature.astro';
 import StatTiles, { type Stat } from '../components/StatTiles.astro';
 import LoopVideo from '../components/LoopVideo.astro';
 import ProofLink from '../components/ProofLink.astro';
 import LogoWall from '../components/LogoWall.astro';
+import Lines from '../components/Lines.astro';
 import { TILES } from '../data/tiles';
 import { MEDIA } from '../data/media';
 import {
-  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, POSITIONING, CONTENT_TAGLINE,
+  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, POSITIONING, CONTACT_PATH,
+  CREATOR_PATH,
 } from '../consts';
+
+/*
+ * The home page's copy. Positioning: a creator-led marketing and
+ * partnerships agency — creator marketing at the core, never the limit.
+ * "\n" in a display line marks where it breaks. The closing call to action is
+ * the footer's (src/components/Footer.astro).
+ */
+
+const services = ['Creator marketing', 'Campaign strategy', 'Content', 'Brand partnerships'];
+
+const entries: Entry[] = [
+  { who: 'For Brands', line: 'Marketing that finds new audiences.', cta: 'Let’s talk', href: CONTACT_PATH },
+  { who: 'For Creators', line: 'Join our network. Get discovered by brands.', cta: 'Become a creator', href: CREATOR_PATH },
+];
 
 /**
  * The only figures the stat tiles may show, exactly as supplied — nothing
- * recomputed, no other percentage, and no client named. From AMAVI's
- * programme reporting, April to August 2026. Tiles 1–4 play behind them.
+ * recomputed, no other percentage, and no client named. Tiles 1–4 play
+ * behind them.
  */
 const stats: Stat[] = [
   { value: '23%', label: 'above target on creator partnerships' },
-  { value: '47%', label: 'above target for one healthcare client' },
-  { value: '40%', label: 'above target for two clients' },
-  { value: '92%', label: 'net-new audience reach' },
+  { value: '47%', label: 'above target for a healthcare client' },
+  { value: '40%', label: 'above target across two client campaigns' },
+  { value: '92%', label: 'new audience reach' },
 ];
 
 const schema = {
@@ -41,48 +57,63 @@ const schema = {
   description={SITE_DESCRIPTION}
   schema={schema}
 >
-  <Hero title={TAGLINE} intro={POSITIONING} />
+  <Hero title={TAGLINE} intro={POSITIONING} services={services} entries={entries}>
+    <Fragment slot="actions">
+      <a href="/services/" class="btn btn--primary">Work with us</a>{' '}
+      <a href={CREATOR_PATH} class="btn btn--secondary">Join the creator network</a>
+    </Fragment>
+  </Hero>
 
-  {/* ================= Under the hero ================= */}
+  {/* ================= Introduction ================= */}
   <Feature labelledby="equation-heading">
-    <h2 id="equation-heading" class="display display--lg">Creators are one part of the equation.</h2>
+    <p class="eyebrow">More than creator marketing.</p>
+    <h2 id="equation-heading" class="display display--lg">
+      <Lines text={'Creators are one part\nof the equation.'} />
+    </h2>
     <p class="feature__body">
       We build campaigns around <strong>the right people, the right partnerships and the right
-      opportunities</strong> — whether that’s a creator, a community, a tourism operator or a brand
-      partnership.
+      opportunities</strong> — whether that’s a creator, a community, a tourism operator, a brand
+      partnership or a new route to your audience.
     </p>
-    <ProofLink href="/services/">49 partnerships delivered against a target of 40</ProofLink>
+    <p class="feature__body">
+      We start with the goal, find the opportunity and build the strategy around it.
+    </p>
+    <ProofLink href="/services/">See what we do</ProofLink>
+    <ProofLink href="/services/#results">49 partnerships delivered against a target of 40</ProofLink>
     {/* Temporary fill: see src/data/media.ts. (Tile 5 isn't used here: its
         burned-in captions read badly as a silent loop.) */}
     <LoopVideo slot="media" src={MEDIA.home.creators.src} ratio="2/3" />
   </Feature>
 
-  {/* ================= Stats on video tiles ================= */}
+  {/* ================= Results ================= */}
   <section class="section section--ruled" aria-labelledby="stats-heading">
     <div class="container">
-      {/* One line per sentence where there's room, so the break falls between
-          them. Which line leads — this or the hero's — is open: see
-          CONTENT_TAGLINE in src/consts.ts. */}
+      <p class="eyebrow stats__eyebrow">The numbers behind the work.</p>
       <h2 id="stats-heading" class="display display--lg stats__title">
-        {CONTENT_TAGLINE.split(/(?<=\.)\s+/).map((sentence, i) => <>{i > 0 && ' '}<span>{sentence}</span></>)}
+        <Lines text={'Built to reach\nthe people that matter.'} />
       </h2>
       <StatTiles stats={stats} tiles={TILES.slice(0, 4)} />
-      <p class="meta stats__source">Four client programmes, April to August 2026.</p>
+      <p class="meta stats__source">Selected campaign results across AMAVI client work.</p>
     </div>
   </section>
 
-  {/* ================= How we work =================
-      TODO(client): copy under review — new for this layout, built from what
-      the site already says about how AMAVI works. */}
+  {/* ================= How we work ================= */}
   <Feature reverse ruled labelledby="how-heading">
-    <h2 id="how-heading" class="eyebrow">How we work</h2>
+    <p class="eyebrow">How we work</p>
+    <h2 id="how-heading" class="display display--lg">
+      <Lines text={'Start with the goal.\nFind the opportunity.'} />
+    </h2>
     <p class="feature__body">
-      From the first shortlist to the final report, we run <strong>every partnership end to
-      end</strong> — sourcing, agreements, campaign management and reporting. And <strong>every
-      one is agreed in writing</strong> before anything goes live, so what we promise is what
-      arrives.
+      We don’t start with a list of deliverables. We start with <strong>what you want to
+      achieve</strong>.
     </p>
-    <ProofLink href="/services/">Trusted by brands across Ireland</ProofLink>
+    <p class="feature__body">
+      From there, we identify <strong>the people, platforms, partnerships and opportunities</strong>{' '}
+      that can help you get there — then manage the process from strategy through execution.
+    </p>
+    <p class="label">Strategy → Discovery → Execution</p>
+    <p class="feature__body"><strong>One objective. One clear strategy. The right people around it.</strong></p>
+    <ProofLink href="/services/#how-we-work">How we work</ProofLink>
     {/* Temporary fill: see src/data/media.ts. */}
     <LoopVideo slot="media" src={MEDIA.home.howWeWork.src} ratio="2/3" />
   </Feature>
@@ -91,26 +122,36 @@ const schema = {
   <section class="section section--tight section--ruled">
     <LogoWall
       marquee
-      heading="Our Partners"
-      intro="Trusted by brands across healthcare, wellbeing, home services and ecommerce."
+      eyebrow="Trusted by"
+      heading={'Brands we’ve\nbuilt with.'}
+      intro="From healthcare and wellness to food, fashion and lifestyle, we work with brands looking to reach new audiences in more meaningful ways."
     />
   </section>
 
-  {/* ================= Philosophy =================
-      TODO(client): confirm the philosophy line. */}
+  {/* ================= Philosophy ================= */}
   <section class="section section--ruled philosophy" aria-labelledby="philosophy-heading">
     <div class="container container--narrow philosophy__inner">
-      <h2 id="philosophy-heading" class="eyebrow">Our philosophy</h2>
-      <p class="display display--md philosophy__line">The right people will always beat more people.</p>
+      <p class="eyebrow">Our philosophy</p>
+      <h2 id="philosophy-heading" class="display display--md philosophy__line">
+        <Lines text={'The right people\nbeat more people.'} />
+      </h2>
+      <div class="philosophy__body">
+        <p class="lead">More followers don’t always mean more impact.</p>
+        <p class="lead">
+          We believe the right creator, community, partner or opportunity can open a door that
+          reach alone can’t.
+        </p>
+      </div>
     </div>
   </section>
 </Base>
 
 <style>
+  .stats__eyebrow { margin-bottom: var(--space-m); }
   .stats__title { margin-bottom: var(--space-xl); }
-  .stats__title span { display: block; }
   .stats__source { margin-top: var(--space-m); }
 
   .philosophy__inner { display: grid; gap: var(--space-m); justify-items: center; text-align: center; }
   .philosophy__line { max-width: 22ch; }
+  .philosophy__body { display: grid; gap: var(--space-2xs); justify-items: center; }
 </style>

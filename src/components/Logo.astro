@@ -61,6 +61,7 @@ const { variant = 'brand', size = 'sm' } = Astro.props;
   .wordmark--brand { color: var(--accent); }
   .wordmark--current { color: inherit; }
 
-  .wordmark--sm { font-size: 1.3125rem; }
+  /* Two steps up the scale from where it started, at the client's direction. */
+  .wordmark--sm { font-size: 1.6875rem; }
   .wordmark--lg { font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem); }
 </style>
