@@ -1,8 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
-import Hero, { type Entry } from '../components/Hero.astro';
+import Hero from '../components/Hero.astro';
 import Feature from '../components/Feature.astro';
 import StatTiles, { type Stat } from '../components/StatTiles.astro';
+import Frame from '../components/Frame.astro';
 import LoopVideo from '../components/LoopVideo.astro';
 import ProofLink from '../components/ProofLink.astro';
 import LogoWall from '../components/LogoWall.astro';
@@ -10,23 +11,17 @@ import Lines from '../components/Lines.astro';
 import { TILES } from '../data/tiles';
 import { MEDIA } from '../data/media';
 import {
-  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, POSITIONING, CONTACT_PATH,
-  CREATOR_PATH,
+  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, POSITIONING, CREATOR_PATH,
 } from '../consts';
 
 /*
  * The home page's copy. Positioning: a creator-led marketing and
  * partnerships agency — creator marketing at the core, never the limit.
- * "\n" in a display line marks where it breaks. The closing call to action is
- * the footer's (src/components/Footer.astro).
+ * "\n" in a display line marks where it breaks.
+ *
+ * The page opens on the hero and the client logos, then makes its case: what
+ * AMAVI is, the numbers, how it works.
  */
-
-const services = ['Creator marketing', 'Campaign strategy', 'Content', 'Brand partnerships'];
-
-const entries: Entry[] = [
-  { who: 'For Brands', line: 'Marketing that finds new audiences.', cta: 'Let’s talk', href: CONTACT_PATH },
-  { who: 'For Creators', line: 'Join our network. Get discovered by brands.', cta: 'Become a creator', href: CREATOR_PATH },
-];
 
 /**
  * The only figures the stat tiles may show, exactly as supplied — nothing
@@ -57,15 +52,45 @@ const schema = {
   description={SITE_DESCRIPTION}
   schema={schema}
 >
-  <Hero title={TAGLINE} intro={POSITIONING} services={services} entries={entries}>
+  <Hero title={TAGLINE} intro={POSITIONING}>
     <Fragment slot="actions">
       <a href="/services/" class="btn btn--primary">Work with us</a>{' '}
       <a href={CREATOR_PATH} class="btn btn--secondary">Join the creator network</a>
     </Fragment>
   </Hero>
 
+  {/* ================= Partners ================= */}
+  <section class="section section--tight" aria-label="Brands we work with">
+    <LogoWall marquee eyebrow="Trusted by" />
+  </section>
+
+  {/* ================= Results ================= */}
+  <section class="section section--ruled" aria-labelledby="stats-heading">
+    <div class="container">
+      <div class="stats__note">
+        <p>
+          AMAVI Socials is a creator-led marketing and partnerships agency working with brands
+          across Ireland and Europe. We work in healthcare, wellness, hospitality, food and
+          retail — categories where trust matters more than volume.
+        </p>
+        <p>
+          Sometimes the answer is a creator. Sometimes it’s a community, a local business or a
+          partnership nobody else thought to look for. We start with the objective, then build the
+          right mix around it.
+        </p>
+      </div>
+
+      <p class="eyebrow stats__eyebrow">The numbers behind the work.</p>
+      <h2 id="stats-heading" class="display display--lg stats__title">
+        <Lines text={'Built to reach\nthe people that matter.'} />
+      </h2>
+      <StatTiles stats={stats} tiles={TILES.slice(0, 4)} />
+      <p class="meta stats__source">Selected campaign results across AMAVI client work.</p>
+    </div>
+  </section>
+
   {/* ================= Introduction ================= */}
-  <Feature labelledby="equation-heading">
+  <Feature ruled labelledby="equation-heading">
     <p class="eyebrow">More than creator marketing.</p>
     <h2 id="equation-heading" class="display display--lg">
       <Lines text={'Creators are one part\nof the equation.'} />
@@ -78,24 +103,11 @@ const schema = {
     <p class="feature__body">
       We start with the goal, find the opportunity and build the strategy around it.
     </p>
+    <ProofLink href="/about/">Our story</ProofLink>
     <ProofLink href="/services/">See what we do</ProofLink>
-    <ProofLink href="/services/#results">49 partnerships delivered against a target of 40</ProofLink>
-    {/* Temporary fill: see src/data/media.ts. (Tile 5 isn't used here: its
-        burned-in captions read badly as a silent loop.) */}
-    <LoopVideo slot="media" src={MEDIA.home.creators.src} ratio="2/3" />
+    {/* AMAVI's own campaign board: see src/data/media.ts. */}
+    <Frame slot="media" media={MEDIA.home.creators} ratio="2/3" sizes="(min-width: 48em) 22rem, 60vw" />
   </Feature>
-
-  {/* ================= Results ================= */}
-  <section class="section section--ruled" aria-labelledby="stats-heading">
-    <div class="container">
-      <p class="eyebrow stats__eyebrow">The numbers behind the work.</p>
-      <h2 id="stats-heading" class="display display--lg stats__title">
-        <Lines text={'Built to reach\nthe people that matter.'} />
-      </h2>
-      <StatTiles stats={stats} tiles={TILES.slice(0, 4)} />
-      <p class="meta stats__source">Selected campaign results across AMAVI client work.</p>
-    </div>
-  </section>
 
   {/* ================= How we work ================= */}
   <Feature reverse ruled labelledby="how-heading">
@@ -113,45 +125,25 @@ const schema = {
     </p>
     <p class="label">Strategy → Discovery → Execution</p>
     <p class="feature__body"><strong>One objective. One clear strategy. The right people around it.</strong></p>
-    <ProofLink href="/services/#how-we-work">How we work</ProofLink>
+    {/* TODO(client): "How we work" came off the Services page; this block is
+        the fullest description of it now. */}
+    <ProofLink href="/services/">How we work</ProofLink>
     {/* Temporary fill: see src/data/media.ts. */}
     <LoopVideo slot="media" src={MEDIA.home.howWeWork.src} ratio="2/3" />
   </Feature>
-
-  {/* ================= Partners ================= */}
-  <section class="section section--tight section--ruled">
-    <LogoWall
-      marquee
-      eyebrow="Trusted by"
-      heading={'Brands we’ve\nbuilt with.'}
-      intro="From healthcare and wellness to food, fashion and lifestyle, we work with brands looking to reach new audiences in more meaningful ways."
-    />
-  </section>
-
-  {/* ================= Philosophy ================= */}
-  <section class="section section--ruled philosophy" aria-labelledby="philosophy-heading">
-    <div class="container container--narrow philosophy__inner">
-      <p class="eyebrow">Our philosophy</p>
-      <h2 id="philosophy-heading" class="display display--md philosophy__line">
-        <Lines text={'The right people\nbeat more people.'} />
-      </h2>
-      <div class="philosophy__body">
-        <p class="lead">More followers don’t always mean more impact.</p>
-        <p class="lead">
-          We believe the right creator, community, partner or opportunity can open a door that
-          reach alone can’t.
-        </p>
-      </div>
-    </div>
-  </section>
 </Base>
 
 <style>
+  /* A plain centred statement, no heading: what AMAVI is, before the figures. */
+  .stats__note {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--container-narrow);
+    margin: 0 auto var(--space-2xl);
+    text-align: center;
+  }
+
   .stats__eyebrow { margin-bottom: var(--space-m); }
   .stats__title { margin-bottom: var(--space-xl); }
   .stats__source { margin-top: var(--space-m); }
-
-  .philosophy__inner { display: grid; gap: var(--space-m); justify-items: center; text-align: center; }
-  .philosophy__line { max-width: 22ch; }
-  .philosophy__body { display: grid; gap: var(--space-2xs); justify-items: center; }
 </style>

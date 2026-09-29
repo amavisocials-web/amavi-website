@@ -1,23 +1,53 @@
 ---
 import Base from '../layouts/Base.astro';
-import Frame from '../components/Frame.astro';
 import Lines from '../components/Lines.astro';
-import type { FooterCta } from '../components/Footer.astro';
-import { MEDIA } from '../data/media';
 
 /**
  * About: who AMAVI is and how it thinks — a point of view more than an
  * introduction. Creator marketing is the core speciality; the page makes
- * clear it's never the limit. The closing call to action is the footer's,
- * worded for this page (footerCta below).
+ * clear it's never the limit.
  *
- * The four portraits (2:3) are set in src/data/media.ts, marked there as
- * temporary fills; a slot left empty shows "Add image".
+ * "Why AMAVI" is the page's one dark band: the copy over an abstract city
+ * plan, marked where AMAVI is. The pattern is drawn from a handful of fixed
+ * numbers — a design, not a survey map — and is hidden from assistive tech.
  *
- * TODO(client): no team photos or bios supplied, so this page ships without a
- * team section rather than with stock portraits (brief §9).
- * src/components/Team.astro is scaffolded and ready to import.
+ * TODO(client): no team photos supplied, so "Who we are" is names, roles and
+ * lines rather than portraits. src/components/Team.astro is scaffolded if you
+ * want photographs later.
  */
+
+/**
+ * TODO(client): the team — real names, roles and a line or two each. These two
+ * entries are placeholders so the section has its shape; replace them, add as
+ * many as you like, and the list follows.
+ */
+const team = [
+  { name: '[Name]', role: '[Role]', bio: '[TODO(client): a line or two on what they do at AMAVI.]' },
+  { name: '[Name]', role: '[Role]', bio: '[TODO(client): a line or two on what they do at AMAVI.]' },
+];
+
+/**
+ * The city plan behind "Why AMAVI": one centre, roads leaving the frame, ring
+ * roads, and blocks along the roads. Every number is fixed, so the drawing is
+ * the same on every build. An abstraction of a city, not a map of one.
+ */
+/* Off-centre on purpose: the pin falls clear of the copy, under the heading. */
+const CITY = { x: 320, y: 470 };
+const ANGLES = [-72, -28, 8, 46, 96, 140, 178, 216, 262, 308];
+const point = (angle: number, distance: number) => ({
+  x: CITY.x + Math.cos((angle * Math.PI) / 180) * distance,
+  y: CITY.y + Math.sin((angle * Math.PI) / 180) * distance,
+});
+const radials = ANGLES.map((angle) => point(angle, 1100));
+const rings = [120, 235, 380, 560];
+const blocks = ANGLES.flatMap((angle, i) =>
+  [170, 300, 450, 620].slice(i % 2 === 0 ? 0 : 1).map((distance, j) => {
+    const at = point(angle + (j % 2 ? 7 : -7), distance);
+    const w = 52 + ((i * 13 + j * 29) % 46);
+    const h = 30 + ((i * 7 + j * 17) % 34);
+    return { x: at.x - w / 2, y: at.y - h / 2, w, h, angle: angle + 90 };
+  }),
+);
 
 const approach = [
   {
@@ -38,34 +68,11 @@ const approach = [
   },
 ];
 
-/**
- * AMAVI by the numbers — verified figures only. A figure with no value isn't
- * shown, so nothing unconfirmed is ever published.
- */
-const figures: { value?: string; label: string }[] = [
-  { value: '600+', label: 'creators in our network' },
-  // TODO(client): the current client count — not published until confirmed.
-  { value: undefined, label: 'clients' },
-  // TODO(client): the current number of industries — not published until confirmed.
-  { value: undefined, label: 'industries' },
-  { value: '125+', label: 'live posts' },
-];
-const shown = figures.filter((f) => f.value);
-
-const footerCta: FooterCta = {
-  heading: 'Have a goal?\nLet’s find the opportunity.',
-  brands: {
-    line: 'Tell us what you’re trying to achieve. We’ll figure out who and what can help you get there.',
-    cta: 'Let’s talk',
-  },
-  creators: { line: 'Want to work with brands that value great creative?', cta: 'Join the AMAVI network' },
-};
 ---
 
 <Base
   title="About"
   description="AMAVI is a creator-led marketing and partnerships agency. We start with the objective, then find the creators, communities and partnerships that reach the audience."
-  footerCta={footerCta}
 >
   {/* ================= Intro ================= */}
   <section class="section about">
@@ -75,7 +82,8 @@ const footerCta: FooterCta = {
       <div class="about__lead">
         <p class="lead">
           AMAVI is a <strong>creator-led marketing and partnerships agency</strong> working with
-          brands across Ireland and Europe.
+          brands across Ireland and Europe. Founded in Prishtina, Kosovo, we work with clients
+          across healthcare, wellness, hospitality, food and retail.
         </p>
         <p class="lead">
           We believe growth starts with people. The right creator, community, business or
@@ -86,32 +94,6 @@ const footerCta: FooterCta = {
       <a href="/services/" class="btn btn--primary about__cta">Work with us</a>
     </div>
 
-    <div class="container">
-      <ul class="about__images" role="list">
-        {MEDIA.about.map((slot) => (
-          <li><Frame slot={slot} ratio="2/3" sizes="(min-width: 64em) 17rem, 45vw" /></li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
-  {/* ================= What we believe ================= */}
-  <section class="section section--ruled" aria-labelledby="believe-heading">
-    <div class="container split">
-      <div class="split__head">
-        <p class="eyebrow">What we believe</p>
-        <h2 id="believe-heading" class="display display--md"><Lines text={'Not more noise.\nBetter connections.'} /></h2>
-      </div>
-      <div class="split__body">
-        <p>
-          The internet doesn’t have a shortage of content. It has a shortage of things worth paying
-          attention to.
-        </p>
-        <p>That’s why we don’t start with platforms, follower counts or a predefined list of deliverables.</p>
-        <p><strong>We start with the objective.</strong></p>
-        <p>Then we find the people, partnerships, communities and opportunities that can make it happen.</p>
-      </div>
-    </div>
   </section>
 
   {/* ================= Our approach ================= */}
@@ -133,9 +115,24 @@ const footerCta: FooterCta = {
     </div>
   </section>
 
-  {/* ================= Why AMAVI ================= */}
-  <section class="section section--ruled" aria-labelledby="why-heading">
-    <div class="container split">
+  {/* ================= Why AMAVI: over the city ================= */}
+  <section class="section why-amavi surface-dark" aria-labelledby="why-heading">
+    <div class="city" aria-hidden="true">
+      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMinYMid slice" role="presentation">
+        {/* Roads leaving the frame: where AMAVI is, and everywhere the work goes. */}
+        {radials.map((r) => <line x1={CITY.x} y1={CITY.y} x2={r.x} y2={r.y} class="city__road" />)}
+        {rings.map((radius) => <circle cx={CITY.x} cy={CITY.y} r={radius} class="city__ring" />)}
+        {blocks.map((b) => (
+          <rect x={b.x} y={b.y} width={b.w} height={b.h} class="city__block"
+                transform={`rotate(${b.angle} ${b.x + b.w / 2} ${b.y + b.h / 2})`} />
+        ))}
+        <path d="M-40 250 C 220 300, 360 430, 600 430 S 980 300, 1240 350" class="city__river" />
+        <circle cx={CITY.x} cy={CITY.y} r="46" class="city__here" />
+        <circle cx={CITY.x} cy={CITY.y} r="9" class="city__pin" />
+      </svg>
+    </div>
+
+    <div class="container split why-amavi__inner">
       <div class="split__head">
         <p class="eyebrow">Why AMAVI</p>
         <h2 id="why-heading" class="display display--md"><Lines text={'Start with the\nopportunity.\nNot the deliverable.'} /></h2>
@@ -146,31 +143,49 @@ const footerCta: FooterCta = {
         <p>Sometimes it needs a community.</p>
         <p>Sometimes it needs a partnership that puts your brand directly in front of the right audience.</p>
         <p><strong>We look at the bigger picture, then build the right mix around it.</strong></p>
+        <p class="label city__caption">Prishtina, Kosovo · 42.66° N 21.16° E</p>
       </div>
     </div>
   </section>
 
-  {/* ================= In practice ================= */}
-  <section class="section section--ruled" aria-labelledby="example-heading">
+  {/* ================= The network ================= */}
+  <section class="section section--ruled" aria-labelledby="network-heading">
     <div class="container split">
       <div class="split__head">
-        <p class="eyebrow">Thinking beyond creators</p>
-        <h2 id="example-heading" class="display display--md"><Lines text={'One restaurant.\nA whole new audience.'} /></h2>
+        <p class="eyebrow">Our network</p>
+        <h2 id="network-heading" class="display display--md">We know who to call.</h2>
       </div>
       <div class="split__body">
-        <p>A restaurant wanted to reach more visitors travelling through the area.</p>
         <p>
-          Instead of relying solely on influencer marketing, we looked at who was already bringing
-          those people through the door.
+          We’ve built a database of over a thousand creators and partners across Ireland — people
+          we’ve worked with, vetted or tracked, organised by audience, niche and location.
         </p>
         <p>
-          We researched and sourced relevant tour operators, bus companies and other potential local
-          partners — creating new routes to the audience beyond social media.
-        </p>
-        <p class="eyebrow split__highlight">
-          A broader partnership strategy built around the actual business objective.
+          That network is growing across Europe. Every campaign we run adds to it, which means the
+          next brief starts further ahead than the last one.
         </p>
       </div>
+    </div>
+  </section>
+
+  {/* ================= Who we are ================= */}
+  <section class="section section--ruled" aria-labelledby="team-heading">
+    <div class="container split">
+      <div class="split__head">
+        <p class="eyebrow">Who we are</p>
+        <h2 id="team-heading" class="display display--md">A small team that answers the phone.</h2>
+      </div>
+      <ul class="team" role="list">
+        {team.map((member) => (
+          <li class="team__member">
+            <div class="team__who">
+              <h3 class="team__name">{member.name}</h3>
+              <p class="team__role">{member.role}</p>
+            </div>
+            <p class="team__bio">{member.bio}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
@@ -191,23 +206,6 @@ const footerCta: FooterCta = {
       </div>
     </div>
   </section>
-
-  {/* ================= By the numbers ================= */}
-  {shown.length > 0 && (
-    <section class="section section--ruled" aria-labelledby="numbers-heading">
-      <div class="container">
-        <h2 id="numbers-heading" class="eyebrow numbers__heading">AMAVI by the numbers</h2>
-        <ul class="numbers" role="list" style={`--cols:${shown.length}`}>
-          {shown.map((figure) => (
-            <li class="number">
-              <p class="number__value">{figure.value}</p>
-              <p class="number__label">{figure.label}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  )}
 </Base>
 
 <style>
@@ -219,16 +217,33 @@ const footerCta: FooterCta = {
   .about__lead strong { font-weight: 700; }
   .about__cta { margin-top: var(--space-s); }
 
-  .about__images {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-s);
-    margin-top: clamp(4rem, 2rem + 6vw, 7rem);
+  /* ---------- The four portraits ----------
+     A row at every width. On a phone it scrolls sideways, a card and a bit in
+     view, so four 2:3 portraits can't fill the screen; from 48em up all four
+     sit across the container and scale with it. */
+  /* ---------- Why AMAVI: white on black, over the city ----------
+     The drawing is decoration — white lines on black, well under the text,
+     with the one accent mark where AMAVI is. */
+  .why-amavi { position: relative; isolation: isolate; overflow: hidden; }
+  .why-amavi__inner { position: relative; }
+
+  .city { position: absolute; inset: 0; z-index: -1; }
+  .city svg { width: 100%; height: 100%; }
+  .city :global(.city__road),
+  .city :global(.city__ring),
+  .city :global(.city__block),
+  .city :global(.city__river) {
+    fill: none;
+    stroke: var(--on-dark);
+    vector-effect: non-scaling-stroke;
   }
-  @media (min-width: 64em) {
-    .about__images { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m); }
-  }
+  .city :global(.city__road) { stroke-width: 1; opacity: 0.28; }
+  .city :global(.city__ring) { stroke-width: 1; opacity: 0.16; }
+  .city :global(.city__block) { stroke-width: 1; opacity: 0.22; }
+  .city :global(.city__river) { stroke-width: 2; opacity: 0.14; }
+  .city :global(.city__here) { fill: none; stroke: var(--on-dark); stroke-width: 1; opacity: 0.5; }
+  .city :global(.city__pin) { fill: var(--accent); }
+  .city__caption { margin-top: var(--space-m); opacity: 0.8; }
 
   /* ---------- Heading beside its text, as on Services ---------- */
   .split { display: grid; gap: var(--space-l); }
@@ -245,11 +260,6 @@ const footerCta: FooterCta = {
     line-height: 1.65;
   }
   .split__body strong { font-weight: 700; }
-  .split__highlight {
-    margin-top: var(--space-s);
-    padding-top: var(--space-m);
-    border-top: var(--stroke) solid var(--line);
-  }
 
   /* ---------- Approach: a ruled list, as the areas are on Services ---------- */
   .approach { list-style: none; border-top: var(--stroke) solid var(--line); }
@@ -267,35 +277,29 @@ const footerCta: FooterCta = {
   }
   .approach__body { font-weight: var(--weight-secondary); }
 
+  /* ---------- The team: a ruled list, name and role beside the line ---------- */
+  .team { list-style: none; border-top: var(--stroke) solid var(--line); }
+  .team__member {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-m);
+    border-bottom: var(--stroke-hair) solid var(--line);
+  }
+  @media (min-width: 64em) {
+    .team__member { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-l); align-items: baseline; }
+  }
+  .team__who { display: grid; gap: var(--space-3xs); align-content: start; }
+  .team__name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .team__role { font-size: var(--text-sm); font-weight: var(--weight-secondary); }
+  .team__bio { font-weight: var(--weight-secondary); }
+
   /* ---------- Philosophy: centred, as on the home page ---------- */
   .philosophy__inner { display: grid; gap: var(--space-m); justify-items: center; text-align: center; }
   .philosophy__line { max-width: 22ch; }
   .philosophy__body { display: grid; gap: var(--space-2xs); justify-items: center; }
-
-  /* ---------- Numbers: the figure large, a hairline above ----------
-     On wide screens the figures share the row between them, however many
-     are confirmed. */
-  .numbers__heading { margin-bottom: var(--space-xl); }
-  .numbers {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-xl) var(--space-m);
-  }
-  @media (min-width: 64em) { .numbers { grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr)); } }
-  .number {
-    display: grid;
-    gap: var(--space-2xs);
-    align-content: start;
-    padding-top: var(--space-m);
-    border-top: var(--stroke) solid var(--line);
-  }
-  .number__value {
-    font-family: var(--font-display);
-    font-stretch: var(--display-stretch);
-    font-weight: 600;
-    font-size: clamp(1.75rem, 1.1rem + 2.53vw, 3.1875rem);
-    line-height: 0.95;
-  }
-  .number__label { font-size: var(--text-sm); font-weight: var(--weight-strong); }
 </style>

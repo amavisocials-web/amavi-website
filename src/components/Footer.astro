@@ -1,48 +1,21 @@
 ---
 import Logo from './Logo.astro';
 import Lines from './Lines.astro';
-import ProofLink from './ProofLink.astro';
-import {
-  SOCIALS, SITE_NAME, CONTACT_PATH, CREATOR_PATH, CONTACT_EMAIL, BRAND_ENQUIRY_MAILTO,
-} from '../consts';
+import { SOCIALS, SITE_NAME, CONTACT_PATH, CREATOR_PATH, CONTACT_EMAIL } from '../consts';
 
 /**
  * The footer: black, full bleed — edge to edge and down to the bottom of the
- * page, with its padding holding the content off the edges. It opens on the
- * page's closing call to action — one route for brands, one for creators, and
- * the inbox for anything else — then the brand, the site's pages, socials, the
- * sign-off and the small print.
+ * page, with its padding holding the content off the edges.
  *
- * The call to action's copy can differ by page (About and Services set their
- * own); anything a page leaves out keeps the default below. The brands route uses
- * BRAND_ENQUIRY_MAILTO, the same pre-filled email as the "Email us" button on
- * the contact page.
+ * The same on every page, with no props and no per-page variants: the
+ * wordmark, what AMAVI is, the sign-off, then the site's pages, how to reach
+ * us and where to follow, and the small print. No dividing rules, and no
+ * closing call to action — each page ends on its own last section.
  */
-export interface FooterCta {
-  /** "\n" marks a line break. */
-  heading: string;
-  brands: { line: string; cta: string };
-  creators: { line: string; cta: string };
-}
-
-export const DEFAULT_CTA: FooterCta = {
-  heading: 'Have a goal.\nLet’s find the opportunity.',
-  brands: { line: 'You know where you want to go. We’ll help find the way there.', cta: 'Let’s talk' },
-  creators: { line: 'Want to work with great brands? Join the AMAVI creator network.', cta: 'Join the network' },
-};
-
-interface Props {
-  cta?: Partial<FooterCta>;
-}
-const cta: FooterCta = { ...DEFAULT_CTA, ...Astro.props.cta };
-
 const year = new Date().getFullYear();
 
 const pages = [
   { label: 'Home', href: '/' },
-  // TODO(client): there's no Work page yet — "Work" leads to the sector
-  // examples on Services until there is.
-  { label: 'Work', href: '/services/#sectors' },
   { label: 'Services', href: '/services/' },
   { label: 'About', href: '/about/' },
   { label: 'Creator Network', href: CREATOR_PATH },
@@ -52,27 +25,6 @@ const pages = [
 
 <footer class="site-footer" id="site-footer">
   <div class="footer-card surface-dark">
-    <section class="footer-contact" aria-labelledby="footer-contact-heading">
-      <h2 id="footer-contact-heading" class="display display--lg footer-title"><Lines text={cta.heading} /></h2>
-      <ul class="routes" role="list">
-        <li class="route">
-          <h3 class="label route__who">For brands</h3>
-          <p class="route__line">{cta.brands.line}</p>
-          <ProofLink href={BRAND_ENQUIRY_MAILTO} class="route__cta">{cta.brands.cta}</ProofLink>
-        </li>
-        <li class="route">
-          <h3 class="label route__who">For creators</h3>
-          <p class="route__line">{cta.creators.line}</p>
-          <ProofLink href={CREATOR_PATH} class="route__cta">{cta.creators.cta}</ProofLink>
-        </li>
-        <li class="route">
-          <h3 class="label route__who">General</h3>
-          <p class="route__line">Anything else.</p>
-          <a class="route__link" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-        </li>
-      </ul>
-    </section>
-
     <div class="footer-grid">
       <div class="footer-brand">
         <Logo size="lg" variant="white" />
@@ -88,6 +40,14 @@ const pages = [
       </nav>
 
       <div class="footer-col">
+        <h2 class="label footer-heading">Contact</h2>
+        <ul role="list">
+          <li><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></li>
+          <li>Ireland &amp; EU</li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
         <h2 class="label footer-heading">Follow</h2>
         <ul role="list">
           {SOCIALS.map((s) => (
@@ -101,7 +61,6 @@ const pages = [
       </div>
     </div>
 
-    <hr class="rule" />
     <div class="footer-base">
       <p class="meta">&copy; {year} {SITE_NAME}. All rights reserved.</p>
       <p class="meta"><a href="/privacy/">Privacy Policy</a></p>
@@ -117,41 +76,15 @@ const pages = [
     padding: var(--card-pad);
   }
 
-  /* ---- The call to action: three routes ---------------------------------- */
-  .footer-contact { display: grid; gap: var(--space-l); padding-bottom: var(--space-xl); }
-  .routes {
-    list-style: none;
-    display: grid;
-    gap: var(--space-l);
-  }
-  @media (min-width: 48em) {
-    .routes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-l); }
-  }
-  .route {
-    display: grid;
-    gap: var(--space-2xs);
-    align-content: start;
-    padding-top: var(--space-s);
-    border-top: var(--stroke-hair) solid var(--on-dark);
-  }
-  .route__line { font-weight: var(--weight-secondary); max-width: 34ch; }
-  .route__link {
-    justify-self: start;
-    font-weight: var(--weight-strong);
-    overflow-wrap: anywhere;
-  }
-  .route :global(.route__cta) { justify-self: start; margin-top: var(--space-2xs); }
-
-  /* ---- Brand, pages and socials ------------------------------------------ */
+  /* ---- Brand, pages, contact and socials --------------------------------- */
   .footer-grid {
     display: grid;
     gap: var(--space-xl);
-    padding-block: var(--space-xl) var(--space-l);
-    border-top: var(--stroke-hair) solid var(--on-dark);
+    padding-bottom: var(--space-l);
   }
   @media (min-width: 48em) {
     .footer-grid {
-      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
       gap: var(--space-l);
       align-items: start;
     }
@@ -162,6 +95,7 @@ const pages = [
   .footer-heading { display: block; margin-bottom: var(--space-s); }
 
   .footer-col ul { list-style: none; display: grid; gap: var(--space-2xs); }
+  .footer-col li { font-size: var(--text-sm); overflow-wrap: anywhere; }
 
   /* White links; the accent marks hover, with an underline so the state
      never rests on colour alone. */
@@ -170,7 +104,6 @@ const pages = [
     text-decoration: none;
     transition: color var(--dur) var(--ease);
   }
-  .footer-col a { font-size: var(--text-sm); }
   .footer-col a:hover,
   .footer-base a:hover {
     text-decoration: underline;

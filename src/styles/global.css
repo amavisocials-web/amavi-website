@@ -89,8 +89,9 @@
   --space-l:   2.5rem;
   --space-xl:  4rem;
   --space-2xl: 6rem;
-  /* More room than before: space now does the separating colour used to. */
-  --section-y: clamp(4rem, 2.25rem + 7.5vw, 8.5rem);
+  /* Space does the separating that colour used to — at 70% of where it
+     started, at the client's direction (28 September 2026). */
+  --section-y: clamp(2.75rem, 1.6rem + 5.25vw, 6rem);
 
   /* --- Layout ----------------------------------------------------------- */
   --container: 76rem;
@@ -225,7 +226,7 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
 .container--narrow { max-width: var(--container-narrow); }
 
 .section { padding-block: var(--section-y); }
-.section--tight { padding-block: clamp(2.5rem, 1.5rem + 4vw, 4.5rem); }
+.section--tight { padding-block: clamp(1.75rem, 1.05rem + 2.8vw, 3.15rem); }
 
 /* Where a section once separated itself with a background, it now takes a
    full-width black hairline and the extra space above. */

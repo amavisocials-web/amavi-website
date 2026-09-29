@@ -22,18 +22,14 @@ export const SITE_URL = 'https://www.amavisocials.co';
  */
 
 /**
- * The home hero headline and the About page statement. A line break ("\n")
- * sets where display type breaks; anywhere it's plain text it reads as a
- * space.
+ * The home hero's headline. A line break ("\n") sets where display type
+ * breaks; anywhere it's plain text it reads as a space.
  */
-export const TAGLINE = 'We find the people\nwho move your\nbusiness forward.';
-
-/** The line under the headline: four words, each with its own full stop. */
-export const HERO_SUBLINE = ['Creators', 'Communities', 'Opportunities'];
+export const TAGLINE = 'Content that connects';
 
 /** One sentence of positioning, under the hero and wherever AMAVI is introduced. */
 export const POSITIONING =
-  'AMAVI Socials is a creator-led marketing and partnerships agency helping brands reach new audiences through the right people, relationships and opportunities.';
+  'Creator-led marketing and partnerships. We find the people, communities and businesses who can put your brand in front of the right audience.';
 
 /**
  * The home hero's full-screen video: two separate cuts, one base path.

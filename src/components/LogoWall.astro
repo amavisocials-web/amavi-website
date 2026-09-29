@@ -41,7 +41,7 @@ const COPIES = 3;
 ---
 
 <div class:list={['logo-wall', { 'logo-wall--marquee': marquee }]}>
-  {(heading || intro) && (
+  {(eyebrow || heading || intro) && (
     <div class:list={['logo-wall__head', { container: marquee }]}>
       {eyebrow && <p class="eyebrow">{eyebrow}</p>}
       {heading && <H class="display display--md logo-wall__heading"><Lines text={heading} /></H>}

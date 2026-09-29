@@ -19,6 +19,8 @@ export interface ServiceArea {
   id: string;
   number: string;
   title: string;
+  /** One line under the title, set in italics: what this area is. */
+  summary: string;
   /** Short paragraphs under the title. */
   intro: string[];
   services: Service[];
@@ -31,6 +33,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     id: 'creator-marketing',
     number: '01',
     title: 'Creator Marketing',
+    summary: 'We find, brief and manage the creators who make sense for your brand.',
     intro: ['The right creator can give a brand something media buying can’t: trust, relevance and attention.'],
     services: [
       {
@@ -54,6 +57,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     id: 'brand-campaign-strategy',
     number: '02',
     title: 'Brand & Campaign Strategy',
+    summary: 'We turn a business objective into a campaign someone can actually run.',
     intro: ['Before we choose the platform, creator or format, we need to know what we’re trying to achieve.'],
     services: [
       { name: 'Campaign Concepts', description: 'Turning a business objective into an idea people want to engage with.' },
@@ -73,6 +77,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     id: 'content-social',
     number: '03',
     title: 'Content & Social',
+    summary: 'We make content that looks native to the feed, not to the brand guidelines.',
     intro: [
       'Good content shouldn’t look like advertising.',
       'It should look like something people actually want to watch.',
@@ -95,6 +100,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     id: 'growth-partnerships',
     number: '04',
     title: 'Growth Partnerships',
+    summary: 'We find the businesses and communities that already have your audience.',
     intro: [
       'Sometimes the fastest route to a new audience isn’t another post.',
       'It’s finding the people who already have them.',
@@ -135,6 +141,10 @@ export const SECTORS: Sector[] = [
 
 /**
  * Results, as client · objective · approach · result.
+ *
+ * Not rendered at the moment: the Results section came off /services on
+ * 28 September 2026. Kept because these are the verified figures — put the
+ * section back and it reads from here.
  *
  * Clients are described, never named, as on the home page. Figures come only
  * from AMAVI's creator-programme report, April–August 2026 (brief §5), written

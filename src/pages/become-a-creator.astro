@@ -18,10 +18,29 @@ import { CONTACT_EMAIL } from '../consts';
         brief fits.
       </p>
       <p class="meta page-head__meta">
-        Six short steps, about five minutes. Only the essentials are required. Questions?
-        Email{' '}
-        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        Six short steps, about five minutes. Only the essentials are required.
       </p>
+    </div>
+  </section>
+
+  {/* What applying actually means, before the first field. */}
+  <section class="section section--tight next" aria-labelledby="next-heading">
+    <div class="container container--narrow">
+      <h2 id="next-heading" class="display display--md">What happens next</h2>
+      <div class="next__body">
+        <p>
+          We keep your details on file and get in touch when a campaign matches your audience and
+          content. We’ll always tell you the brand, the deliverables, the timeline and whether it’s
+          gifted or paid before you commit to anything.
+        </p>
+        <p>
+          No follower minimum. We work with creators of every size — who’s watching matters more
+          than how many.
+        </p>
+        <p>
+          Questions? Email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+        </p>
+      </div>
     </div>
   </section>
 
@@ -36,5 +55,9 @@ import { CONTACT_EMAIL } from '../consts';
   .page-head { padding-bottom: var(--space-l); }
   .page-head__lead { margin-top: var(--space-m); }
   .page-head__meta { margin-top: var(--space-s); }
+
+  .next__body { display: grid; gap: var(--space-s); margin-top: var(--space-m); max-width: var(--measure); }
+  .next__body p { font-weight: var(--weight-secondary); }
+
   .form-page { padding-top: 0; }
 </style>

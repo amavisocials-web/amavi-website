@@ -2,10 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Frame from '../components/Frame.astro';
 import Lines from '../components/Lines.astro';
-import ReachMeters from '../components/ReachMeters.astro';
-import LogoWall from '../components/LogoWall.astro';
-import type { FooterCta } from '../components/Footer.astro';
-import { SERVICE_AREAS, SECTORS, CASE_STUDIES } from '../data/services';
+import { SERVICE_AREAS, SECTORS } from '../data/services';
 import { MEDIA } from '../data/media';
 import { SITE_NAME, SITE_URL } from '../consts';
 
@@ -13,54 +10,18 @@ import { SITE_NAME, SITE_URL } from '../consts';
  * What AMAVI does: the goal comes first, and the mix — creators, strategy,
  * content, partnerships — is built around it. Creator marketing leads; the
  * other areas make clear it's never the limit. The copy lives in
- * src/data/services.ts; the closing call to action is the footer's, worded
- * for this page (footerCta below).
+ * src/data/services.ts.
  *
- * Laid out like the home page: an index up top that jumps to each area, then
- * each area as text beside a portrait image, alternating sides.
+ * The four areas are an accordion: the list of numbered rows is the page's
+ * index, and each row opens in place to its full content. It is built to work
+ * without JavaScript — every panel is in the page and open until
+ * src/scripts/service-accordions.ts collapses them — and each row keeps its
+ * own id, so /services/#creator-marketing still opens that area.
  *
- * Images: one portrait (2:3) for the top of the page, one per area, and one
- * (4:5) per sector — all set in src/data/media.ts, where they are marked as
- * temporary fills. A slot left empty there shows "Add image".
+ * Images: one portrait (2:3) for the top of the page, one inside each area's
+ * panel, and one (4:5) per sector — all set in src/data/media.ts, where they
+ * are marked as temporary fills. A slot left empty there shows "Add image".
  */
-
-/** The process, in the order it runs. A real sequence, so it is numbered. */
-const stages = [
-  { title: 'Discovery', body: 'We understand the business, audience, objectives and opportunity.' },
-  { title: 'Strategy', body: 'We determine the right mix of creators, content, partnerships and channels.' },
-  { title: 'Sourcing', body: 'We find the people and opportunities that fit the strategy.' },
-  { title: 'Activation', body: 'We manage outreach, briefs, agreements, timelines and execution.' },
-  { title: 'Amplification', body: 'Where relevant, we identify opportunities to extend the reach of the work.' },
-  { title: 'Reporting', body: 'We measure what happened, what worked and what we can build on next.' },
-];
-
-/**
- * Per-account reach, by sector rather than by name, as requested.
- *
- * Source: AMAVI's cumulative creator-programme report, April–August 2026.
- * These are CLIENT ACCOUNT totals over the trailing 90 days, not figures
- * attributable to creator content alone (brief §5). The caption says so, and
- * it must stay whatever else changes here.
- */
-const accounts = [
-  { client: 'Neurodiversity assessment provider', views: '3.6M+', nonFollower: 87.7 },
-  { client: 'Home services franchise network', views: '380,054', nonFollower: 94.8 },
-  { client: 'Autism assessment and aftercare service', views: '281,664', nonFollower: 95.9 },
-  { client: 'Mental health concierge platform', views: '204K+', nonFollower: 93.4 },
-];
-
-const clientSectors = [
-  'Food & Hospitality', 'Healthcare & Wellness', 'Fashion & Beauty', 'Travel & Lifestyle', 'Tech & Startups',
-];
-
-/** The footer's call to action, worded for this page; the creators route keeps its default. */
-const footerCta: Partial<FooterCta> = {
-  heading: 'Have a goal?\nLet’s find the way there.',
-  brands: {
-    line: 'Tell us what you’re trying to achieve. We’ll figure out the people, partnerships and opportunities that can help you get there.',
-    cta: 'Let’s talk',
-  },
-};
 
 const schema = {
   '@context': 'https://schema.org',
@@ -86,65 +47,72 @@ const schema = {
   title="Services"
   description="AMAVI starts with your goal, then builds the right mix around it: creator marketing, campaign strategy, content and social, and growth partnerships."
   schema={schema}
-  footerCta={footerCta}
 >
-  {/* ================= Head: the goal first, and an index ================= */}
+  {/* ================= Head, then the four areas as an accordion ================= */}
   <section class="section svc-head">
     <div class="container svc-head__grid">
       <div class="svc-head__text">
         <p class="eyebrow">What we do</p>
         <h1 class="display display--lg"><Lines text={'Your goal\ncomes first.'} /></h1>
         <div class="svc-head__lead">
-          <p class="lead">We don’t believe every brand needs the same marketing mix.</p>
           <p class="lead">
-            We start with <strong>what you want to achieve</strong>, then find the right people,
-            partnerships, content and opportunities to get you there.
+            We don’t believe every brand needs the same marketing mix. We start with{" "}
+            <strong>what you want to achieve</strong>, then find the right people, partnerships,
+            content and opportunities to get you there.
           </p>
         </div>
         <p class="label">Creators&nbsp;· Campaigns&nbsp;· Content&nbsp;· Partnerships</p>
-        <ol class="svc-index" role="list">
-          {SERVICE_AREAS.map((area) => (
-            <li>
-              <a class="svc-index__link" href={`#${area.id}`}>
-                <span class="svc-index__number">{area.number}</span>
-                <span class="svc-index__title">{area.title}</span>
-                <svg viewBox="0 0 10 20" aria-hidden="true">
+      </div>
+      <Frame media={MEDIA.services.head} ratio="2/3" class="svc-head__media" />
+    </div>
+
+    <div class="container">
+      <ol class="areas" role="list" data-accordion>
+        {SERVICE_AREAS.map((area) => (
+          <li class="area" id={area.id} data-area data-open="true">
+            <h2 class="area__heading">
+              <button type="button" class="area__trigger" id={`${area.id}-trigger`}
+                      aria-expanded="true" aria-controls={`${area.id}-panel`} data-trigger>
+                <span class="area__index" aria-hidden="true">{area.number}</span>
+                <span class="area__name">{area.title}</span>
+                <svg class="area__chevron" viewBox="0 0 10 20" aria-hidden="true">
                   <path d="M1 1l8 9-8 9" fill="none" stroke="currentColor" stroke-width="1.25" vector-effect="non-scaling-stroke" />
                 </svg>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </div>
-      <Frame slot={MEDIA.services.head} ratio="2/3" class="svc-head__media" />
+              </button>
+            </h2>
+
+            <div class="area__panel" id={`${area.id}-panel`} role="region"
+                 aria-labelledby={`${area.id}-trigger`} data-panel>
+              <div class="area__inner">
+                <div class="area__grid">
+                  <div class="area__text">
+                    {/* The row above is the heading; here the number and title
+                        are the panel's opening, set large. */}
+                    <p class="area__number" aria-hidden="true">{area.number}</p>
+                    <p class="display display--md area__title">{area.title}</p>
+                    <p class="area__summary">{area.summary}</p>
+                    <div class="area__intro">
+                      {area.intro.map((line) => <p class="lead">{line}</p>)}
+                    </div>
+                    <ul class="area__services" role="list">
+                      {area.services.map((service) => (
+                        <li class="area__service">
+                          <h3 class="area__service-name">{service.name}</h3>
+                          <p class="area__service-desc">{service.description}</p>
+                        </li>
+                      ))}
+                    </ul>
+                    <p class="eyebrow">{area.closing}</p>
+                  </div>
+                  <Frame media={MEDIA.services.areas[area.id]} ratio="2/3" class="area__media" />
+                </div>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
     </div>
   </section>
-
-  {/* ================= The four areas ================= */}
-  {SERVICE_AREAS.map((area, i) => (
-    <section class:list={['section', 'section--ruled', 'area', { 'area--reverse': i % 2 === 1 }]}
-             id={area.id} aria-labelledby={`${area.id}-heading`}>
-      <div class="container area__grid">
-        <div class="area__text">
-          <p class="area__number" aria-hidden="true">{area.number}</p>
-          <h2 id={`${area.id}-heading`} class="display display--md area__title">{area.title}</h2>
-          <div class="area__intro">
-            {area.intro.map((line) => <p class="lead">{line}</p>)}
-          </div>
-          <ul class="area__services" role="list">
-            {area.services.map((service) => (
-              <li class="area__service">
-                <h3 class="area__service-name">{service.name}</h3>
-                <p class="area__service-desc">{service.description}</p>
-              </li>
-            ))}
-          </ul>
-          <p class="eyebrow">{area.closing}</p>
-        </div>
-        <Frame slot={MEDIA.services.areas[area.id]} ratio="2/3" class="area__media" />
-      </div>
-    </section>
-  ))}
 
   {/* ================= Sectors =================
       A sector and the kind of work there — no metrics, no client names. */}
@@ -161,136 +129,42 @@ const schema = {
       <ul class="sectors" role="list">
         {SECTORS.map((sector) => (
           <li class="sector">
-            <Frame slot={MEDIA.services.sectors[sector.name]} ratio="4/5" sizes="(min-width: 64em) 12rem, 70vw" />
+            <Frame media={MEDIA.services.sectors[sector.name]} ratio="4/5" sizes="(min-width: 64em) 12rem, 70vw" />
             <h3 class="label sector__name">{sector.name}</h3>
-            <p class="sector__work">{sector.focus.join('\u00a0· ')}</p>
+            <p class="sector__work">{sector.focus.join(' · ')}</p>
           </li>
         ))}
       </ul>
     </div>
   </section>
 
-  {/* ================= How we work, why creator-led, and results ================= */}
-  <div class="section section--ruled" id="how-we-work">
-    <div class="container">
-      <section aria-labelledby="how-heading">
-        <div class="section-head">
-          <p class="eyebrow">How we work</p>
-          <h2 id="how-heading" class="display display--md"><Lines text={'From objective\nto execution.'} /></h2>
-        </div>
-
-        <ol class="programme">
-          {stages.map((step, i) => (
-            <li class="programme__step">
-              <span class="programme__number" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-              <h3 class="display display--sm programme__title">{step.title}</h3>
-              <p class="programme__body">{step.body}</p>
-            </li>
-          ))}
-        </ol>
-
-        <p class="eyebrow programme__closing">One objective. One strategy. The right people around it.</p>
-      </section>
-
-      <section class="subsection why" aria-labelledby="why-heading">
-        <div class="why__head">
-          <p class="eyebrow">Why creator-led</p>
-          <h2 id="why-heading" class="display display--md why__heading"><Lines text={'People create\nthe connection.'} /></h2>
-        </div>
-
-        <div class="prose why__body">
-          <p>Brands don’t build relationships with algorithms. People do.</p>
-          <p>
-            Creators bring context, personality and trust to the brands they work with — helping
-            businesses enter conversations that traditional advertising can’t always create.
-          </p>
-          <p><strong>But creators are only one part of the picture.</strong></p>
-          <p>
-            We combine creator marketing with content, strategy and partnerships to build campaigns
-            around <strong>the audience — not just the platform</strong>.
-          </p>
-        </div>
-      </section>
-
-      <section class="subsection" id="results" aria-labelledby="results-heading">
-        <div class="section-head">
-          <p class="eyebrow">What it looks like in practice</p>
-          <h2 id="results-heading" class="display display--md"><Lines text={'The work should\nmove something.'} /></h2>
-        </div>
-
-        <ul class="cases" role="list">
-          {CASE_STUDIES.map((study) => (
-            <li class="case">
-              <div class="case__client">
-                <p class="label">Client</p>
-                <h3 class="case__name">{study.client}</h3>
-              </div>
-              <dl class="case__facts">
-                <div class="case__fact">
-                  <dt class="label">Objective</dt>
-                  <dd>{study.objective}</dd>
-                </div>
-                <div class="case__fact">
-                  <dt class="label">Approach</dt>
-                  <dd>{study.approach}</dd>
-                </div>
-                <div class="case__fact case__fact--result">
-                  <dt class="label">Result</dt>
-                  <dd>{study.result}</dd>
-                </div>
-              </dl>
-            </li>
-          ))}
-        </ul>
-        <p class="meta cases__source">
-          Partnership figures from AMAVI’s creator-programme report, April–August 2026. Client names
-          withheld.
-        </p>
-
-        <div class="reach-block">
-          <h3 class="eyebrow">Reach on client accounts</h3>
-          <p class="lead">
-            Four client accounts during their partnership period. On every one, most of the
-            accounts reached weren’t already following the brand.
-          </p>
-          <ReachMeters
-            level={4}
-            rows={accounts}
-            caption="Client account totals over the trailing 90 days, covering the period each partnership ran. These are account-level figures and are not attributable to creator content alone — they are not presented as campaign results. Client names withheld."
-          />
-        </div>
-      </section>
-    </div>
-  </div>
-
-  {/* ================= Who we work with =================
-      Types of client, not names; the logos below are the cleared roster. The
-      brief's rule that Fettle is never a "therapy platform" still applies to
-      anything added here. */}
-  <section class="section section--ruled clients" aria-labelledby="clients-heading">
-    <div class="container">
-      <div class="clients__copy">
-        <div class="clients__head">
-          <p class="eyebrow">Who we work with</p>
-          <h2 id="clients-heading" class="display display--md"><Lines text={'Brands with\nsomething to say.'} /></h2>
-        </div>
-        <div class="prose clients__body">
-          <p>
-            We work with ambitious brands that want to reach new audiences, build relevance and
-            create relationships that last beyond a single campaign.
-          </p>
-          <p>
-            From emerging businesses to established brands, we’re most useful when there’s a clear
-            objective — and room to think differently about how to reach it.
-          </p>
-          <p class="label clients__sectors">{clientSectors.join('\u00a0· ')}</p>
-        </div>
+  {/* ================= Why creator-led ================= */}
+  <section class="section section--ruled why" aria-labelledby="why-heading">
+    <div class="container why__grid">
+      <div class="why__head">
+        <p class="eyebrow">Why creator-led</p>
+        <h2 id="why-heading" class="display display--md why__heading"><Lines text={'People create\nthe connection.'} /></h2>
       </div>
 
-      <LogoWall level={3} />
+      <div class="prose why__body">
+        <p>Brands don’t build relationships with algorithms. People do.</p>
+        <p>
+          Creators bring context, personality and trust to the brands they work with — helping
+          businesses enter conversations that traditional advertising can’t always create.
+        </p>
+        <p><strong>But creators are only one part of the picture.</strong></p>
+        <p>
+          We combine creator marketing with content, strategy and partnerships to build campaigns
+          around <strong>the audience — not just the platform</strong>.
+        </p>
+      </div>
     </div>
   </section>
 </Base>
+
+<script>
+  import '../scripts/service-accordions';
+</script>
 
 <style>
   /* ---------- Head ---------- */
@@ -304,38 +178,54 @@ const schema = {
     .svc-head :global(.svc-head__media) { width: min(100%, 22rem); justify-self: end; }
   }
 
-  /* The index: each area a row, a hairline under each, a chevron that steps on hover. */
-  .svc-index { list-style: none; margin-top: var(--space-m); border-top: var(--stroke) solid var(--line); }
-  .svc-index__link {
+  /* ---------- The four areas: an index that opens in place ----------
+     Each row keeps the index's old look — number, title, chevron, a hairline
+     under each — and the chevron turns down when its panel is open. */
+  .areas { list-style: none; margin-top: var(--space-2xl); border-top: var(--stroke) solid var(--line); }
+  .area { border-bottom: var(--stroke) solid var(--line); scroll-margin-top: var(--header-h); }
+
+  .area__trigger {
     display: grid;
     grid-template-columns: 2.5rem minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--space-s);
-    padding-block: var(--space-s);
-    border-bottom: var(--stroke) solid var(--line);
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--space-s) 0;
+    text-align: left;
     color: var(--ink);
-    text-decoration: none;
+    cursor: pointer;
     transition: color var(--dur) var(--ease);
   }
-  .svc-index__number { font-size: var(--text-sm); font-weight: var(--weight-strong); color: var(--accent); }
-  .svc-index__title {
+  .area__index { font-size: var(--text-sm); font-weight: var(--weight-strong); color: var(--accent); }
+  .area__name {
     font-size: 0.6875rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-  .svc-index__link svg { width: 0.7rem; height: 1.4rem; transition: transform var(--dur) var(--ease); }
-  .svc-index__link:hover { color: var(--accent); }
-  .svc-index__link:hover svg { transform: translateX(0.3rem); }
+  .area__chevron { width: 0.7rem; height: 1.4rem; transition: transform var(--dur) var(--ease); }
+  .area__trigger:hover { color: var(--accent); }
+  .area__trigger:hover .area__chevron { transform: translateX(0.3rem); }
+  .area__trigger[aria-expanded='true'] .area__chevron,
+  .area__trigger[aria-expanded='true']:hover .area__chevron { transform: rotate(90deg); }
 
-  /* ---------- Areas: text beside a portrait image, alternating ---------- */
-  .area__grid { display: grid; gap: var(--space-xl); }
+  /* The panel opens on its own height: 0fr to 1fr animates, and the inner
+     box clips what doesn't fit yet. Until the script marks the list ready,
+     nothing collapses — so a page without JavaScript shows all four. */
+  .area__panel { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--dur) var(--ease); }
+  .area__inner { min-height: 0; overflow: hidden; }
+  [data-accordion='ready'] .area[data-open='false'] .area__panel { grid-template-rows: 0fr; }
+  @media (prefers-reduced-motion: reduce) {
+    .area__panel { transition: none; }
+  }
+
+  /* ---------- Inside a panel: text beside a portrait image ---------- */
+  .area__grid { display: grid; gap: var(--space-xl); padding-bottom: var(--space-xl); }
   .area :global(.area__media) { width: min(100%, 16rem); }
   @media (min-width: 48em) {
     .area__grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-2xl); align-items: start; }
     .area :global(.area__media) { width: min(100%, 22rem); justify-self: end; }
-    .area--reverse .area__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
-    .area--reverse :global(.area__media) { order: -1; justify-self: start; }
   }
 
   .area__text { display: grid; gap: var(--space-m); align-content: start; }
@@ -348,6 +238,8 @@ const schema = {
     line-height: 0.85;
     color: var(--accent);
   }
+  /* One line on what the area is, before the case for it. */
+  .area__summary { font-style: italic; font-weight: var(--weight-secondary); max-width: var(--measure); }
   .area__intro { display: grid; gap: var(--space-2xs); }
   .area__services { list-style: none; margin-top: var(--space-s); border-top: var(--stroke) solid var(--line); }
   .area__service {
@@ -396,80 +288,13 @@ const schema = {
   .sector__name { margin-top: var(--space-s); }
   .sector__work { font-size: var(--text-base); font-weight: 700; line-height: 1.35; }
 
-  /* ---------- Process: a numbered grid, not a stack of cards ---------- */
-  .programme {
-    list-style: none;
-    display: grid;
-    gap: var(--space-l) var(--space-xl);
-  }
-  @media (min-width: 40em) { .programme { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 64em) { .programme { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
-  .programme__step {
-    display: grid;
-    gap: var(--space-xs);
-    align-content: start;
-    padding-top: var(--space-m);
-    border-top: var(--stroke) solid var(--line);
-  }
-  .programme__number {
-    font-size: var(--text-xs);
-    font-weight: var(--weight-strong);
-    letter-spacing: var(--tracking-caps);
-    font-variant-numeric: tabular-nums;
-  }
-  .programme__body { font-weight: var(--weight-secondary); max-width: 36ch; }
-  .programme__closing { margin-top: var(--space-xl); }
-
-  /* Each part after the process opens on a hairline, with a section's worth
-     of room above it. */
-  .subsection {
-    margin-top: var(--section-y);
-    padding-top: var(--space-xl);
-    border-top: var(--stroke-hair) solid var(--line);
-  }
-
   /* ---------- Why creator-led ---------- */
-  .why { display: grid; gap: var(--space-l); }
+  .why__grid { display: grid; gap: var(--space-l); }
   @media (min-width: 64em) {
-    .why { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
+    .why__grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
   }
   .why__head { display: grid; gap: var(--space-m); align-content: start; }
   .why__heading { max-width: 16ch; }
   /* Lead-sized and light; the two claims that matter step up to strong. */
   .why__body { font-size: var(--text-lead); font-weight: var(--weight-secondary); line-height: 1.65; }
-
-  /* ---------- Results: client, objective, approach, result — ruled rows ---------- */
-  .cases { list-style: none; border-top: var(--stroke) solid var(--line); }
-  .case {
-    display: grid;
-    gap: var(--space-s);
-    padding-block: var(--space-m);
-    border-bottom: var(--stroke-hair) solid var(--line);
-  }
-  @media (min-width: 64em) {
-    .case { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-l); }
-  }
-  .case__client { display: grid; gap: var(--space-3xs); align-content: start; }
-  .case__name { font-size: var(--text-base); font-weight: 700; line-height: 1.35; }
-  .case__facts { display: grid; gap: var(--space-s); }
-  .case__fact { display: grid; gap: var(--space-3xs); }
-  @media (min-width: 40em) {
-    .case__fact { grid-template-columns: 7rem minmax(0, 1fr); gap: var(--space-s); align-items: baseline; }
-  }
-  .case__fact dd { font-weight: var(--weight-secondary); }
-  .case__fact--result dd { font-weight: 700; }
-  .cases__source { margin-top: var(--space-m); }
-
-  .reach-block { display: grid; gap: var(--space-s); margin-top: var(--space-xl); }
-  .reach-block .lead { margin-bottom: var(--space-m); }
-
-  /* ---------- Who we work with ---------- */
-  .clients__copy { display: grid; gap: var(--space-m); margin-bottom: var(--space-l); }
-  @media (min-width: 64em) {
-    .clients__copy { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-xl); align-items: start; }
-  }
-  .clients__head { display: grid; gap: var(--space-m); align-content: start; }
-  .clients__body { font-weight: var(--weight-secondary); }
-  .prose .clients__sectors { margin-top: var(--space-m); }
 </style>

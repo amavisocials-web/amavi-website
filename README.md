@@ -96,10 +96,10 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 
 | Path | What it is |
 |---|---|
-| `/` | Full-screen video hero with split entry points for brands and creators; "Creators are one part of the equation"; stats over looping video tiles; how we work; partners marquee; philosophy line |
-| `/about` | A point of view more than an introduction: who AMAVI is, what it believes, the approach (four services), why AMAVI, one example beyond creators, the philosophy, AMAVI by the numbers |
-| `/services` | What AMAVI does, goal first: four areas and their services, six sectors, how we work (six stages), why creator-led, results (client · objective · approach · result), who AMAVI works with |
-| `/become-a-creator` | The creator application: six steps, to Google Sheets and Netlify Forms |
+| `/` | Full-screen video hero ("Content that connects") with both buttons; the "Trusted by" logo marquee; what AMAVI is, then the stats over looping video tiles; "Creators are one part of the equation"; how we work |
+| `/about` | Who AMAVI is: the intro, the approach (four services), why AMAVI over a city plan in black, the network, who we are, the philosophy |
+| `/services` | What AMAVI does, goal first: the four areas as an accordion, six sectors, why creator-led |
+| `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Get in Touch: brands to email, creators to the application |
 | `/privacy` | Privacy policy |
 
@@ -119,9 +119,10 @@ src/
     amavi-socials-logo.png   The supplied logo — favicon and share image only
     logos/                   Client logos, solid black on transparent
   layouts/Base.astro     <head>, header, footer — every page uses this
+  data/countries.ts      Country codes for the application's country select
   components/            Nav (header and menu), Footer, Hero, Feature,
-                         StatTiles, LoopVideo, Placeholder, ProofLink, LogoWall,
-                         ContactPaths, the creator form, Logo, Fonts
+                         StatTiles, LoopVideo, Placeholder, ProofLink,
+                         LogoWall, ContactPaths, the creator form, Logo, Fonts
   scripts/loop-videos.ts   Lazy, visible-only playback for every video
   scripts/creator-form.ts  The application's steps, validation and submission
   pages/                 One file per route
@@ -156,14 +157,18 @@ and highlights, and a black footer. Six colours, defined once in
 | `--surface-dark` | `#000000` | The footer, and the flat overlay under text on video |
 | `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on black and on video |
 
-**The exceptions to white** are the footer (full bleed, edge to edge) and text set over
-video — the hero, once it has footage, and the stat tiles — which sits on a
-flat black overlay. There are no greys, tints, gradients or shadows beyond
-those two overlays.
+**The exceptions to white** are the footer (full bleed, edge to edge), the
+"Why AMAVI" band on /about — white on black, over a city plan drawn in
+hairlines — and text set over video, which sits on a flat black overlay (the
+hero, once it has footage, and the stat tiles). There are no greys, tints,
+gradients or shadows beyond those overlays and the drawing's own line
+opacities.
 
 **Separation without colour.** Depth comes from line weight, type scale and
 space. Where a section used to sit on a tint, it now takes `.section--ruled`:
-a full-width black hairline, and more room above and below (`--section-y`).
+a full-width black hairline, and room above and below (`--section-y`, set at
+70% of its original value on 28 September 2026, with `.section--tight` cut to
+match).
 
 | Token | Value | Use |
 |---|---|---|
@@ -271,12 +276,15 @@ real face may set wider; the display sizes are the `--display-*` tokens.
 `/become-a-creator` is a six-step form in a single card, one step on screen at
 a time:
 
-1. **About you** — name, email, city, country
-2. **Your channels** — Instagram, TikTok, YouTube, X, LinkedIn, blog, other
-3. **Your audience** — follower range, engagement rate, audience insights
+1. **About you** — name, email, country (a select of every country, each with
+   its flag — `src/data/countries.ts`)
+2. **Your channels** — Instagram, TikTok, YouTube, other
+3. **Your audience** — follower range (`TODO(client)`: tiers to be supplied),
+   engagement rate, audience insights
 4. **Your content** — niches, content formats
-5. **Rates** — collaboration preference, rates per format, currency, rate
-   notes, past collaborations, media kit link
+5. **Rates** — collaboration preference, then (only for Paid or Both) rates
+   per format and currency, plus rate notes, past collaborations, media kit
+   link
 6. **Review & submit** — every answer to check (each group has an Edit link),
    anything else, and the consent checkbox
 
@@ -295,9 +303,15 @@ adapted to a checkbox — word for word; keep it that way.
 - **Phone first:** the card runs edge to edge, every input is 16px (so iOS
   never zooms), chips are tap-sized, and Back/Next stay pinned to the bottom
   of the screen on long steps.
-- **Handles become links.** "@jane" in the Instagram field is sent as
-  `https://www.instagram.com/jane`; a bare domain gets `https://`. Anything
-  that isn't a link is flagged as typed, never rewritten.
+- **Handles are stored bare.** Instagram and TikTok carry a fixed "@" inside
+  the field, so a typed one is stripped as it's typed and a pasted profile
+  link is cut back to the handle when the field is left. The sheet gets
+  `jane`, not `@jane` or a URL. The media kit link is still normalised to a
+  full URL, and anything that isn't a link is flagged as typed, never
+  rewritten.
+- **Rates follow the answer above them.** Gifted hides them and empties
+  anything typed, so a hidden field can never block the step or reach the
+  sheet; Paid and Both show them and ask for at least one.
 - **Without JavaScript** it is one long form that posts natively to Netlify
   Forms, with the browser's own validation. The same happens if the script
   fails to load: after six seconds the long form comes back.
@@ -317,14 +331,19 @@ Each application is sent to two places at once:
 The row is written before the email is sent, each in its own try/catch, so a
 bounced or rate-limited notification can never cost you the row.
 
-The success message appears **only after a confirmed response**: the Apps
-Script replied `{"success":true}`, or Netlify accepted the submission. If
-neither confirms — offline, a 20-second timeout, a server error — the error
-state shows instead, everything typed stays in place to retry, and the
-applicant is asked to email their application to **partnerships@amavisocials.com**
-(`APPLICATIONS_EMAIL` in `src/consts.ts`). If only one of the two fails, the
-applicant still sees success (the application is safe in the other) and the
-failure is logged to the browser console for you to diagnose.
+**Only the Apps Script's reply decides what the applicant sees.** The button
+reads "Send application", then "Sending…" (disabled, so it can't be sent
+twice), then "Sent" — and the confirmation appears only after
+`{"success":true}`. A refusal, a non-2xx, a dropped connection or the
+20-second timeout all show the error state instead, with everything typed
+still in place:
+
+> We couldn't submit your application. Please try again in a moment — or email
+> your details to partnerships@amavisocials.com.
+
+(`APPLICATIONS_EMAIL` in `src/consts.ts`.) The backup copy to Netlify is sent
+alongside and its outcome is only logged — otherwise a page served from
+anywhere but Netlify would "confirm" an application that never arrived.
 
 ## Creator applications → Google Sheets
 
@@ -410,24 +429,25 @@ are a static row.
   beneath. Without JavaScript the menu button is a link to the footer's list
   of pages. Over hero footage the header is see-through with white contents
   until the hero has scrolled past.
-- **Hero** (`Hero.astro`). Full screen. Headline, the four-word subline with
-  accent full stops, one line of positioning, then two large entry points:
-  **For Brands** → Get in Touch, **For Creators** → Become a Creator.
+- **Hero** (`Hero.astro`). Full screen: headline, one line of positioning and
+  the two buttons, over video. It can also take a subline of words with accent
+  full stops, a line of services under the buttons, and large entry points
+  beneath (**For Brands**, **For Creators**) — the home page uses none of the
+  three, so the hero is headline, sentence, buttons.
 - **Feature blocks** (`Feature.astro`). One text column beside one portrait
   piece of media, alternating sides. Key phrases in the body copy are bold;
   each block ends on a **proof line** (`ProofLink.astro`) — a short claim in
   capitals with a chevron — linking to Services.
 - **Stat tiles** (`StatTiles.astro`). The four figures, each over a looping
   creator video: four across on a wide screen, two by two on a phone.
-- **Partners marquee** (`LogoWall.astro`), then the philosophy line.
+- **Partners marquee** (`LogoWall.astro`). On the home page it sits directly
+  under the hero, logos only, with no heading of its own.
 - **Footer** (`Footer.astro`). Full-bleed black: edge to edge and down to the
-  bottom of the page, its own padding holding the content off the edges. It opens
-  on the page's closing call to action, with one route each for brands (the
-  pre-filled brand enquiry email), creators (the application) and anything
-  else (the inbox); then the pages, socials, the sign-off and the small print.
-  The call to action's wording is a default on every page except About and
-  Services, which set their own through `footerCta` on `Base.astro` — anything
-  a page leaves out keeps the default.
+  bottom of the page, its own padding holding the content off the edges. The
+  same on every page — no props, no per-page variants: the wordmark, what
+  AMAVI is, the sign-off, then three columns (**Site**, **Contact**,
+  **Follow**) and the small print. No dividing rules, and no closing call to
+  action: each page ends on its own last section.
 
 ### Placeholders
 
@@ -442,20 +462,37 @@ shows "Add image" until a picture arrives.
 
 The copy lives in **`src/data/services.ts`**:
 
-- **Four areas**, each a short intro, a list of services (a name and one line
-  on what the client gets) and a closing line.
+- **Four areas**, each a one-line summary (set in italics, under the title), a
+  short intro, a list of services (a name and one line on what the client
+  gets) and a closing line.
 - **Six sectors**, each a sector and the kind of work there. No metrics and no
   client names.
-- **Results**, as client · objective · approach · result. They use only the
-  verified figures in brief §5, written out as counts rather than
-  percentages. Clients are described, never named.
+- **Results** (`CASE_STUDIES`) are still there but **not rendered**: the
+  Results section came off the page on 28 September 2026. They are the
+  verified figures from brief §5, ready if the section returns.
 
-Add, reorder or edit entries there and the page lays itself out, including the
-index at the top that jumps to each area (`/services/#creator-marketing` and so
-on). Sector images are keyed by sector name in `src/data/media.ts`, so a
-renamed sector needs its key renamed there too. The six stages of "How we
-work" and the "Why creator-led" text are in `src/pages/services.astro`
-itself.
+Add, reorder or edit entries and the page lays itself out. Sector images are
+keyed by sector name in `src/data/media.ts`, so a renamed sector needs its key
+renamed there too. The "Why creator-led" copy is in
+`src/pages/services.astro` itself.
+
+### The areas are an accordion
+
+The numbered list is both the page's index and its content: a row opens in
+place to the area's number, title, intro, services and closing line, with its
+image beside them. One at a time; opening one closes the rest.
+
+- Each trigger is a `<button>` inside its `<h2>`, with `aria-expanded` and
+  `aria-controls`; each panel is a `role="region"` labelled by its trigger.
+  Enter and Space toggle, Tab moves between the four triggers.
+- A closed panel is `inert`, so nothing inside it is focusable or read out.
+- It opens by animating `grid-template-rows` from `0fr` to `1fr`, and holds
+  still under `prefers-reduced-motion`.
+- **Without JavaScript every panel stays open.** The collapsing CSS only
+  applies once `src/scripts/service-accordions.ts` marks the list ready, so a
+  failed script leaves the page readable rather than sealed shut.
+- Each row keeps its own id, so `/services/#creator-marketing` still opens
+  that area and scrolls to it — on load and on a later hash change.
 
 ## Visual content
 
@@ -592,20 +629,15 @@ The ones that matter most:
   them from clips with stock-library names. See `src/data/media.ts`.
 - **Creator handles and consent** for the creator videos, in
   `src/data/tiles.ts`.
-- **About: client and industry counts.** "AMAVI by the numbers" shows only
-  600+ creators and 125+ live posts until the current counts are confirmed.
-  Set them in `src/pages/about.astro` and they appear. For reference, the logo
-  wall shows 9 cleared partners.
-- **"Restaurant" or "seafood bar".** Brief §2 says The Humble Fishmonger is a
-  seafood bar, never a restaurant. The About page's example uses the supplied
-  copy ("One restaurant. A whole new audience."), while Services calls it a
-  seafood bar. If the example is the Fishmonger, About should say seafood bar
-  too.
 - **The home page's 92%.** The brief lists "92% net-new audience reach" but
-  not how it is measured, so Services doesn't repeat it. Its results are
-  written out as counts instead. Confirm the basis, or drop the figure.
-- **A measured outcome for the seafood bar** result on Services, if there is
-  one, and **an image for Tech & Startups**.
+  not how it is measured, and the home stats are the only place it appears.
+  Confirm what it measures, or drop the figure.
+- **The home page's proof lines.** "49 partnerships delivered against a target
+  of 40" and "See how we work" used to link to sections on Services that have
+  since been removed; both now go to the page itself. Marked `TODO(client)` in
+  `src/pages/index.astro`.
+- **An image for Tech & Startups**, the one sector card still showing
+  "Add image".
 - **TikTok link** for the footer (`SOCIALS` in `src/consts.ts`).
 - **A Work page.** The footer's "Work" leads to the sectors on Services until
   there is one.

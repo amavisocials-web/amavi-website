@@ -1,6 +1,7 @@
 import type { ImageMetadata } from 'astro';
 
 import cafeLaptop from '../assets/media/services-head.jpg';
+import homeCreators from '../assets/media/home-creators.jpg';
 import areaCreatorMarketing from '../assets/media/area-creator-marketing.jpg';
 import areaBrandStrategy from '../assets/media/area-brand-strategy.jpg';
 import areaContentSocial from '../assets/media/area-content-social.jpg';
@@ -43,8 +44,16 @@ const cafe: ImageSlot = { image: cafeLaptop, alt: 'A laptop showing the AMAVI So
 
 export const MEDIA = {
   home: {
-    /** "Creators are one part of the equation." 2:3. From 16521739. */
-    creators: { src: '/media/features/creators' } as VideoSlot,
+    /**
+     * "Creators are one part of the equation." 2:3. AMAVI's own: campaign work
+     * for Le Olive and ADHD Now on the board (supplied 29 September 2026,
+     * cropped past the Instagram overlay it came with). It replaced the
+     * creators loop, which is still in public/media/features/ if wanted back.
+     */
+    creators: {
+      image: homeCreators,
+      alt: 'Someone looking at a board of AMAVI campaign work for Le Olive and ADHD Now',
+    } as ImageSlot,
     /** "How we work." 2:3. From 15636407, first 12 seconds. */
     howWeWork: { src: '/media/features/studio' } as VideoSlot,
   },
@@ -70,7 +79,10 @@ export const MEDIA = {
       'Lifestyle & Travel': { image: seaCliffs, alt: 'Sea cliffs on the Irish coast' },
     } as Record<string, ImageSlot | undefined>,
   },
-  /** Four portraits, 2:3. */
+  /**
+   * Four portraits, 2:3. Not rendered at the moment: the row of cards came off
+   * /about on 29 September 2026. Kept so putting it back is one line.
+   */
   about: [
     cafe,
     { image: about2, alt: 'A woman closing a laptop in a café' },

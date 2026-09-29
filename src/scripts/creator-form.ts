@@ -16,10 +16,15 @@
  * Google Apps Script web app in data-sheets-endpoint, which appends the row to
  * the creators database and emails AMAVI a copy
  * (scripts/google-sheets-handler.gs), and, at the same time, to Netlify Forms,
- * which keeps the backup copy. Success shows only once one of them has
- * confirmed it has the application: {"success":true} from the script, or a 2xx
- * from Netlify. Otherwise the error state shows, everything typed stays in
- * place, and the applicant is given an address to send it to instead.
+ * which keeps the backup copy.
+ *
+ * Only the endpoint's reply decides what the applicant sees: "Application
+ * received" appears after {"success":true} and nothing else. A refusal, a
+ * non-2xx, a dropped connection or the 20-second timeout all show the error
+ * state instead, with everything typed still in place. The backup copy is
+ * attempted either way and its outcome is logged, never shown — a page served
+ * from anywhere but Netlify would otherwise "confirm" an application that
+ * never reached AMAVI.
  */
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
@@ -59,6 +64,19 @@ function toLink(raw: string, base?: string): string {
   if (!value) return '';
   if (base && (value.startsWith('@') || !/[./]/.test(value))) return base + value.replace(/^@/, '');
   return /^https?:\/\//i.test(value) ? value : `https://${value.replace(/^\/+/, '')}`;
+}
+
+/**
+ * A handle, without the "@" and without the profile URL someone pasted:
+ * "@name", "instagram.com/name" and "https://www.tiktok.com/@name" all become
+ * "name". The field shows its own "@", so one typed here would double it.
+ */
+function toHandle(raw: string): string {
+  let value = raw.trim();
+  if (/^https?:\/\//i.test(value) || /^[\w-]+(\.[\w-]+)+\//.test(value)) {
+    value = (value.split(/[?#]/)[0].replace(/\/+$/, '').split('/').pop() ?? '').trim();
+  }
+  return value.replace(/^@+/, '').trim();
 }
 
 function isLink(value: string): boolean {
@@ -132,10 +150,23 @@ function validate(scope: HTMLElement): HTMLElement[] {
   const channelSet = scope.querySelector<HTMLElement>('[data-channels]');
   if (channelSet) {
     clearError(channelSet);
-    const channelLinks = links.filter((l) => channelSet.contains(l));
-    if (!channelLinks.some((l) => l.value.trim()) && channelLinks[0]) {
+    const fields = [...channelSet.querySelectorAll<HTMLInputElement>('input[name]')];
+    if (!fields.some((field) => field.value.trim()) && fields[0]) {
       setError(channelSet, 'Add at least one channel, so brands can see your work.');
-      problems.push(channelLinks[0]);
+      problems.push(fields[0]);
+    }
+  }
+
+  // Rates: asked for only once the answer is Paid or Both, which is also the
+  // only time they're on screen.
+  const rateGroup = scope.querySelector<HTMLElement>('[data-rate-group]');
+  const ratesShown = rateGroup && !rateGroup.closest('[data-rates]')?.hidden;
+  if (rateGroup && ratesShown) {
+    clearError(rateGroup);
+    const rates = [...rateGroup.querySelectorAll<HTMLInputElement>('[data-rate]')];
+    if (!rates.some((rate) => rate.value.trim()) && rates[0]) {
+      setError(rateGroup, 'Add at least one rate, or choose Gifted above.');
+      problems.push(rates[0]);
     }
   }
 
@@ -241,14 +272,47 @@ function enhance(form: HTMLFormElement) {
   const next = form.querySelector<HTMLButtonElement>('[data-next]');
   const hint = form.querySelector<HTMLElement>('[data-form-hint]');
   const failBox = form.querySelector<HTMLElement>('[data-form-error]');
-  const failReason = form.querySelector<HTMLElement>('[data-form-error-reason]');
   const success = document.querySelector<HTMLElement>('[data-form-success]');
   const links = [...form.querySelectorAll<HTMLInputElement>('[data-link]')];
+  const handles = [...form.querySelectorAll<HTMLInputElement>('[data-handle]')];
+  const rates = form.querySelector<HTMLElement>('[data-rates]');
+  const rateInputs = [...form.querySelectorAll<HTMLInputElement>('[data-rate]')];
+  const preference = [...form.querySelectorAll<HTMLInputElement>('input[name="collaboration_preference"]')];
   const endpoint = form.dataset.sheetsEndpoint;
   const last = steps.length - 1;
 
   let current = 0;
   let sending = false;
+
+  // A typed "@" goes as it's typed; a pasted profile link is cut back to the
+  // handle when the field is left, where rewriting mid-word would fight the
+  // person typing.
+  for (const input of handles) {
+    input.addEventListener('input', () => {
+      if (input.value.startsWith('@')) input.value = input.value.replace(/^@+/, '');
+    });
+    input.addEventListener('blur', () => {
+      const handle = toHandle(input.value);
+      if (handle !== input.value) input.value = handle;
+    });
+  }
+
+  /**
+   * Rates belong to Paid and Both. On Gifted they leave the step altogether,
+   * and anything typed goes with them: a hidden field must never decide
+   * whether the step passes, or turn up in the application.
+   */
+  const syncRates = () => {
+    if (!rates) return;
+    const charging = preference.some((option) => option.checked && option.value !== 'Gifted');
+    rates.hidden = !charging;
+    if (charging) return;
+    rateInputs.forEach((input) => { input.value = ''; });
+    const group = form.querySelector<HTMLElement>('[data-rate-group]');
+    if (group) clearError(group);
+  };
+  preference.forEach((option) => option.addEventListener('change', syncRates));
+  syncRates();
 
   // Show the link that will actually be sent as soon as the field is left —
   // but only when it is one. Anything else stays exactly as typed, to be
@@ -400,7 +464,6 @@ function enhance(form: HTMLFormElement) {
 
   async function send() {
     sending = true;
-    const label = next?.textContent ?? '';
     if (next) {
       next.disabled = true;
       setLabel('Sending…');
@@ -412,38 +475,40 @@ function enhance(form: HTMLFormElement) {
       body.append(key, typeof value === 'string' ? value : value.name);
     }
 
-    const destinations = [
-      { name: 'Google Sheets', send: endpoint ? toSheets(endpoint, body) : Promise.reject(new Error('PUBLIC_SHEETS_ENDPOINT not set')) },
-      { name: 'Netlify Forms', send: toNetlify(form.getAttribute('action') || '/', body) },
-    ];
-    const results = await Promise.allSettled(destinations.map((d) => d.send));
+    // The backup copy is sent alongside and never decides the outcome.
+    const backup = toNetlify(form.getAttribute('action') || '/', body).catch((reason) => {
+      console.error('[amavi] backup copy not sent to Netlify Forms', reason);
+    });
 
-    const failures = results.flatMap((r, i) => (r.status === 'rejected' ? [[destinations[i].name, r.reason] as const] : []));
-    // Logged, not shown: one destination failing while the other has the
-    // application is something for AMAVI to fix, not for the applicant.
-    failures.forEach(([name, reason]) => console.error(`[amavi] creator application not sent to ${name}`, reason));
-
-    if (failures.length < results.length) {
-      form.hidden = true;
-      form.reset();
-      if (success) {
-        success.hidden = false;
-        reveal(success);
+    try {
+      if (!endpoint) throw new Error('PUBLIC_SHEETS_ENDPOINT is not set, so there is nowhere to send this.');
+      await toSheets(endpoint, body);
+    } catch (reason) {
+      console.error(`[amavi] creator application not sent. ${reasonFor(reason)}`, reason);
+      if (failBox) {
+        failBox.hidden = false;
+        reveal(failBox);
       }
+      sending = false;
+      if (next) {
+        next.disabled = false;
+        setLabel('Send application');
+      }
+      if (back) back.disabled = false;
       return;
+    } finally {
+      void backup;
     }
 
-    if (failReason) failReason.textContent = reasonFor(failures[failures.length - 1]?.[1]);
-    if (failBox) {
-      failBox.hidden = false;
-      reveal(failBox);
+    // Confirmed by the endpoint, and only then.
+    setLabel('Sent');
+    await new Promise((resolve) => window.setTimeout(resolve, 450));
+    form.hidden = true;
+    form.reset();
+    if (success) {
+      success.hidden = false;
+      reveal(success);
     }
-    sending = false;
-    if (next) {
-      next.disabled = false;
-      setLabel(label);
-    }
-    if (back) back.disabled = false;
   }
 }
 

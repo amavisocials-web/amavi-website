@@ -16,6 +16,7 @@
  */
 import FormStep from './FormStep.astro';
 import { APPLICATIONS_EMAIL } from '../consts';
+import { COUNTRIES } from '../data/countries';
 
 const FORM_NAME = 'creator-application';
 
@@ -31,6 +32,8 @@ if (!sheetsEndpoint) {
   throw new Error(`PUBLIC_SHEETS_ENDPOINT should be the Apps Script web app URL, https://script.google.com/…/exec — got "${sheetsEndpoint}".`);
 }
 
+/* TODO(client): the tiers are still to be supplied. These are the live form's
+   bands, left in place so the step works until the new ones arrive. */
 const followerBands = [
   'Nano — under 5K', 'Micro — 5K to 15K', 'Mid — 15K to 50K', 'Macro — 50K to 150K', 'Major — 150K+',
 ];
@@ -53,15 +56,16 @@ const rates = [
 ];
 const currencies = ['EUR (€)', 'GBP (£)', 'USD ($)', 'Other'];
 
-/** `base` turns a bare @handle into a link for that platform. */
+/**
+ * `handle` fields carry a fixed "@" inside the input and store the handle
+ * without it (src/scripts/creator-form.ts strips one if it's typed or pasted).
+ * "Other" is free text: the platform and the handle, whatever they are.
+ */
 const channels = [
-  { name: 'instagram', label: 'Instagram', base: 'https://www.instagram.com/', ph: '@yourname or link' },
-  { name: 'tiktok', label: 'TikTok', base: 'https://www.tiktok.com/@', ph: '@yourname or link' },
-  { name: 'youtube', label: 'YouTube', base: 'https://www.youtube.com/@', ph: '@yourchannel or link' },
-  { name: 'x', label: 'X', base: 'https://x.com/', ph: '@yourname or link' },
-  { name: 'linkedin', label: 'LinkedIn', base: 'https://www.linkedin.com/in/', ph: 'Profile link' },
-  { name: 'blog', label: 'Blog or website', base: '', ph: 'yourblog.com' },
-  { name: 'other_link', label: 'Other', base: '', ph: 'Any other platform' },
+  { name: 'instagram', label: 'Instagram', handle: true, ph: 'yourname' },
+  { name: 'tiktok', label: 'TikTok', handle: true, ph: 'yourname' },
+  { name: 'youtube', label: 'YouTube channel', handle: false, ph: '@yourchannel, or a link' },
+  { name: 'other_link', label: 'Other', handle: false, ph: 'Platform and handle' },
 ];
 
 const STEPS = [
@@ -133,21 +137,19 @@ const total = STEPS.length;
             <p class="field__error" id="cf-email-error" aria-live="polite"></p>
           </div>
 
-          <div class="field-grid field-grid--2">
-            <div class="field">
-              <label class="field__label" for="cf-city">City</label>
-              <input class="field__control" id="cf-city" name="city" type="text" required
-                     autocomplete="address-level2" aria-describedby="cf-city-error"
-                     data-error="Please add your city." />
-              <p class="field__error" id="cf-city-error" aria-live="polite"></p>
-            </div>
-            <div class="field">
-              <label class="field__label" for="cf-country">Country</label>
-              <input class="field__control" id="cf-country" name="country" type="text" required
-                     autocomplete="country-name" aria-describedby="cf-country-error"
-                     data-error="Please add your country." />
-              <p class="field__error" id="cf-country-error" aria-live="polite"></p>
-            </div>
+          <div class="field">
+            <label class="field__label" for="cf-country">Country</label>
+            <span class="select">
+              <select class="field__control" id="cf-country" name="country" required
+                      autocomplete="country-name" aria-describedby="cf-country-error"
+                      data-error="Please choose your country.">
+                <option value="">Choose your country</option>
+                {COUNTRIES.map((country) => (
+                  <option value={country.name}>{country.flag} {country.name}</option>
+                ))}
+              </select>
+            </span>
+            <p class="field__error" id="cf-country-error" aria-live="polite"></p>
           </div>
         </FormStep>
 
@@ -160,10 +162,13 @@ const total = STEPS.length;
               {channels.map((c) => (
                 <div class="field">
                   <label class="field__label" for={`cf-${c.name}`}>{c.label}</label>
-                  <input class="field__control" id={`cf-${c.name}`} name={c.name} type="text"
-                         inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false"
-                         placeholder={c.ph} data-link data-handle-base={c.base || undefined}
-                         aria-describedby={`cf-${c.name}-error`} />
+                  <span class:list={['handle', { 'handle--at': c.handle }]}>
+                    {c.handle && <span class="handle__at" aria-hidden="true">@</span>}
+                    <input class="field__control" id={`cf-${c.name}`} name={c.name} type="text"
+                           inputmode={c.handle ? 'text' : 'url'} autocapitalize="off" autocorrect="off"
+                           spellcheck="false" placeholder={c.ph} data-handle={c.handle ? '' : undefined}
+                           aria-describedby={`cf-${c.name}-error`} />
+                  </span>
                   <p class="field__error" id={`cf-${c.name}-error`} aria-live="polite"></p>
                 </div>
               ))}
@@ -258,29 +263,36 @@ const total = STEPS.length;
             <p class="field__error" id="cf-pref-error" aria-live="polite"></p>
           </div>
 
-          <div class="field" role="group" aria-labelledby="cf-rates-label" aria-describedby="cf-rates-hint">
-            <span class="field__label" id="cf-rates-label">
-              Rates per format <span class="field__optional">(optional)</span>
-            </span>
-            <p class="field__hint" id="cf-rates-hint">Only for the formats you charge for — leave the rest blank.</p>
-            <div class="field-grid rate-grid">
-              {rates.map((r) => (
-                <div class="field">
-                  <label class="field__label field__label--sub" for={`cf-${r.name}`}>{r.label}</label>
-                  <input class="field__control" id={`cf-${r.name}`} name={r.name} type="text"
-                         inputmode="decimal" placeholder="e.g. 250" data-rate />
-                </div>
-              ))}
+          {/* Shown once the answer is Paid or Both; the script hides it for
+              Gifted and empties it, so a hidden rate is never submitted.
+              Without JavaScript it stays visible, and optional. */}
+          <div class="rates" data-rates>
+            <div class="field" role="group" aria-labelledby="cf-rates-label"
+                 aria-describedby="cf-rates-hint cf-rates-error" data-rate-group>
+              <span class="field__label" id="cf-rates-label">Rates per format</span>
+              <p class="field__hint" id="cf-rates-hint">
+                Whatever you charge for — one is enough. Leave the rest blank.
+              </p>
+              <div class="field-grid rate-grid">
+                {rates.map((r) => (
+                  <div class="field">
+                    <label class="field__label field__label--sub" for={`cf-${r.name}`}>{r.label}</label>
+                    <input class="field__control" id={`cf-${r.name}`} name={r.name} type="text"
+                           inputmode="decimal" placeholder="e.g. 250" data-rate />
+                  </div>
+                ))}
+              </div>
+              <p class="field__error" id="cf-rates-error" aria-live="polite"></p>
             </div>
-          </div>
 
-          <div class="field cf-currency">
-            <label class="field__label" for="cf-currency">Currency</label>
-            <span class="select">
-              <select class="field__control" id="cf-currency" name="rate_currency" data-review-if="[data-rate]">
-                {currencies.map((c) => <option value={c}>{c}</option>)}
-              </select>
-            </span>
+            <div class="field cf-currency">
+              <label class="field__label" for="cf-currency">Currency</label>
+              <span class="select">
+                <select class="field__control" id="cf-currency" name="rate_currency" data-review-if="[data-rate]">
+                  {currencies.map((c) => <option value={c}>{c}</option>)}
+                </select>
+              </span>
+            </div>
           </div>
 
           <div class="field">
@@ -346,13 +358,11 @@ const total = STEPS.length;
       {/* Shown by the script: a validation nudge, or a failed send. Never both. */}
       <p class="field__error" data-form-hint aria-live="polite"></p>
       <div class="form-status" data-form-error tabindex="-1" hidden>
-        <strong>Your application didn’t send.</strong>{' '}
-        <span data-form-error-reason>Something went wrong on the way.</span>{' '}
-        Nothing you’ve entered has been lost — please try again. If it keeps failing, email your
-        application to{' '}
+        We couldn’t submit your application. Please try again in a moment — or email your details
+        to{' '}
         <a href={`mailto:${APPLICATIONS_EMAIL}?subject=${encodeURIComponent('Creator application')}`}>
           {APPLICATIONS_EMAIL}
-        </a>{' '}and we’ll add you ourselves.
+        </a>.
       </div>
     </div>
 
@@ -487,6 +497,24 @@ const total = STEPS.length;
 
   /* --- Fields specific to this form ----------------------------------------- */
   .field__label--sub { font-weight: var(--weight-body); }
+  /* A handle field carries its "@" inside the input, so the answer can't be
+     typed with two. The input keeps its own styles; only its left padding
+     moves, to clear the mark. */
+  .handle { display: grid; position: relative; }
+  .handle__at {
+    position: absolute;
+    left: 0.875rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 500;
+    pointer-events: none;
+  }
+  .handle--at .field__control { padding-left: 1.85rem; }
+
+  /* The rates sit in the step's own grid until they're hidden as a block. */
+  .rates { display: contents; }
+  .rates[hidden] { display: none; }
+
   .cf-currency { max-width: 16rem; }
   /* Rates are short numbers: two per row even on a phone, three from tablet. */
   .rate-grid {

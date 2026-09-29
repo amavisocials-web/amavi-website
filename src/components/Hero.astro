@@ -1,9 +1,10 @@
 ---
 /**
- * The home page's full-screen opening: headline, subline, one line of
- * positioning, the two buttons (the `actions` slot) and a short line of
- * services, over video — with two large entry points beneath, one for brands
- * and one for creators. The copy comes from the page (src/pages/index.astro).
+ * The home page's full-screen opening: headline, one line of positioning and
+ * the buttons (the `actions` slot), over video. A page can add a subline, a
+ * short line of services under the buttons, and large entry points beneath;
+ * the home page uses none of the three. The copy comes from the page
+ * (src/pages/index.astro).
  *
  * Two separate cuts of footage, both from HERO_VIDEO in src/consts.ts: the
  * desktop cut (16:9) plays on landscape screens, the mobile cut (9:16) on
@@ -18,7 +19,7 @@
  */
 import Lines from './Lines.astro';
 import { videoFiles } from '../lib/media';
-import { HERO_VIDEO, HERO_SUBLINE } from '../consts';
+import { HERO_VIDEO } from '../consts';
 
 export interface Entry {
   who: string;
@@ -33,11 +34,14 @@ interface Props {
   /** "\n" marks a line break. */
   title: string;
   intro: string;
+  /** A few words under the headline, each closed by an accent full stop. */
+  subline?: string[];
   /** Short list of services, set in small capitals under the buttons. */
   services?: string[];
-  entries: Entry[];
+  /** Large entry points under the hero, one per audience. */
+  entries?: Entry[];
 }
-const { title, intro, services = [], entries } = Astro.props;
+const { title, intro, subline = [], services = [], entries = [] } = Astro.props;
 
 const desktop = videoFiles(HERO_VIDEO);
 const mobile = videoFiles(`${HERO_VIDEO}-portrait`);
@@ -83,16 +87,19 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
 
     <div class="hero__body">
       <h1 class="display display--xl hero__title enter enter--1"><Lines text={title} /></h1>
-      <p class="hero__subline enter enter--2">
-        {HERO_SUBLINE.map((word, i) => (
-          <>{i > 0 && ' '}<span class="hero__word">{word}<span class="hero__stop">.</span></span></>
-        ))}
-      </p>
+      {subline.length > 0 && (
+        <p class="hero__subline enter enter--2">
+          {subline.map((word, i) => (
+            <>{i > 0 && ' '}<span class="hero__word">{word}<span class="hero__stop">.</span></span></>
+          ))}
+        </p>
+      )}
       <p class="hero__intro enter enter--2">{intro}</p>
       <div class="hero__actions enter enter--3"><slot name="actions" /></div>
       {services.length > 0 && <p class="label hero__services enter enter--3">{services.join(' · ')}</p>}
     </div>
 
+    {entries.length > 0 && (
     <nav class="hero__entries enter enter--3" aria-label="Where to start">
       {entries.map((entry) => (
         <a class="entry" href={entry.href}>
@@ -106,6 +113,7 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
         </a>
       ))}
     </nav>
+    )}
   </div>
 </section>
 
