@@ -32,7 +32,7 @@ type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 /** Long enough for a slow mobile connection; short enough not to hang. */
 const TIMEOUT_MS = 20_000;
 
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { prefersReducedMotion as reducedMotion } from './lib/motion';
 
 /* --- Field errors ------------------------------------------------------------ */
 

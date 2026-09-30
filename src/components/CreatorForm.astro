@@ -142,7 +142,8 @@ const total = STEPS.length;
             the script fills in and swaps to (src/scripts/country-combobox.ts).
             Without JavaScript the select is the field, whole and native; with
             it, the select stays as the value that submits, so whatever reaches
-            the sheet is a country from this list either way.
+            the sheet is a country from this list either way. Both start
+            empty: a country in the field means the applicant chose it.
           */}
           <div class="field" data-country>
             <label class="field__label" for="cf-country">Country</label>
@@ -161,7 +162,7 @@ const total = STEPS.length;
               <input class="field__control combobox__input" id="cf-country-input" type="text"
                      role="combobox" aria-expanded="false" aria-controls="cf-country-list"
                      aria-autocomplete="list" autocomplete="off" autocapitalize="off"
-                     autocorrect="off" spellcheck="false" placeholder="Start typing your country"
+                     autocorrect="off" spellcheck="false" placeholder="Start typing or click to see all countries"
                      aria-describedby="cf-country-error"
                      data-error="Please choose your country from the list." />
               <ul class="combobox__list" id="cf-country-list" role="listbox"
@@ -526,8 +527,11 @@ const total = STEPS.length;
   [data-stepper='pending'] .apply__viewport,
   [data-stepper='ready'] .apply__viewport {
     min-width: 0;
-    overflow: hidden;
-    overflow: clip;
+    /* Clip the slide, not the page. Clipping both axes cut the country list
+       off at the card's edge, since it hangs below the last field of step 1;
+       clipping only the axis the track moves on lets it open in full. */
+    overflow-x: clip;
+    overflow-y: visible;
     transition: height 480ms var(--ease);
   }
   [data-stepper='pending'] .apply__track,

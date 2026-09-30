@@ -125,7 +125,7 @@ const schema = {
                     <ul class="area__services" role="list">
                       {area.services.map((service) => (
                         <li class="area__service">
-                          <h3 class="area__service-name">{service.name}</h3>
+                          <h3 class="row-label">{service.name}</h3>
                           <p class="area__service-desc">{service.description}</p>
                         </li>
                       ))}
@@ -157,7 +157,7 @@ const schema = {
       <ul class="values" role="list">
         {VALUES.map((value) => (
           <li class="value">
-            <h3 class="value__name">{value.name}</h3>
+            <h3 class="row-label">{value.name}</h3>
             <p class="value__body">{value.body}</p>
           </li>
         ))}
@@ -295,12 +295,6 @@ const schema = {
   @media (min-width: 80em) {
     .area__service { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); column-gap: var(--space-m); align-items: baseline; }
   }
-  .area__service-name {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
   .area__service-desc { font-weight: var(--weight-secondary); }
 
   /* ---------- Why AMAVI: four points, two by two ----------
@@ -317,12 +311,6 @@ const schema = {
     .value:nth-child(-n+2) { padding-top: 0; }
   }
 
-  .value__name {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
   .value__body { font-weight: var(--weight-secondary); }
 
 </style>

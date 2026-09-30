@@ -8,10 +8,14 @@
  * that submits. Whatever reaches the sheet is therefore a name from the list,
  * never something typed.
  *
- * Matching is case- and accent-insensitive and looks anywhere in the name, so
- * "espana" finds España, "cote" finds Côte d'Ivoire and "land" finds Ireland,
- * Finland and Poland. Nothing matching shows "No matches" rather than an empty
- * box.
+ * Matching is case- and accent-insensitive and runs from the start of the
+ * name, so "ir" is Iran, Iraq and Ireland rather than every country with
+ * those letters somewhere in it, and "cot" finds Côte d'Ivoire. Nothing
+ * matching shows "No matches" rather than an empty box.
+ *
+ * The field starts empty and nothing is highlighted until an arrow key or the
+ * pointer picks something: a country in the field means the applicant chose
+ * it.
  *
  * It is a combobox in the ARIA sense: the input owns the listbox through
  * aria-controls, says whether it is open, and names the option under the
@@ -98,11 +102,14 @@ if (combobox && field && select && input && list && empty && wrapper) {
 
   const filter = (query: string) => {
     const needle = fold(query);
-    shown = needle ? options.filter((option) => option.search.includes(needle)) : options;
+    shown = needle ? options.filter((option) => option.search.startsWith(needle)) : options;
     for (const option of options) option.el.hidden = !shown.includes(option);
     empty.hidden = shown.length > 0;
     list.hidden = shown.length === 0;
-    setActive(shown.length > 0 ? Math.max(0, shown.findIndex((o) => o.name === chosen)) : -1);
+    // Nothing highlighted, and back to the top of the list: what opens is the
+    // list itself, not a suggestion.
+    setActive(-1);
+    list.scrollTop = 0;
   };
 
   const open = () => {
@@ -197,6 +204,8 @@ if (combobox && field && select && input && list && empty && wrapper) {
         event.preventDefault();
         if (!isOpen()) { open(); return; }
         if (shown.length === 0) return;
+        // From nothing, Down takes the first and Up the last.
+        if (active < 0) { setActive(event.key === 'ArrowDown' ? 0 : shown.length - 1); break; }
         const step = event.key === 'ArrowDown' ? 1 : -1;
         setActive((active + step + shown.length) % shown.length);
         break;

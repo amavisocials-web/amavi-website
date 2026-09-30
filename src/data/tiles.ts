@@ -1,12 +1,12 @@
 /**
  * Creator content from AMAVI's own campaigns, self-hosted in
- * public/media/tiles/. Tiles 1–4 play behind the home page's stat tiles
- * (src/components/StatTiles.astro), in this order. Tile 5 isn't on the site:
+ * public/media/tiles/. Tiles 1–4 drift beside the figures on the home page
+ * (src/components/Numbers.astro), in this order. Tile 5 isn't on the site:
  * its burned-in captions read badly as a silent background loop.
- * (src/components/ContentTiles.astro, a linked row of all five, is kept but
- * not currently used.)
  *
- * Each tile keeps the link to its original Instagram post, for the linked row.
+ * Each tile keeps the link to its original Instagram post, for a row that
+ * linked them; that row came off on 30 September 2026 and is in git if it is
+ * wanted back.
  *
  * - `src` is the video's base path, with no extension: the tile plays
  *   `<src>.webm` and `<src>.mp4`, whichever exist, and preloads neither.

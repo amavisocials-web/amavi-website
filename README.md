@@ -124,6 +124,7 @@ src/
                          invitation), Footer, Hero, Feature, Numbers,
                          ServicesSlider, LoopVideo, Placeholder, ProofLink,
                          LogoWall, ContactPaths, the creator form, Logo, Fonts
+  scripts/lib/motion.ts    One prefers-reduced-motion query, shared
   scripts/loop-videos.ts   Lazy, visible-only playback for every video
   scripts/service-accordions.ts  The four areas on /services, opening in place
   scripts/services-slider.ts  The home page's services row, paged by its arrows
@@ -201,6 +202,10 @@ the description about 34 characters wide.
 | `--stroke` | 1px | Borders, field outlines, rules |
 | `--stroke-hair` | 1px, 0.5px on dense screens | Section and row dividers |
 | `--stroke-mark` | 2px | Accent marks only: focus ring, active nav |
+
+**`.row-label`** in `global.css` is the one rule behind the label in every
+two-column row — the approach items, the service sub-services, the value grid:
+12px capitals at 700, which three components used to declare separately.
 
 **Secondary text** is never grey. It is black, set smaller or lighter:
 `--weight-secondary` (300) against `--weight-body` (400) and

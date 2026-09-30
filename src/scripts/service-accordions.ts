@@ -21,7 +21,7 @@ interface Item {
   panel: HTMLElement;
 }
 
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { prefersReducedMotion as reducedMotion } from './lib/motion';
 
 const list = document.querySelector<HTMLElement>('[data-accordion]');
 

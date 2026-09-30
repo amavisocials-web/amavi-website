@@ -88,7 +88,7 @@ const commitment = [
       <ul class="approach" role="list">
         {approach.map((item) => (
           <li class="approach__item">
-            <h3 class="approach__name">{item.name}</h3>
+            <h3 class="row-label">{item.name}</h3>
             <p class="approach__body">{item.body}</p>
           </li>
         ))}
@@ -131,7 +131,7 @@ const commitment = [
       <ul class="approach" role="list">
         {commitment.map((item) => (
           <li class="approach__item">
-            <h3 class="approach__name">{item.name}</h3>
+            <h3 class="row-label">{item.name}</h3>
             <p class="approach__body">{item.body}</p>
           </li>
         ))}
@@ -148,7 +148,6 @@ const commitment = [
   /* ---------- Intro: space does the work ---------- */
   .about { padding-block: clamp(4rem, 2rem + 8vw, 9rem) var(--section-y); }
   .about__intro { display: grid; justify-items: center; text-align: center; gap: var(--space-m); }
-  .about__statement { max-width: 28ch; }
   /* Its own measure rather than the narrow container's and the shared .lead's
      48ch: the lines run to about 75 characters, a paragraph to read rather
      than a column. Below 48em the measure is wider than the screen, so the
@@ -206,11 +205,5 @@ const commitment = [
   .approach { list-style: none; display: grid; gap: var(--space-l); }
   .approach__item { display: grid; gap: var(--space-3xs); }
   @media (min-width: 64em) { .approach { gap: var(--space-xl); } }
-  .approach__name {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
   .approach__body { font-weight: var(--weight-secondary); }
 </style>

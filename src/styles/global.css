@@ -215,6 +215,16 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
   text-transform: uppercase;
 }
 
+/* The name in a two-column row — the approach items, the service
+   sub-services, the value grid: the eyebrow's capitals held at one size,
+   whatever the row's width. */
+.row-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 /* Small Montserrat capitals, for a section that genuinely needs naming. */
 .label {
   font-family: var(--font-body);

@@ -12,7 +12,8 @@
  * - A video that isn't displayed (the hero's desktop cut on a phone, and the
  *   other way round) never intersects, so it never loads at all.
  */
-const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+import { reduceMotion as still } from './lib/motion';
+
 const videos = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]')];
 const visible = new Set<HTMLVideoElement>();
 
