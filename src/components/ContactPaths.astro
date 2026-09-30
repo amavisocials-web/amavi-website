@@ -73,9 +73,10 @@ const H = `h${level}` as 'h2' | 'h3';
      on a phone, side by side from tablet up. */
   .paths--page { gap: 0; border: var(--stroke) solid var(--line); }
   .paths--page .path { padding: clamp(1.75rem, 1rem + 3.5vw, 3.5rem); }
-  .paths--page .path + .path { border-top: var(--stroke) solid var(--line); }
+  /* Space between the routes, not a line. */
+  .paths--page { gap: var(--space-m); }
   .paths--page .path__title { font-size: var(--display-md); }
   @media (min-width: 48em) {
-    .paths--page .path + .path { border-top: 0; border-left: var(--stroke) solid var(--line); }
+    .paths--page { gap: var(--space-l); }
   }
 </style>

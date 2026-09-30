@@ -25,8 +25,6 @@ export interface ServiceArea {
   intro: string;
   /** What the area actually covers, as a name and a line each. */
   services: Service[];
-  /** The line the area closes on. */
-  closing: string;
 }
 
 /** The five practice areas, in the order they open on the page. */
@@ -35,109 +33,104 @@ export const SERVICE_AREAS: ServiceArea[] = [
     id: 'creator-community-aor',
     number: '01',
     title: 'Creator & Influencer Community AOR',
-    summary: 'Creator communities run as an ongoing programme, not a one-off campaign.',
-    intro: 'Build lasting relevance through creator communities rather than one-off activity. By developing long-term relationships with creators who genuinely fit the brand, we create a group of advocates who keep speaking for you between campaigns, not just during them.',
+    summary: 'Always-on creator programmes that drive sustained brand relevance, not short-lived spikes.',
+    intro: 'Build lasting audience relevance through ongoing creator communities rather than isolated campaigns. By cultivating genuine, long-term relationships with creators who mirror your brand values, we build a dedicated network of brand advocates who champion your business continuously.',
     services: [
       {
         name: 'Strategy',
-        description: 'We build the creative and strategic proposal around your objective, grounded in audience behaviour and what’s actually happening on the platforms, with clear timings and success measures agreed up front.',
+        description: 'We develop data-driven creative proposals aligned with your commercial targets, grounded in real platform behaviors and actionable KPIs.',
       },
       {
-        name: 'Creator sourcing & vetting',
-        description: 'We search on audience rather than follower count, then check every creator for genuine engagement, content quality and brand fit before they reach you.',
+        name: 'Creator Sourcing & Vetting',
+        description: 'We prioritize audience trust over vanity metrics, auditing every creator for genuine engagement, content aesthetics, and brand fit before they reach your desk.',
       },
       {
-        name: 'Ambassador programmes',
-        description: 'Longer-term relationships that keep a brand present between campaigns rather than only during them.',
+        name: 'Ambassador Programmes',
+        description: 'Long-term strategic partnerships engineered to maintain continuous brand presence and advocacy between campaign launches.',
       },
     ],
-    closing: 'One creator or one hundred. We build the right mix.',
   },
   {
     id: 'creator-campaigns',
     number: '02',
     title: 'Influencer & Creator Campaigns',
-    summary: 'Campaigns built around a business objective, managed end to end.',
-    intro: 'Our campaigns are built around a business objective, not a posting schedule. We source and vet the creators, negotiate the rates, brief the work and manage it through to publication, so each campaign reaches people the brand hasn’t reached before.',
+    summary: 'Full-funnel creator campaigns built around commercial goals and managed end-to-end.',
+    intro: 'We design campaigns to deliver measurable business outcomes, not just impressions. From creator discovery and fee negotiation to contract compliance, briefing, and delivery, we handle every detail so your brand consistently unlocks new, high-converting audiences.',
     services: [
       {
-        name: 'Creator sourcing & vetting',
-        description: 'Deep searches to find creators with real engagement and the right audience, followed by a multi-step check so nothing reaches you that doesn’t fit the brand.',
+        name: 'Creator Sourcing & Vetting',
+        description: 'Targeted searches to identify creators with authentic influence, backed by a rigorous vetting process to guarantee brand safety.',
       },
       {
-        name: 'Contracting & briefing',
-        description: 'We handle agreements, licensing, usage rights and compliance in house, then brief each creator directly so expectations are clear before any content starts.',
+        name: 'Contracting & Briefing',
+        description: 'End-to-end management of legal agreements, usage rights, and creative briefs, ensuring complete clarity and alignment before production starts.',
       },
       {
-        name: 'Campaign management',
-        description: 'From outreach and negotiation through to timelines, approvals and delivery.',
+        name: 'Campaign Management',
+        description: 'Full-service oversight covering creator outreach, negotiation, production timelines, asset approvals, and publishing.',
       },
       {
-        name: 'Measurement',
-        description: 'Tracking throughout the campaign and a final report against the original objective, including how much of the audience was new to the brand.',
+        name: 'Measurement & Reporting',
+        description: 'Real-time performance tracking and comprehensive post-campaign reporting evaluated directly against your core business objectives.',
       },
     ],
-    closing: 'The objective comes first. The channel follows.',
   },
   {
     id: 'creator-ugc',
     number: '03',
     title: 'Creator UGC Content',
-    summary: 'Creator content produced in volume, for your channels as well as theirs.',
-    intro: 'Creator content is one of the most useful assets a brand can own. We produce it in volume, native to the platforms people actually use, and hand it over for your own channels and paid media long after the original post has run.',
+    summary: 'High-performing creator assets produced at scale for both organic and paid media.',
+    intro: 'Authentic creator content is one of the most powerful conversion assets a brand can leverage. We produce high-volume, platform-native content and deliver full usage rights so assets continue driving ROI across your paid ad channels long after the original post.',
     services: [
       {
-        name: 'Content production',
-        description: 'We oversee content from concept through to final cut, with a structured review at each stage. Nothing publishes before you’ve seen it.',
+        name: 'Content Production',
+        description: 'Structured creative direction from concepting through final edit, featuring multi-stage brand reviews before anything goes live.',
       },
       {
-        name: 'Paid amplification',
-        description: 'Creator content works harder when it doesn’t stop at the creator’s channel. We help put it to work across your own social and paid media.',
+        name: 'Paid Amplification',
+        description: 'Scaling top-performing creator creative through targeted paid social campaigns to maximize reach, engagement, and conversion.',
       },
       {
-        name: 'Content systems',
-        description: 'Repeatable formats and frameworks that make content easier to produce consistently.',
+        name: 'Content Systems',
+        description: 'Repeatable creative frameworks and content playbooks that make high-volume output consistent and scalable.',
       },
     ],
-    closing: 'Built for the feed. Made for the brand.',
   },
   {
     id: 'affiliate-marketing',
     number: '04',
     title: 'Affiliate Marketing',
-    summary: 'Creator partnerships structured around performance.',
-    intro: 'We connect creators, content and commerce so the work can be measured against revenue. Partnerships are structured around performance, with tracking and commission agreed from the start.',
+    summary: 'Performance-driven creator partnerships structured directly around revenue.',
+    intro: 'We connect creative content directly to commercial revenue. By structuring creator partnerships around trackable performance and transparent commission structures, every campaign dollar is directly accountable to bottom-line growth.',
     services: [
       {
-        name: 'Partnership structure',
-        description: 'Commission, tracking and terms agreed before anything goes live, so everyone knows what success looks like.',
+        name: 'Partnership Structure',
+        description: 'Clear commission models, attribution tracking, and commercial terms established up front to align goals and maximize ROI.',
       },
       {
-        name: 'Creator communities',
-        description: 'We identify the creators whose audiences are most likely to convert, not just the ones with the largest reach.',
+        name: 'Creator Communities',
+        description: 'Targeting creators with high-intent audiences and proven conversion records rather than focusing strictly on follower counts.',
       },
       {
-        name: 'Measurement',
-        description: 'Reporting tied to revenue rather than impressions alone.',
+        name: 'Measurement & Attribution',
+        description: 'Granular sales tracking and financial reporting that measure success by revenue generated rather than vanity impressions.',
       },
     ],
-    closing: 'Work that can be measured against the till.',
   },
   {
     id: 'live-experiences',
     number: '05',
     title: 'Live Experiences',
-    summary: 'Activations that put creators, customers and the brand in the same room.',
-    intro: 'We bring creators, customers and the brand into the same room. Each activation is built to be worth attending and worth filming, turning a single moment into content that keeps working afterwards.',
+    summary: 'High-impact activations that bring creators, communities, and brands into the same room.',
+    intro: 'We design experiential events that bring creators, key partners, and customers face-to-face. Each activation is engineered to deliver an unforgettable real-world experience while generating an ecosystem of digital content that extends campaign life for months.',
     services: [
-      { name: 'Creative production', description: 'Planning and running the activation itself, in person or online.' },
-      { name: 'Talent management', description: 'Sourcing, briefing and looking after the creators on the day.' },
+      { name: 'Creative Production', description: 'End-to-end concepting, planning, and execution for live, hybrid, and digital brand activations.' },
+      { name: 'Talent Management', description: 'Curation, briefing, and dedicated on-site coordination for creators and brand VIPs.' },
       {
-        name: 'Content capture',
-        description: 'Everything filmed on the day becomes content the brand can use long after the event has ended.',
+        name: 'Content Capture',
+        description: 'Professional multi-platform content capture on the day, providing a rich library of assets for ongoing marketing.',
       },
     ],
-    closing: 'One day of work. Months of content.',
   },
 ];
 
@@ -152,11 +145,11 @@ export interface Sector {
 
 export const SECTORS: Sector[] = [
   { name: 'Food & Hospitality', focus: ['Creators', 'Tourism partnerships', 'Local audience growth'] },
-  { name: 'Healthcare', focus: ['Education', 'Creator partnerships', 'Community'] },
-  { name: 'Wellness', focus: ['Creators', 'UGC', 'Content strategy'] },
-  { name: 'Fashion & Beauty', focus: ['Seeding', 'Creators', 'Campaigns'] },
-  { name: 'Lifestyle & Travel', focus: ['Creators', 'Partnerships', 'Audience development'] },
-  { name: 'Tech & Startups', focus: ['Creator campaigns', 'Content', 'Brand awareness'] },
+  { name: 'Healthcare', focus: ['Education', 'Creator partnerships', 'Community trust'] },
+  { name: 'Wellness', focus: ['Creators', 'UGC assets', 'Content strategy'] },
+  { name: 'Fashion & Beauty', focus: ['Product seeding', 'Creators', 'Full-funnel campaigns'] },
+  { name: 'Lifestyle & Travel', focus: ['Creators', 'Strategic partnerships', 'Audience development'] },
+  { name: 'Tech & Startups', focus: ['Creator campaigns', 'Native content', 'Brand awareness'] },
 ];
 
 /**

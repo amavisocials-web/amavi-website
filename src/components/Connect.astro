@@ -1,0 +1,139 @@
+---
+import { CONTACT_PATH } from '../consts';
+
+/**
+ * The closing invitation, above the footer: a label, one question, and one
+ * way to answer it.
+ *
+ * The circle around "you" is drawn rather than typeset — a single stroked
+ * path stretched to whatever that word measures, so it stays around the word
+ * at every size and in either display face, with an even stroke because it
+ * doesn't scale with the box. It is decoration, hidden from assistive tech,
+ * and drawn in the accent so it reads as a mark made on the page.
+ *
+ * The pill and the circle beside it are one link, not two: one tab stop, one
+ * destination, and both fill or empty together.
+ *
+ * Every page carries this except Get in touch, which is where it leads.
+ */
+---
+
+<section class="section section--ruled connect" aria-labelledby="connect-heading">
+  <div class="container connect__inner">
+    <p class="eyebrow connect__eyebrow">Connect</p>
+
+    <h2 id="connect-heading" class="display connect__line">
+      What can we do for <span class="connect__word">you<svg
+          class="connect__ring" viewBox="0 0 120 72" preserveAspectRatio="none"
+          aria-hidden="true" focusable="false">
+        <path d="M100 11C74 1 30 4 14 20 0 34 6 54 32 62c28 8 66 4 78-12 9-12 4-28-18-39"
+              fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
+              vector-effect="non-scaling-stroke" />
+      </svg></span>?
+    </h2>
+
+    <a class="connect__action" href={CONTACT_PATH}>
+      <span class="connect__pill">Reach out</span>
+      <span class="connect__arrow" aria-hidden="true">
+        <svg viewBox="0 0 22 12" focusable="false">
+          <path d="M0 6h19M14.5 1L20 6l-5.5 5" fill="none" stroke="currentColor"
+                stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        </svg>
+      </span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .connect__inner { display: grid; gap: var(--space-m); }
+
+  /* The label beside the question, the invitation under it. */
+  @media (min-width: 64em) {
+    .connect__inner {
+      grid-template-columns: minmax(8rem, 16fr) minmax(0, 84fr);
+      column-gap: var(--space-xl);
+      row-gap: var(--space-xl);
+      align-items: start;
+    }
+    .connect__eyebrow { grid-area: 1 / 1; padding-top: 0.55em; }
+    .connect__line { grid-area: 1 / 2; }
+    .connect__action { grid-area: 2 / 1 / 3 / 3; }
+  }
+
+  .connect__line { font-size: var(--display-lg); }
+
+  /* ---- The drawn circle -------------------------------------------------- */
+  .connect__word { position: relative; display: inline-block; white-space: nowrap; }
+  .connect__ring {
+    position: absolute;
+    left: -0.34em;
+    top: -0.24em;
+    width: calc(100% + 0.68em);
+    height: calc(100% + 0.48em);
+    /* Past the reset's max-width, or the circle is clamped to the word's own
+       width and sits off to one side of it. */
+    max-width: none;
+    overflow: visible;
+    color: var(--accent);
+    pointer-events: none;
+  }
+
+  /* ---- Reach out: two shapes, one link ----------------------------------- */
+  .connect__action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    justify-self: start;
+    text-decoration: none;
+    margin-top: var(--space-xs);
+  }
+  @media (min-width: 64em) { .connect__action { margin-top: 0; } }
+
+  .connect__pill,
+  .connect__arrow {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    /* The primary button's colours: an accent fill with a white label, which
+       inverts to an outline on hover (see .btn--primary). */
+    background: var(--accent);
+    border: var(--stroke) solid var(--accent);
+    color: var(--bg);
+    transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .connect__pill {
+    /* 45px tall: a target before it is a shape. */
+    padding: 1.05em 1.9em;
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .connect__arrow { width: 3rem; height: 3rem; border-radius: 50%; }
+  .connect__arrow svg {
+    width: 1.1rem;
+    height: 0.6rem;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  .connect__action:hover .connect__pill,
+  .connect__action:hover .connect__arrow,
+  .connect__action:focus-visible .connect__pill,
+  .connect__action:focus-visible .connect__arrow { background: var(--bg); color: var(--accent); }
+  .connect__action:hover .connect__arrow svg,
+  .connect__action:focus-visible .connect__arrow svg { transform: translateX(3px); }
+
+  .connect__action:focus-visible { outline-offset: 6px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .connect__pill,
+    .connect__arrow,
+    .connect__arrow svg { transition: none; }
+    .connect__action:hover .connect__arrow svg,
+    .connect__action:focus-visible .connect__arrow svg { transform: none; }
+  }
+</style>

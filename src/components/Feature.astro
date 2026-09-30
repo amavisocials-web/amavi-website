@@ -33,7 +33,8 @@ const { reverse = false, ruled = false, labelledby } = Astro.props;
     .feature__grid {
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
       align-items: start;
-      gap: var(--space-2xl);
+      column-gap: var(--space-xl);
+      row-gap: var(--space-2xl);
     }
     .feature__media { width: min(100%, 22rem); justify-self: end; }
     .feature--reverse .feature__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }

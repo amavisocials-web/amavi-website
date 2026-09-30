@@ -34,7 +34,7 @@ const shaped = tiles.slice(0, 4).map((tile, i) => ({ ...tile, ratio: RATIOS[i % 
 const columns = [shaped.slice(0, 2), shaped.slice(2)];
 ---
 
-<section class="section section--ruled numbers" aria-labelledby={labelledby}>
+<section class="section numbers" aria-labelledby={labelledby}>
   <div class="container numbers__grid">
     <div class="numbers__text">
       <slot />
@@ -67,7 +67,7 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
 
   .numbers__grid { display: grid; gap: var(--space-xl); }
   @media (min-width: 64em) {
-    .numbers__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2xl); align-items: center; }
+    .numbers__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-xl); row-gap: var(--space-2xl); align-items: center; }
     /* Text first in the markup, collage first on the screen. */
     .collage { order: -1; }
   }

@@ -133,22 +133,13 @@ const schema = {
       ))}
     </dl>
 
-    <div class="numbers__foot">
-    </div>
-
     <p class="numbers__more">
-      <a class="know" href="/about/">
-        <span class="know__text">Get to know AMAVI</span>
-        <svg class="know__arrow" viewBox="0 0 20 10" aria-hidden="true" focusable="false">
-          <path d="M0 5h17.4M13.4 1L18 5l-4.6 4" fill="none" stroke="currentColor" stroke-width="1.25"
-                vector-effect="non-scaling-stroke" />
-        </svg>
-      </a>
+      <ProofLink href="/about/">Get to know AMAVI</ProofLink>
     </p>
   </Numbers>
 
   {/* ================= Introduction ================= */}
-  <Feature ruled labelledby="equation-heading">
+  <Feature labelledby="equation-heading">
     <h2 id="equation-heading" class="display display--lg">
       <Lines text={'Our creators are one part\nof the equation.'} />
     </h2>
@@ -177,7 +168,7 @@ const schema = {
         <ServicesSlider services={WAYS} />
 
         <p class="ways__more">
-          <ProofLink href="/services/">And many more: see all services</ProofLink>
+          <ProofLink href="/services/">View more details</ProofLink>
         </p>
       </div>
     </div>
@@ -194,17 +185,14 @@ const schema = {
 
   /* ---- The figures, as sentences: the number leading each line ---- */
   .stat-lines { display: grid; }
+  /* No rules: the figures stand apart on space alone. */
+  .stat-lines { gap: var(--space-l); }
   .stat-line {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     align-items: baseline;
     gap: var(--space-s);
-    padding-block: var(--space-m);
-    border-top: var(--stroke-hair) solid var(--line);
   }
-  /* A rule between the lines, not around the list. */
-  .stat-line:first-child { padding-top: 0; border-top: none; }
-  .stat-line:last-child { padding-bottom: 0; }
 
   .stat-line__value {
     font-family: var(--font-display);
@@ -219,78 +207,15 @@ const schema = {
   }
   .stat-line__text { font-weight: var(--weight-secondary); text-wrap: pretty; }
 
-  .numbers__foot { display: grid; gap: var(--space-2xs); }
-
-  /* ---- Get to know AMAVI: the header's link, at body size ---------------- */
-  /* Its own element rather than a footnote — with the column's 24px gap and
-     the link's own tap padding, about 40px of air above the words. */
-  .numbers__more { margin-top: var(--space-3xs); }
-  @media (max-width: 47.99em) { .numbers__more { margin-top: 0; } }
-
-  .know {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2xs);
-    /* 46px tall on a phone, from padding rather than type size. The room on
-       the right is where the arrow slides, so nothing moves around it. */
-    padding-block: 0.75rem;
-    padding-right: var(--space-2xs);
-    color: var(--ink);
-    font-size: var(--text-base);
-    font-weight: var(--weight-strong);
-    letter-spacing: var(--tracking-caps);
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: color var(--dur) var(--ease);
-  }
-  .know:hover,
-  .know:focus-visible { color: var(--accent); }
-
-  .know__text { position: relative; }
-  /* The rule it rests on, in black: the same hairline the header's link
-     carries, and what stays under prefers-reduced-motion. */
-  .know__text::after,
-  .know__text::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -0.3em;
-    border-bottom: var(--stroke) solid var(--line);
-  }
-  /* The accent rule, wiped across it from the left. */
-  .know__text::before {
-    border-bottom-color: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--dur) var(--ease);
-  }
-  .know:hover .know__text::before,
-  .know:focus-visible .know__text::before { transform: scaleX(1); }
-
-  .know__arrow {
-    width: 1.25rem;
-    height: 0.625rem;
-    flex: none;
-    transition: transform var(--dur) var(--ease);
-  }
-  .know:hover .know__arrow,
-  .know:focus-visible .know__arrow { transform: translateX(6px); }
-
-  /* The colour still changes; the arrow stays where it is and the rule is
-     simply there, so the link never looks like less of a link. */
-  @media (prefers-reduced-motion: reduce) {
-    .know,
-    .know__arrow,
-    .know__text::before { transition: none; }
-    .know:hover .know__arrow,
-    .know:focus-visible .know__arrow { transform: none; }
-  }
+  /* Its own element rather than a footnote: with the column's 24px gap, about
+     40px of air above the words, and 32 on a phone. */
+  .numbers__more { margin-top: var(--space-s); }
+  @media (max-width: 47.99em) { .numbers__more { margin-top: var(--space-2xs); } }
 
   /* ---- Services: the heading on one side, the ways on the other ---- */
   .ways__grid { display: grid; gap: var(--space-xl); }
   @media (min-width: 64em) {
-    .ways__grid { grid-template-columns: minmax(0, 40fr) minmax(0, 60fr); gap: var(--space-2xl); align-items: start; }
+    .ways__grid { grid-template-columns: minmax(0, 40fr) minmax(0, 60fr); column-gap: var(--space-xl); row-gap: var(--space-2xl); align-items: start; }
   }
   .ways__head { display: grid; gap: var(--space-m); align-content: start; }
 

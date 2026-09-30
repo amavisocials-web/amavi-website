@@ -97,8 +97,8 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 | Path | What it is |
 |---|---|
 | `/` | Full-screen video hero ("Content that connects") with both buttons; the "Trusted by" logo marquee; what AMAVI is; the figures beside a drifting collage of creator work; "Creators are one part of the equation"; the services, as a row you page through |
-| `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting), why AMAVI over a city plan in black |
-| `/services` | What AMAVI does, goal first: five practice areas as an accordion, how we deliver (six steps), six sectors, why creator-led |
+| `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting), the philosophy over a photograph in black, the commitment, and the closing invitation |
+| `/services` | What AMAVI does, goal first: five practice areas as an accordion, why AMAVI in four points, the closing invitation, the client logos |
 | `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Get in Touch: brands to email, creators to the application |
 | `/privacy` | Privacy policy |
@@ -112,7 +112,7 @@ src/
   consts.ts              Site-wide constants: email, nav, socials, positioning,
                          tagline, hero video path
   logos.ts               Client logo manifest and optical sizing
-  data/services.ts       The four service areas, the sectors, and the results
+  data/services.ts       The five service areas, the sectors (kept, not rendered), and the results
   data/tiles.ts          Creator videos: tiles 1–4 play behind the home stats
   lib/media.ts           Build-time checks for files in public/
   assets/
@@ -120,10 +120,10 @@ src/
     logos/                   Client logos, solid black on transparent
   layouts/Base.astro     <head>, header, footer — every page uses this
   data/countries.ts      Country codes for the application's country select
-  components/            Nav (header and menu), Footer, Hero, Feature,
-                         Numbers, ServicesSlider, LoopVideo, Placeholder,
-                         ProofLink, LogoWall, ContactPaths, the creator form,
-                         Logo, Fonts
+  components/            Nav (header and menu), Connect (the closing
+                         invitation), Footer, Hero, Feature, Numbers,
+                         ServicesSlider, LoopVideo, Placeholder, ProofLink,
+                         LogoWall, ContactPaths, the creator form, Logo, Fonts
   scripts/loop-videos.ts   Lazy, visible-only playback for every video
   scripts/service-accordions.ts  The four areas on /services, opening in place
   scripts/services-slider.ts  The home page's services row, paged by its arrows
@@ -149,7 +149,8 @@ public/fonts/            ALT Rigatoni goes here once licensed (see Typefaces)
 
 White backgrounds, black text, black hairline rules, `#341BCA` for accents
 and highlights, and a black footer. Six colours, defined once in
-`src/styles/global.css`, and the only colour values anywhere in the codebase:
+`src/styles/global.css`, and — with the section divider's two translucent
+shades below — the only colour values anywhere in the codebase:
 
 | Token | Value | Use |
 |---|---|---|
@@ -159,18 +160,41 @@ and highlights, and a black footer. Six colours, defined once in
 | `--accent` | `#341BCA` | Accents and highlights: the logo, links, button fills and outlines, hover and pressed states, focus rings, the hero's full stops, area and step numbers, the application's progress bar — wherever musetheagency.com uses its red |
 | `--surface-dark` | `#000000` | The footer, and the flat overlay under text on video |
 | `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on black and on video |
+| `--divider-line` | `rgb(0 0 0 / 0.06)`, and `rgb(255 255 255 / 0.10)` under `.surface-dark` | The few lines left between sections |
 
 **The exceptions to white** are the footer (full bleed, edge to edge), the
-"Why AMAVI" band on /about — white on black, over a city plan drawn in
-hairlines — and text set over video, which sits on a flat black overlay (the
-hero and the stat tiles). There are no greys, tints, gradients or shadows
-beyond those overlays and the drawing's own line opacities.
+"Our philosophy" band on /about — white over a photograph under a black
+shade at 0.72, where white holds 9.2:1 on the lightest pixel in the picture —
+and text set over video, which sits on a flat black overlay (the hero and the
+stat tiles). There are no tints, gradients or shadows beyond
+those overlays and the drawing's own line opacities, and one grey: the line
+between sections, below.
 
 **Separation without colour.** Depth comes from line weight, type scale and
-space. Where a section used to sit on a tint, it now takes `.section--ruled`:
-a full-width black hairline, and room above and below (`--section-y`, set at
-70% of its original value on 28 September 2026, with `.section--tight` cut to
-match).
+space. Where a section used to sit on a tint, it takes `.section--ruled`, and
+room above and below (`--section-y`, set at 70% of its original value on 28
+September 2026, with `.section--tight` cut to match).
+
+**Sections divide by space, not by lines** (30 September 2026). `.section--ruled`
+is now the exception: one boundary on the home page, two on About, one on
+Services, none anywhere else — kept only where two white sections of similar
+shape meet and would otherwise run together. Where it does appear it is a 1px
+line in `--divider-line`, barely there, across the container's content box at
+the top of the section: `.section--ruled::before` rather than a border, so it
+stops where the words do and a screen reader never meets it, and inside
+`.surface-dark` the same property gives it a translucent white.
+
+Rules inside content went the same way. The stat lines, the approach items,
+the service sub-services, the value grid, the contact routes and the privacy
+lead all separate on space now; each list's gap grew to carry the separation.
+What keeps its rules: **the collapsed accordion rows on Services**, which are
+the clickable rows themselves, and field, button and card borders.
+
+**Two-column gaps** came down by a third on 30 September 2026 — 96px to 64px
+between the columns of every split, and 40px to 24px between a label and its
+line — so the two halves read as one block. The rows of sub-services split
+into two columns at 80em rather than 64em: beside a picture, a 64em panel left
+the description about 34 characters wide.
 
 | Token | Value | Use |
 |---|---|---|
@@ -407,8 +431,24 @@ Logos live in `src/assets/logos/` and are declared once in **`src/logos.ts`**.
   wider than the AMAVI wordmark in the header (79×55 at every width): today
   the tallest renders 46px and the widest 76px.
 
-**Every logo is solid black** on transparent, with no colour versions. The
-supplied colour artwork was converted in place by:
+**Two sets.** The home page runs the logos **solid black on transparent**
+(`src/assets/logos/`); /services runs the **full-colour originals**
+(`src/assets/logos/colour/`), each on a white chip with the same padding and
+radius, which is what lets a set supplied on white, cream and navy sit
+together in one row. `<LogoWall colour />` picks the colour file, falls back
+to the black one where there is no colour version, and takes its optical
+nudge from `colourScale` rather than `scale`: a mark that is a filled block in
+colour carries far more ink than its black cut-out.
+
+The colour set was reassembled on 30 September 2026, after the mono
+conversion had overwritten the originals in place: six came back out of git
+(`a7c66c1`, and `f4bf291` for The Humble Fishmonger), Le Olive and Pearls Co.
+from the supplied files, each trimmed to its own artwork. **Line 98 has no
+colour original anywhere** — it was cut from a square social image before the
+conversion — so the colour row shows its black wordmark until the file is
+supplied.
+
+The black set was converted in place by:
 
 ```bash
 npm run logos:mono
@@ -479,6 +519,16 @@ are a static row.
   inside it is about half a section's, taken off the head's own padding, the
   marquee's and the two sections' (`.partners` and `.what` in
   `src/pages/index.astro`), not off a negative margin.
+- **The closing invitation** (`Connect.astro`). The last section on /about,
+  and the one that closes the practice areas on /services: the label, "What
+  can we do for you?" with a circle drawn around the last word, and Reach out,
+  which leads to Get in touch. It is a component rather than part of the
+  layout, so putting it at the end of another page is one line on that page. The
+  circle is a stroked path stretched to whatever that word measures, so it
+  stays around it at every size and in either display face, and its stroke
+  stays even because it doesn't scale with the box. The pill and the round
+  arrow beside it are one link, not two — one tab stop, one destination — and
+  they fill and empty together, the arrow nudging right on hover.
 - **Footer** (`Footer.astro`). Full-bleed black: edge to edge and down to the
   bottom of the page, its own padding holding the content off the edges. The
   same on every page — no props, no per-page variants: the wordmark, what
@@ -491,9 +541,8 @@ are a static row.
 Wherever an image or a video is missing, the page shows an outlined frame at
 the exact aspect ratio the real media will take, with **"Add image"** or
 **"Add video"** in the middle (`Placeholder.astro`). Swapping in the real file
-moves nothing else on the page. Today every slot but one is filled with
-temporary media (see Visual content); the Tech & Startups sector on Services
-shows "Add image" until a picture arrives.
+moves nothing else on the page. Every slot is filled with temporary media
+(see Visual content).
 
 ## Services
 
@@ -502,16 +551,17 @@ The copy lives in **`src/data/services.ts`**:
 - **Five practice areas**, each a one-line summary (set in italics, under the
   title), a paragraph, the sub-services it covers as a name and a line each,
   and a closing line.
-- **Six sectors**, each a sector and the kind of work there. No metrics and no
-  client names.
-- **Results** (`CASE_STUDIES`) are still there but **not rendered**: the
-  Results section came off the page on 28 September 2026. They are the
-  verified figures from brief §5, ready if the section returns.
+- **Six sectors** (`SECTORS`) and **results** (`CASE_STUDIES`) are still
+  there but **not rendered**. The Results section came off the page on 28
+  September 2026; the sectors, with their images, came off on 30 September,
+  replaced by "Why AMAVI" in the same position. Both are ready if either
+  section returns, and their images are still keyed by sector name in
+  `src/data/media.ts`.
 
-Add, reorder or edit entries and the page lays itself out. Sector images are
-keyed by sector name in `src/data/media.ts`, so a renamed sector needs its key
-renamed there too. The "Why creator-led" copy is in
-`src/pages/services.astro` itself.
+Add, reorder or edit entries and the page lays itself out. The "Why AMAVI"
+four points are in `src/pages/services.astro` itself. The page closes on the
+client logos in full colour: `<LogoWall marquee colour eyebrow="Trusted by" />`,
+the same marquee the home page runs in black.
 
 ### The areas are an accordion
 
@@ -685,11 +735,10 @@ The ones that matter most:
   of 40" and "See how we work" used to link to sections on Services that have
   since been removed; both now go to the page itself. Marked `TODO(client)` in
   `src/pages/index.astro`.
-- **An image for Tech & Startups**, the one sector card still showing
-  "Add image".
+- **Line 98's logo in colour.** Every other client logo has a colour original
+  for the row on /services; Line 98's was lost to the mono conversion, so that
+  row shows its black wordmark. See Client logos.
 - **TikTok link** for the footer (`SOCIALS` in `src/consts.ts`).
-- **A Work page.** The footer's "Work" leads to the sectors on Services until
-  there is one.
 - **Menu labels.** The header menu still reads About / Services / Become a
   Creator / Get in Touch; the footer uses the new names (Creator Network,
   Contact). Say which set to keep.

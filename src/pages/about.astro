@@ -1,57 +1,57 @@
 ---
+import { Image } from 'astro:assets';
+
 import Base from '../layouts/Base.astro';
 import Lines from '../components/Lines.astro';
+import Connect from '../components/Connect.astro';
+import { MEDIA } from '../data/media';
 
 /**
  * About: who AMAVI is and how it thinks — a point of view more than an
  * introduction. Creator marketing is the core speciality; the page makes
  * clear it's never the limit.
  *
- * "Why AMAVI" is the page's one dark band: the copy over an abstract city
- * plan, marked where AMAVI is. The pattern is drawn from a handful of fixed
- * numbers — a design, not a survey map — and is hidden from assistive tech.
-
+ * "Our philosophy" is the page's one dark band: the copy over a photograph
+ * of AMAVI's own work, under an overlay heavy enough that white text holds on
+ * every part of it. The picture is decoration, and hidden from assistive tech.
  */
-
-/**
- * The city plan behind "Why AMAVI": one centre, roads leaving the frame, ring
- * roads, and blocks along the roads. Every number is fixed, so the drawing is
- * the same on every build. An abstraction of a city, not a map of one.
- */
-/* Off-centre on purpose: the pin falls clear of the copy, under the heading. */
-const CITY = { x: 320, y: 470 };
-const ANGLES = [-72, -28, 8, 46, 96, 140, 178, 216, 262, 308];
-const point = (angle: number, distance: number) => ({
-  x: CITY.x + Math.cos((angle * Math.PI) / 180) * distance,
-  y: CITY.y + Math.sin((angle * Math.PI) / 180) * distance,
-});
-const radials = ANGLES.map((angle) => point(angle, 1100));
-const rings = [120, 235, 380, 560];
-const blocks = ANGLES.flatMap((angle, i) =>
-  [170, 300, 450, 620].slice(i % 2 === 0 ? 0 : 1).map((distance, j) => {
-    const at = point(angle + (j % 2 ? 7 : -7), distance);
-    const w = 52 + ((i * 13 + j * 29) % 46);
-    const h = 30 + ((i * 7 + j * 17) % 34);
-    return { x: at.x - w / 2, y: at.y - h / 2, w, h, angle: angle + 90 };
-  }),
-);
 
 const approach = [
   {
     name: 'Strategy',
-    body: 'Turning business targets into clear campaign ideas, defined audiences and actionable execution plans.',
+    body: 'We transform your business goals into a sharp campaign concept, precise audience targeting and a structured delivery roadmap.',
   },
   {
     name: 'Creator selection',
-    body: 'Vetting and onboarding trusted creators and communities, from single posts to long-term partnerships.',
+    body: 'We discover, vet and contract the creators and communities your audience genuinely trusts, from single activations to long-term brand ambassador programmes.',
   },
   {
-    name: 'Content',
-    body: 'Guiding creator output from brief to approval, complete with native video production and platform-first editing.',
+    name: 'Content & production',
+    body: 'We manage creator briefs through to final approval, providing native video editing and production so every asset fits seamlessly onto its platform.',
   },
   {
-    name: 'Reporting',
-    body: 'Tracking live metrics and closing every campaign with data-backed insights to drive your next step.',
+    name: 'Reporting & analytics',
+    body: 'We track performance in real time and deliver clear, actionable post-campaign reporting to ensure every future move is grounded in data.',
+  },
+];
+
+/** What the work is for, in the same ruled list as the approach above it. */
+const commitment = [
+  {
+    name: 'Driving authentic, sustainable growth',
+    body: 'We make it our mission to make your brand as culturally relevant and commercially successful as it can be.',
+  },
+  {
+    name: 'Every touchpoint counts',
+    body: 'Every creator brief, video frame and campaign activation is an opportunity to generate a real response with a tangible result.',
+  },
+  {
+    name: 'End-to-end precision',
+    body: 'From initial strategy and creator matchmaking to native production, legal compliance and data-driven reporting, we handle every detail under one roof.',
+  },
+  {
+    name: 'Network advantage',
+    body: 'Powered by a curated database of over 1,000 vetted creators and partners across Ireland and Europe, every campaign we launch starts further ahead.',
   },
 ];
 
@@ -63,22 +63,17 @@ const approach = [
 >
   {/* ================= Intro ================= */}
   <section class="section about">
-    <div class="container container--narrow about__intro">
+    <div class="container about__intro">
       <h1 class="eyebrow">About AMAVI</h1>
-      <p class="display display--lg about__statement"><Lines text={'We find the\npeople behind\nthe impact.'} /></p>
       <div class="about__lead">
         <p class="lead">
-          AMAVI is a <strong>creator-led marketing and partnerships agency</strong> working with
-          brands across Ireland and Europe. Founded in Prishtina, Kosovo, we work with clients
-          across healthcare, wellness, hospitality, food and retail.
+          We are a <strong>creator-led marketing and partnerships agency</strong> for ambitious
+          brands across Ireland and Europe. In a world overwhelmed by noise, reach is easy to buy.
+          Relevance isn’t. We focus on what actually moves the needle: authentic human connection,
+          trusted voices and measurable commercial results. We solve brand growth problems rather
+          than become one.
         </p>
-        <p class="lead">
-          We believe growth starts with people. The right creator, community, business or
-          partnership can open the door to an audience a brand hasn’t reached before.
-        </p>
-        <p class="lead">Our job is to find that door, and build the strategy to get you through it.</p>
       </div>
-      <a href="/services/" class="btn btn--primary about__cta">Work with us</a>
     </div>
 
   </section>
@@ -88,8 +83,7 @@ const approach = [
     <div class="container split">
       <div class="split__head">
         <p class="eyebrow">Our approach</p>
-        <h2 id="approach-heading" class="display display--md"><Lines text={'Creators are one part\nof the equation.'} /></h2>
-        <p class="lead">We build the right mix around the problem we’re solving.</p>
+        <h2 id="approach-heading" class="display display--md"><Lines text={'Full-funnel influencer,\ndigital and social campaigns.'} /></h2>
       </div>
       <ul class="approach" role="list">
         {approach.map((item) => (
@@ -102,42 +96,51 @@ const approach = [
     </div>
   </section>
 
-  {/* ================= Why AMAVI: over the city ================= */}
+  {/* ================= Our philosophy: over the photograph ================= */}
   <section class="section why-amavi surface-dark" aria-labelledby="why-heading">
-    <div class="city" aria-hidden="true">
-      <svg viewBox="0 0 1200 700" preserveAspectRatio="xMinYMid slice" role="presentation">
-        {/* Roads leaving the frame: where AMAVI is, and everywhere the work goes. */}
-        {radials.map((r) => <line x1={CITY.x} y1={CITY.y} x2={r.x} y2={r.y} class="city__road" />)}
-        {rings.map((radius) => <circle cx={CITY.x} cy={CITY.y} r={radius} class="city__ring" />)}
-        {blocks.map((b) => (
-          <rect x={b.x} y={b.y} width={b.w} height={b.h} class="city__block"
-                transform={`rotate(${b.angle} ${b.x + b.w / 2} ${b.y + b.h / 2})`} />
-        ))}
-        <path d="M-40 250 C 220 300, 360 430, 600 430 S 980 300, 1240 350" class="city__river" />
-        <circle cx={CITY.x} cy={CITY.y} r="46" class="city__here" />
-        <circle cx={CITY.x} cy={CITY.y} r="9" class="city__pin" />
-      </svg>
+    {/* Decoration: what it says is said by the copy over it. */}
+    <div class="band-media" aria-hidden="true">
+      <Image src={MEDIA.philosophy.image} alt="" widths={[768, 1100, 1376]}
+             sizes="100vw" loading="lazy" decoding="async" class="band-media__img" />
+      <div class="band-media__shade"></div>
     </div>
 
     <div class="container split why-amavi__inner">
       <div class="split__head">
-        <p class="eyebrow">Why AMAVI</p>
-        <h2 id="why-heading" class="display display--md"><Lines text={'Start with the\nopportunity.\nNot the deliverable.'} /></h2>
+        <p class="eyebrow">Our philosophy</p>
+        <h2 id="why-heading" class="display display--md"><Lines text={'The right people\nbeat more people.'} /></h2>
       </div>
       <div class="split__body">
         <p>
-          At AMAVI, we believe the right people beat more people. In today’s market, traditional
-          ads get filtered out, but influencer marketing works because it’s rooted in human
-          connection and authentic trust. Delivering high-ROI influencer campaigns is our core
-          specialty. We identify, vet and contract the creators your target audience actually
-          listens to, managing everything from creative strategy to final performance reporting.
-          Backed by an ever-expanding database of over 1,000 creators across Ireland and Europe,
-          every campaign we launch starts further ahead and delivers influence you can measure.
+          A campaign doesn’t always need another influencer. Sometimes it needs a creator, an
+          active community, or a strategic partnership that puts your brand directly in front of
+          the audience that matters. We look at the bigger picture first, then assemble the exact
+          mix to deliver on your commercial targets.
         </p>
-        <p class="label city__caption">Prishtina, Kosovo · 42.66° N 21.16° E</p>
       </div>
     </div>
   </section>
+
+  {/* ================= Our commitment ================= */}
+  <section class="section" aria-labelledby="commitment-heading">
+    <div class="container split">
+      <div class="split__head">
+        <p class="eyebrow">Our commitment</p>
+        <h2 id="commitment-heading" class="display display--md"><Lines text={'What you get when\nyou work with us.'} /></h2>
+      </div>
+      <ul class="approach" role="list">
+        {commitment.map((item) => (
+          <li class="approach__item">
+            <h3 class="approach__name">{item.name}</h3>
+            <p class="approach__body">{item.body}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {/* ================= The closing invitation ================= */}
+  <Connect />
 
 </Base>
 
@@ -145,43 +148,48 @@ const approach = [
   /* ---------- Intro: space does the work ---------- */
   .about { padding-block: clamp(4rem, 2rem + 8vw, 9rem) var(--section-y); }
   .about__intro { display: grid; justify-items: center; text-align: center; gap: var(--space-m); }
-  .about__statement { max-width: 20ch; }
-  .about__lead { display: grid; gap: var(--space-s); justify-items: center; max-width: 54ch; }
+  .about__statement { max-width: 28ch; }
+  /* Its own measure rather than the narrow container's and the shared .lead's
+     48ch: the lines run to about 75 characters, a paragraph to read rather
+     than a column. Below 48em the measure is wider than the screen, so the
+     text fills the content width exactly as it did before. */
+  .about__lead { display: grid; gap: var(--space-s); justify-items: center; max-width: 68ch; }
+  .about__lead .lead { max-width: none; }
   .about__lead strong { font-weight: 700; }
-  .about__cta { margin-top: var(--space-s); }
 
   /* ---------- The four portraits ----------
      A row at every width. On a phone it scrolls sideways, a card and a bit in
      view, so four 2:3 portraits can't fill the screen; from 48em up all four
      sit across the container and scale with it. */
-  /* ---------- Why AMAVI: white on black, over the city ----------
-     The drawing is decoration — white lines on black, well under the text,
-     with the one accent mark where AMAVI is. */
-  .why-amavi { position: relative; isolation: isolate; overflow: hidden; }
+  /* ---------- Our philosophy: white on a photograph ----------
+     The picture fills the band and the shade sits over it, dark enough that
+     white text holds on the lightest part of the frame. */
+  /* A little taller than a section's own space, so the photograph behind it
+     has room to be a picture rather than a strip. */
+  .why-amavi {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: calc(var(--section-y) + var(--space-l));
+  }
   .why-amavi__inner { position: relative; }
 
-  .city { position: absolute; inset: 0; z-index: -1; }
-  .city svg { width: 100%; height: 100%; }
-  .city :global(.city__road),
-  .city :global(.city__ring),
-  .city :global(.city__block),
-  .city :global(.city__river) {
-    fill: none;
-    stroke: var(--on-dark);
-    vector-effect: non-scaling-stroke;
+  .band-media { position: absolute; inset: 0; z-index: -1; }
+  .band-media__img {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    /* The prints hang in the middle of the frame, so a wide band keeps the
+       middle and crops the wall above and below. */
+    object-position: center;
   }
-  .city :global(.city__road) { stroke-width: 1; opacity: 0.28; }
-  .city :global(.city__ring) { stroke-width: 1; opacity: 0.16; }
-  .city :global(.city__block) { stroke-width: 1; opacity: 0.22; }
-  .city :global(.city__river) { stroke-width: 2; opacity: 0.14; }
-  .city :global(.city__here) { fill: none; stroke: var(--on-dark); stroke-width: 1; opacity: 0.5; }
-  .city :global(.city__pin) { fill: var(--accent); }
-  .city__caption { margin-top: var(--space-m); opacity: 0.8; }
+  .band-media__shade { position: absolute; inset: 0; background: var(--surface-dark); opacity: 0.72; }
 
   /* ---------- Heading beside its text, as on Services ---------- */
   .split { display: grid; gap: var(--space-l); }
   @media (min-width: 64em) {
-    .split { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
+    .split { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: var(--space-xl); row-gap: var(--space-2xl); align-items: start; }
   }
   .split__head { display: grid; gap: var(--space-m); align-content: start; }
   .split__body {
@@ -194,14 +202,10 @@ const approach = [
   }
   .split__body strong { font-weight: 700; }
 
-  /* ---------- Approach: a ruled list, as the areas are on Services ---------- */
-  .approach { list-style: none; border-top: var(--stroke) solid var(--line); }
-  .approach__item {
-    display: grid;
-    gap: var(--space-3xs);
-    padding-block: var(--space-m);
-    border-bottom: var(--stroke-hair) solid var(--line);
-  }
+  /* ---------- Approach: a list held apart by space, not by rules ---------- */
+  .approach { list-style: none; display: grid; gap: var(--space-l); }
+  .approach__item { display: grid; gap: var(--space-3xs); }
+  @media (min-width: 64em) { .approach { gap: var(--space-xl); } }
   .approach__name {
     font-size: 0.75rem;
     font-weight: 700;

@@ -2,9 +2,32 @@
 import Base from '../layouts/Base.astro';
 import Frame from '../components/Frame.astro';
 import Lines from '../components/Lines.astro';
-import { SERVICE_AREAS, SECTORS } from '../data/services';
+import LogoWall from '../components/LogoWall.astro';
+import Connect from '../components/Connect.astro';
+import { SERVICE_AREAS } from '../data/services';
 import { MEDIA } from '../data/media';
 import { SITE_NAME, SITE_URL } from '../consts';
+
+/** Why AMAVI, in four points: what a brand gets that it would not get elsewhere. */
+const VALUES = [
+  {
+    name: 'Network advantage',
+    body: 'Direct access to 1,000+ vetted creators across Ireland and Europe, categorised by niche, location and audience demographics.',
+  },
+  {
+    name: 'Audience-first vetting',
+    body: 'We search on real audience engagement and trust rather than vanity follower counts.',
+  },
+  {
+    name: 'End-to-end ownership',
+    body: 'From legal contracts and creator briefing to video editing and performance tracking, we handle everything under one roof.',
+  },
+  {
+    name: 'Commercial accountability',
+    body: 'Every campaign is structured around clear KPIs and measured against tangible business outcomes.',
+  },
+];
+
 
 /**
  * What AMAVI does: the goal comes first, and the mix — creators, strategy,
@@ -58,14 +81,17 @@ const schema = {
             content and opportunities to get you there.
           </p>
         </div>
-        <p class="label">Creators&nbsp;· Campaigns&nbsp;· Content&nbsp;· Partnerships</p>
       </div>
       <Frame media={MEDIA.services.head} ratio="2/3" class="svc-head__media" />
     </div>
 
     <div class="container">
       <ol class="areas" role="list" data-accordion>
-        {SERVICE_AREAS.map((area) => (
+        {SERVICE_AREAS.map((area) => {
+          // `null` is an area that runs without a picture; `undefined` is one
+          // still waiting for one, which the frame shows as "Add image".
+          const media = MEDIA.services.areas[area.id];
+          return (
           <li class="area" id={area.id} data-area data-open="true">
             <h2 class="area__heading">
               <button type="button" class="area__trigger" id={`${area.id}-trigger`}
@@ -81,13 +107,20 @@ const schema = {
             <div class="area__panel" id={`${area.id}-panel`} role="region"
                  aria-labelledby={`${area.id}-trigger`} data-panel>
               <div class="area__inner">
-                <div class="area__grid">
-                  <div class="area__text">
-                    {/* The row above is the heading; here the number and title
-                        are the panel's opening, set large. */}
+                <div class:list={['area__grid', {
+                  'area__grid--wide': media === null,
+                  'area__grid--aligned': media?.align === 'body',
+                }]}>
+                  {/* The row above is the heading; here the number and title
+                      are the panel's opening, set large. Head and body are
+                      separate so a picture can start level with either. */}
+                  <div class="area__head">
                     <p class="area__number" aria-hidden="true">{area.number}</p>
                     <p class="display display--md area__title">{area.title}</p>
                     <p class="area__summary">{area.summary}</p>
+                  </div>
+
+                  <div class="area__body">
                     <p class="area__intro">{area.intro}</p>
                     <ul class="area__services" role="list">
                       {area.services.map((service) => (
@@ -97,63 +130,47 @@ const schema = {
                         </li>
                       ))}
                     </ul>
-                    <p class="eyebrow">{area.closing}</p>
                   </div>
-                  <Frame media={MEDIA.services.areas[area.id]} ratio="2/3" class="area__media" />
+
+                  {media !== null && <Frame media={media} ratio="2/3" class="area__media" />}
                 </div>
               </div>
             </div>
           </li>
-        ))}
+          );
+        })}
       </ol>
     </div>
   </section>
 
-  {/* ================= Sectors =================
-      A sector and the kind of work there — no metrics, no client names. */}
-  <section class="section section--ruled" id="sectors" aria-labelledby="sectors-heading">
+  {/* ================= Why AMAVI =================
+      Four points, in the ruled list the rest of the site uses. */}
+  <section class="section section--ruled" id="why-amavi" aria-labelledby="values-heading">
     <div class="container">
       <div class="section-head">
-        <p class="eyebrow">Where we work</p>
-        <h2 id="sectors-heading" class="display display--md"><Lines text={'Different industries.\nSame approach.'} /></h2>
+        <p class="eyebrow">Why AMAVI</p>
         <p class="lead">
-          We adapt the strategy to the audience, the objective and the opportunity, not the
-          other way around.
+          We combine creative instinct with end-to-end execution to turn genuine audience trust
+          into business growth.
         </p>
       </div>
-      <ul class="sectors" role="list">
-        {SECTORS.map((sector) => (
-          <li class="sector">
-            <Frame media={MEDIA.services.sectors[sector.name]} ratio="4/5" sizes="(min-width: 64em) 12rem, 70vw" />
-            <h3 class="label sector__name">{sector.name}</h3>
-            <p class="sector__work">{sector.focus.join(' · ')}</p>
+      <ul class="values" role="list">
+        {VALUES.map((value) => (
+          <li class="value">
+            <h3 class="value__name">{value.name}</h3>
+            <p class="value__body">{value.body}</p>
           </li>
         ))}
       </ul>
     </div>
   </section>
 
-  {/* ================= Why creator-led ================= */}
-  <section class="section section--ruled why" aria-labelledby="why-heading">
-    <div class="container why__grid">
-      <div class="why__head">
-        <p class="eyebrow">Why creator-led</p>
-        <h2 id="why-heading" class="display display--md why__heading"><Lines text={'People create\nthe connection.'} /></h2>
-      </div>
+  {/* ================= The closing invitation ================= */}
+  <Connect />
 
-      <div class="prose why__body">
-        <p>Brands don’t build relationships with algorithms. People do.</p>
-        <p>
-          Creators bring context, personality and trust to the brands they work with, helping
-          businesses enter conversations that traditional advertising can’t always create.
-        </p>
-        <p><strong>But creators are only one part of the picture.</strong></p>
-        <p>
-          We combine creator marketing with content, strategy and partnerships to build campaigns
-          around <strong>the audience, not just the platform</strong>.
-        </p>
-      </div>
-    </div>
+  {/* ================= Trusted by ================= */}
+  <section class="section" aria-label="Clients we work with">
+    <LogoWall marquee boost={1.15} eyebrow="Trusted by" />
   </section>
 </Base>
 
@@ -169,7 +186,7 @@ const schema = {
   .svc-head__lead strong { font-weight: 700; }
   .svc-head :global(.svc-head__media) { width: min(100%, 16rem); }
   @media (min-width: 48em) {
-    .svc-head__grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-2xl); }
+    .svc-head__grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: var(--space-xl); row-gap: var(--space-2xl); }
     .svc-head :global(.svc-head__media) { width: min(100%, 22rem); justify-self: end; }
   }
 
@@ -216,14 +233,37 @@ const schema = {
   }
 
   /* ---------- Inside a panel: text beside a portrait image ---------- */
-  .area__grid { display: grid; gap: var(--space-xl); padding-bottom: var(--space-xl); }
-  .area :global(.area__media) { width: min(100%, 16rem); }
+  /* The panel ends on its last row, so the tail below it is short. */
+  .area__grid { display: grid; gap: var(--space-m); padding-bottom: var(--space-l); }
+  .area__grid--wide { padding-bottom: var(--space-m); }
+  .area :global(.area__media) { width: min(100%, 16rem); margin-top: var(--space-l); }
+
   @media (min-width: 48em) {
-    .area__grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-2xl); align-items: start; }
-    .area :global(.area__media) { width: min(100%, 22rem); justify-self: end; }
+    .area__grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: var(--space-xl);
+      align-items: start;
+    }
+    .area__head { grid-column: 1; grid-row: 1; }
+    .area__body { grid-column: 1; grid-row: 2; }
+    .area :global(.area__media) {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      width: min(100%, 22rem);
+      justify-self: end;
+      margin-top: 0;
+    }
+    /* Level with the paragraph instead, leaving the number and title clear. */
+    .area__grid--aligned :global(.area__media) { grid-row: 2; }
+    /* An area with no picture: one column across the panel, and less of a
+       tail below it now that nothing has to match an image's height. The
+       intro keeps its measure, so the lines stay readable at full width. */
+    .area__grid--wide { grid-template-columns: minmax(0, 1fr); }
   }
 
-  .area__text { display: grid; gap: var(--space-m); align-content: start; }
+  .area__head,
+  .area__body { display: grid; gap: var(--space-m); align-content: start; }
   /* The area's number: the page's one large accent mark. */
   .area__number {
     font-family: var(--font-display);
@@ -237,16 +277,23 @@ const schema = {
   .area__summary { font-style: italic; font-weight: var(--weight-secondary); max-width: var(--measure); }
   .area__intro { font-weight: var(--weight-secondary); max-width: var(--measure); }
 
-  /* ---------- What an area covers: a ruled table of names and lines ------- */
-  .area__services { list-style: none; margin-top: var(--space-s); border-top: var(--stroke) solid var(--line); }
-  .area__service {
+  /* ---------- What an area covers: names and lines, held apart by space ----
+     No rules in here: the space between the rows is what separates them, so
+     an open panel reads as a set of blocks rather than a table. The rules
+     between 01–05 in the index are a different thing and stay. */
+  .area__services {
+    list-style: none;
     display: grid;
-    gap: var(--space-3xs);
-    padding-block: var(--space-m);
-    border-bottom: var(--stroke-hair) solid var(--line);
+    gap: var(--space-l);
+    margin-top: var(--space-m);
   }
-  @media (min-width: 64em) {
-    .area__service { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-l); align-items: baseline; }
+  .area__service { display: grid; gap: var(--space-3xs); }
+  /* The label moves beside its line only at 80em: beside a picture, the text
+     column at 64em leaves the description about 34 characters wide, which is
+     a column too narrow to read comfortably. */
+  @media (min-width: 64em) { .area__services { gap: var(--space-xl); } }
+  @media (min-width: 80em) {
+    .area__service { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); column-gap: var(--space-m); align-items: baseline; }
   }
   .area__service-name {
     font-size: 0.75rem;
@@ -256,42 +303,26 @@ const schema = {
   }
   .area__service-desc { font-weight: var(--weight-secondary); }
 
-  /* ---------- Sectors: six short cards ---------- */
-  .sectors {
-    list-style: none;
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(14rem, 70%);
-    gap: var(--space-m);
-    margin-inline: calc(var(--gutter) * -1);
-    padding: var(--space-2xs) var(--gutter);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
+  /* ---------- Why AMAVI: four points, two by two ----------
+     Rules between the rows and nowhere else. The columns carry their own
+     padding rather than a grid gap, so a rule runs the full width of the
+     list instead of breaking in the middle of it. */
+  .values { list-style: none; display: grid; }
+  .value { display: grid; gap: var(--space-2xs); align-content: start; padding-block: var(--space-m); }
+  .value:first-child { padding-top: 0; }
+  @media (min-width: 48em) {
+    .values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .value:nth-child(2n+1) { padding-right: var(--space-l); }
+    .value:nth-child(2n) { padding-left: var(--space-l); }
+    .value:nth-child(-n+2) { padding-top: 0; }
   }
-  .sectors::-webkit-scrollbar { display: none; }
-  @media (min-width: 40em) { .sectors { grid-auto-columns: minmax(14rem, 40%); } }
-  @media (min-width: 64em) {
-    .sectors {
-      grid-auto-flow: row;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      margin-inline: 0;
-      padding: 0;
-      overflow: visible;
-    }
-  }
-  .sector { display: grid; gap: var(--space-2xs); align-content: start; scroll-snap-align: start; }
-  .sector__name { margin-top: var(--space-s); }
-  .sector__work { font-size: var(--text-base); font-weight: 700; line-height: 1.35; }
 
-  /* ---------- Why creator-led ---------- */
-  .why__grid { display: grid; gap: var(--space-l); }
-  @media (min-width: 64em) {
-    .why__grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: var(--space-2xl); align-items: start; }
+  .value__name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
-  .why__head { display: grid; gap: var(--space-m); align-content: start; }
-  .why__heading { max-width: 16ch; }
-  /* Lead-sized and light; the two claims that matter step up to strong. */
-  .why__body { font-size: var(--text-lead); font-weight: var(--weight-secondary); line-height: 1.65; }
+  .value__body { font-weight: var(--weight-secondary); }
+
 </style>

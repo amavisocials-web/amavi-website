@@ -1,18 +1,16 @@
 import type { ImageMetadata } from 'astro';
 
-import cafeLaptop from '../assets/media/services-head.jpg';
+import servicesInvoice from '../assets/media/services-invoice.jpg';
 import homeCreators from '../assets/media/home-creators.jpg';
-import areaCreatorMarketing from '../assets/media/area-creator-marketing.jpg';
-import areaBrandStrategy from '../assets/media/area-brand-strategy.jpg';
-import areaContentSocial from '../assets/media/area-content-social.jpg';
-import areaGrowthPartnerships from '../assets/media/area-growth-partnerships.jpg';
+import areaCreatorCommunity from '../assets/media/area-creator-community.jpg';
+import areaCreatorUgc from '../assets/media/area-creator-ugc.jpg';
+import areaAffiliateMarketing from '../assets/media/area-affiliate-marketing.jpg';
 import seaCliffs from '../assets/media/sector-seafood.jpg';
 import sectorHealthcare from '../assets/media/sector-healthcare.jpg';
 import sectorWellness from '../assets/media/sector-wellness.jpg';
 import unboxing from '../assets/media/sector-food.jpg';
 import sectorFashion from '../assets/media/sector-fashion.jpg';
-import about2 from '../assets/media/about-2.jpg';
-import about3 from '../assets/media/about-3.jpg';
+import aboutPhilosophy from '../assets/media/about-philosophy.jpg';
 
 /**
  * Every image and video slot on the site, in one place. Swap a file here (or
@@ -33,14 +31,18 @@ import about3 from '../assets/media/about-3.jpg';
 export interface ImageSlot {
   image: ImageMetadata;
   alt: string;
+  /**
+   * Where the picture starts beside a column of text: level with the top of
+   * it (the default), or level with the paragraph, below the number and
+   * title. Only the service areas read this.
+   */
+  align?: 'top' | 'body';
 }
 
 export interface VideoSlot {
   /** Base path under /public, no extension: `<src>.mp4`, poster `<src>.jpg`. */
   src: string;
 }
-
-const cafe: ImageSlot = { image: cafeLaptop, alt: 'A laptop showing the AMAVI Socials logo on a café table' };
 
 export const MEDIA = {
   home: {
@@ -58,18 +60,27 @@ export const MEDIA = {
     howWeWork: { src: '/media/features/studio' } as VideoSlot,
   },
   services: {
-    head: cafe,
     /**
-     * Keyed by area id in src/data/services.ts. 2:3.
-     * TODO(client): nothing supplied suits Live Experiences — an activation
-     * photograph would — so that one shows "Add image".
+     * "Your goal comes first." 2:3. AMAVI's own: a printed receipt of the five
+     * practice areas (supplied 30 September 2026), in place of the café laptop
+     * photograph that was here.
+     */
+    head: {
+      image: servicesInvoice,
+      alt: 'A printed receipt headed “Services Invoice”, listing AMAVI’s five practice areas with each price still to be decided',
+    } as ImageSlot,
+    /**
+     * Keyed by area id in src/data/services.ts. 2:3. `null` is an area that
+     * runs without a picture on purpose; a missing key is one still waiting
+     * for one, and shows "Add image".
      */
     areas: {
-      'creator-community-aor': { image: areaCreatorMarketing, alt: 'A content studio, with a team at their desks' },
-      'creator-campaigns': { image: areaBrandStrategy, alt: 'An office, with a screen reading “Digital Marketing”' },
-      'creator-ugc': { image: areaContentSocial, alt: 'A studio set for a shoot: lights, cameras and a rail of clothes' },
-      'affiliate-marketing': { image: areaGrowthPartnerships, alt: 'A creator and a brand founder talking on a bench by the sea' },
-    } as Record<string, ImageSlot | undefined>,
+      'creator-community-aor': { image: areaCreatorCommunity, alt: 'Someone holding an oversized phone showing a fashion brand’s online shop' },
+      'creator-campaigns': null,
+      'creator-ugc': { image: areaCreatorUgc, alt: 'A grid of small printed creator photographs pinned to a steel sheet' },
+      'live-experiences': null,
+      'affiliate-marketing': { image: areaAffiliateMarketing, alt: 'Someone filming a flat lay of printed campaign shots on a phone mounted on a tripod', align: 'body' },
+    } as Record<string, ImageSlot | null | undefined>,
     /**
      * Keyed by sector name in src/data/services.ts. 4:5.
      * TODO(client): nothing supplied suits Tech & Startups without repeating a
@@ -87,10 +98,9 @@ export const MEDIA = {
    * Four portraits, 2:3. Not rendered at the moment: the row of cards came off
    * /about on 29 September 2026. Kept so putting it back is one line.
    */
-  about: [
-    cafe,
-    { image: about2, alt: 'A woman closing a laptop in a café' },
-    { image: about3, alt: 'An open gift box reading “Hello from Ireland!”' },
-    { image: areaGrowthPartnerships, alt: 'A creator and a brand founder on a bench by the sea' },
-  ] as (ImageSlot | undefined)[],
+  /** Behind "Our philosophy" on /about, under a black overlay: decoration. */
+  philosophy: {
+    image: aboutPhilosophy,
+    alt: '',
+  } as ImageSlot,
 };

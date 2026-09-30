@@ -23,6 +23,10 @@
      black overlay that keeps text legible over video (the hero and the stat
      tiles). See "Surfaces" below. */
   --surface-dark:  #000000;
+  /* The line between sections, on the few boundaries that still take one:
+     barely there, because space is what separates a section now. Redefined
+     on dark surfaces (.surface-dark), where black would disappear. */
+  --divider-line:  rgb(0 0 0 / 0.06);
   --on-dark:       #FFFFFF;   /* text, links, outlines and focus on black */
 
   /* Contrast, measured:
@@ -233,12 +237,23 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
 .section--tight { padding-block: clamp(1.75rem, 1.05rem + 2.8vw, 3.15rem); }
 
 /* Where a section once separated itself with a background, it now takes a
-   full-width black hairline and the extra space above. */
-.section--ruled { border-top: var(--stroke-hair) solid var(--line); }
+   hairline across the container's content, and room above and below. It is a
+   pseudo-element rather than a border, so the line stops where the words do
+   instead of running edge to edge, and nothing is announced as a separator. */
+.section--ruled { position: relative; }
+.section--ruled::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(100% - var(--gutter) * 2, var(--container) - var(--gutter) * 2);
+  border-top: var(--stroke) solid var(--divider-line);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
 
 .centered { text-align: center; margin-inline: auto; }
 
-.rule { border: 0; border-top: var(--stroke-hair) solid var(--line); margin: 0; }
 
 .section-head {
   display: grid;
@@ -331,7 +346,12 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
    On black, text, links, outlines and rules turn white. The accent keeps the
    primary button's fill and marks hover. Focus rings turn white too: the
    accent is only 2.16:1 against black, and a focus ring needs 3:1. */
-.surface-dark { background: var(--surface-dark); color: var(--on-dark); }
+.surface-dark {
+  background: var(--surface-dark);
+  color: var(--on-dark);
+  /* The same divider, inverted: a translucent white, just visible on black. */
+  --divider-line: rgb(255 255 255 / 0.10);
+}
 
 .surface-dark a:not(.btn) { color: var(--on-dark); }
 .surface-dark a:not(.btn):hover { color: var(--accent); }
@@ -342,7 +362,6 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
 .surface-dark .link-action:hover { color: var(--accent); border-color: var(--accent); }
 .surface-dark .proof-link { color: var(--on-dark); }
 .surface-dark .proof-link:hover { color: var(--accent); }
-.surface-dark .rule { border-color: var(--on-dark); }
 .surface-dark :focus-visible { outline-color: var(--on-dark); }
 
 /* --- Focus and accessibility -------------------------------------------

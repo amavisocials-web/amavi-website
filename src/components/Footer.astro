@@ -8,9 +8,9 @@ import { SOCIALS, SITE_NAME, CONTACT_PATH, CREATOR_PATH, CONTACT_EMAIL } from '.
  * page, with its padding holding the content off the edges.
  *
  * The same on every page, with no props and no per-page variants: the
- * wordmark, what AMAVI is, the sign-off, then the site's pages, how to reach
- * us and where to follow, and the small print. No dividing rules, and no
- * closing call to action — each page ends on its own last section.
+ * wordmark, what AMAVI is, then the site's pages, how to reach us and where
+ * to follow, and the small print. No dividing rules, and no closing call to
+ * action — each page ends on its own last section.
  */
 const year = new Date().getFullYear();
 
@@ -29,7 +29,6 @@ const pages = [
       <div class="footer-brand">
         <Logo size="lg" variant="white" />
         <p class="meta footer-tag"><Lines text={'Creator-led marketing & partnerships.\nIreland & EU.'} /></p>
-        <p class="display display--sm footer-signoff"><Lines text={'People.\nPartnerships.\nProgress.'} /></p>
       </div>
 
       <nav class="footer-col" id="footer-nav" aria-label="Footer">
@@ -72,29 +71,33 @@ const pages = [
   /* Full bleed: no gutter on any side, and black to the bottom of the page.
      The padding below is what keeps the content off the edges. */
   .footer-card {
-    --card-pad: clamp(1.5rem, 0.8rem + 3.2vw, 4rem);
+    /* A third less than it was: the footer is the end of the page, not a
+       section of it. */
+    --card-pad: clamp(1rem, 0.55rem + 2.1vw, 2.65rem);
     padding: var(--card-pad);
   }
 
   /* ---- Brand, pages, contact and socials --------------------------------- */
   .footer-grid {
     display: grid;
-    gap: var(--space-xl);
-    padding-bottom: var(--space-l);
+    gap: var(--space-l);
+    padding-bottom: var(--space-m);
   }
   @media (min-width: 48em) {
     .footer-grid {
       grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
-      gap: var(--space-l);
+      column-gap: var(--space-l);
+      row-gap: var(--space-m);
       align-items: start;
     }
   }
 
-  .footer-tag { margin-top: var(--space-m); max-width: 32ch; }
-  .footer-signoff { margin-top: var(--space-l); }
-  .footer-heading { display: block; margin-bottom: var(--space-s); }
+  .footer-tag { margin-top: var(--space-s); max-width: 32ch; }
+  .footer-heading { display: block; margin-bottom: var(--space-2xs); }
 
   .footer-col ul { list-style: none; display: grid; gap: var(--space-2xs); }
+  /* A little tighter where a pointer, not a thumb, does the choosing. */
+  @media (min-width: 48em) { .footer-col ul { gap: var(--space-3xs); } }
   .footer-col li { font-size: var(--text-sm); overflow-wrap: anywhere; }
 
   /* White links; the accent marks hover, with an underline so the state
@@ -115,6 +118,6 @@ const pages = [
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-s);
-    padding-top: var(--space-m);
+    padding-top: var(--space-s);
   }
 </style>

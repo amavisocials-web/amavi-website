@@ -1,22 +1,27 @@
 ---
 import { Image } from 'astro:assets';
 import Lines from './Lines.astro';
-import { clearedLogos, opticalK, type ClientLogo } from '../logos';
+import { clearedClients, opticalK, type Client } from '../data/clients';
 
 /**
- * Partner logos: a static, wrapped row, or — with `marquee` — a continuous
+ * Client logos: a static, wrapped row, or — with `marquee` — a continuous
  * horizontal scroll.
  *
  * Every logo is solid black on transparent — converted at the asset level by
- * `npm run logos:mono`, so there are no colour versions to fall back to — and
- * sized so a 6:1 wordmark and a 1:1 roundel carry comparable optical weight
- * (see opticalK in src/logos.ts). A partner without a logo file yet has its
- * name set in type at the same weight.
+ * `npm run logos:mono` — and sized so a 6:1 wordmark and a 1:1 roundel carry
+ * comparable optical weight (see opticalK in src/data/clients.ts). A client
+ * without a logo file yet has its name set in type at the same weight, and
+ * `boost` scales a whole row where it should read larger than the default.
+ *
+ * A client with a url becomes a link, opening in a new tab; one with an empty
+ * url is a plain image, with no cursor and no hover. Filling in the url in
+ * src/data/clients.ts is the only change either needs.
  *
  * The marquee repeats the row three times and moves each copy left by its own
  * width, so the loop has no seam at any screen width up to twice the row's
- * length. Only the first copy is exposed to assistive tech; the repeats are
- * aria-hidden, so no logo is read twice. It pauses on hover and while it has
+ * length. Only the first copy is exposed to assistive tech and to the tab
+ * order; the repeats are aria-hidden and their links carry tabindex="-1", so
+ * no logo is read or tabbed to twice. It pauses on hover and while it has
  * keyboard focus, and under prefers-reduced-motion it does not move at all:
  * it becomes the static, wrapped row.
  *
@@ -31,16 +36,21 @@ interface Props {
   intro?: string;
   /** Heading level, to keep each page's outline valid. */
   level?: 2 | 3;
-  logos?: ClientLogo[];
+  clients?: Client[];
   marquee?: boolean;
+  /** Multiplies the row's logo height, e.g. 1.15 for a row that leads a page. */
+  boost?: number;
 }
-const { eyebrow, heading, intro, level = 2, logos = clearedLogos(), marquee = false } = Astro.props;
+const {
+  eyebrow, heading, intro, level = 2, clients = clearedClients(), marquee = false, boost,
+} = Astro.props;
 const H = `h${level}` as 'h2' | 'h3';
-const sized = logos.map((logo) => ({ ...logo, k: opticalK(logo).toFixed(3) }));
+const sized = clients.map((client) => ({ ...client, k: opticalK(client).toFixed(3) }));
 const COPIES = 3;
 ---
 
-<div class:list={['logo-wall', { 'logo-wall--marquee': marquee }]}>
+<div class:list={['logo-wall', { 'logo-wall--marquee': marquee }]}
+     style={boost ? `--logo-boost:${boost}` : undefined}>
   {(eyebrow || heading || intro) && (
     <div class:list={['logo-wall__head', { container: marquee }]}>
       {eyebrow && <p class="eyebrow">{eyebrow}</p>}
@@ -50,17 +60,28 @@ const COPIES = 3;
   )}
 
   {marquee ? (
-    <div class="marquee" tabindex="0" role="region" aria-label={heading ? `${heading.replace(/\n/g, ' ')}: logos` : 'Partner logos'}>
+    <div class="marquee" tabindex="0" role="region" aria-label={heading ? `${heading.replace(/\n/g, ' ')}: logos` : 'Client logos'}>
       <div class="marquee__track">
         {Array.from({ length: COPIES }, (_, copy) => (
           <ul class="marquee__set logo-wall__list" role="list" aria-hidden={copy > 0 ? 'true' : undefined}>
-            {sized.map((logo) => (
+            {sized.map((client) => (
               <li class="logo-wall__item">
-                {logo.src ? (
-                  <Image src={logo.src} alt={copy > 0 ? '' : `${logo.name} logo`} height={140}
-                         loading="eager" decoding="async" class="logo-wall__img" style={`--k:${logo.k}`} />
+                {client.url ? (
+                  <a class="logo-wall__link" href={client.url} target="_blank" rel="noopener noreferrer"
+                     aria-label={`${client.name}, opens in a new tab`}
+                     tabindex={copy > 0 ? -1 : undefined}>
+                    {client.logo ? (
+                      <Image src={client.logo} alt={copy > 0 ? '' : `${client.name} logo`} height={140}
+                             loading="eager" decoding="async" class="logo-wall__img" style={`--k:${client.k}`} />
+                    ) : (
+                      <span class="logo-wall__type" style={`--k:${client.k}`}>{client.name}</span>
+                    )}
+                  </a>
+                ) : client.logo ? (
+                  <Image src={client.logo} alt={copy > 0 ? '' : `${client.name} logo`} height={140}
+                         loading="eager" decoding="async" class="logo-wall__img" style={`--k:${client.k}`} />
                 ) : (
-                  <span class="logo-wall__type" style={`--k:${logo.k}`}>{logo.name}</span>
+                  <span class="logo-wall__type" style={`--k:${client.k}`}>{client.name}</span>
                 )}
               </li>
             ))}
@@ -70,13 +91,23 @@ const COPIES = 3;
     </div>
   ) : (
     <ul class="logo-wall__list logo-wall__list--static" role="list">
-      {sized.map((logo) => (
+      {sized.map((client) => (
         <li class="logo-wall__item">
-          {logo.src ? (
-            <Image src={logo.src} alt={`${logo.name} logo`} height={140}
-                   loading="lazy" decoding="async" class="logo-wall__img" style={`--k:${logo.k}`} />
+          {client.url ? (
+            <a class="logo-wall__link" href={client.url} target="_blank" rel="noopener noreferrer"
+               aria-label={`${client.name}, opens in a new tab`}>
+              {client.logo ? (
+                <Image src={client.logo} alt={`${client.name} logo`} height={140}
+                       loading="lazy" decoding="async" class="logo-wall__img" style={`--k:${client.k}`} />
+              ) : (
+                <span class="logo-wall__type" style={`--k:${client.k}`}>{client.name}</span>
+              )}
+            </a>
+          ) : client.logo ? (
+            <Image src={client.logo} alt={`${client.name} logo`} height={140}
+                   loading="lazy" decoding="async" class="logo-wall__img" style={`--k:${client.k}`} />
           ) : (
-            <span class="logo-wall__type" style={`--k:${logo.k}`}>{logo.name}</span>
+            <span class="logo-wall__type" style={`--k:${client.k}`}>{client.name}</span>
           )}
         </li>
       ))}
@@ -88,9 +119,11 @@ const COPIES = 3;
   .logo-wall {
     /* Sized so no client mark stands taller or wider than the AMAVI wordmark
        in the header — measured against the tallest (The Humble Fishmonger)
-       and the widest (AutismCare Ireland). */
-    --logo-base: clamp(1.9rem, 1.45rem + 1.2vw, 2.55rem);
-    --logo-cap: 4.75rem;
+       and the widest (AutismCare). `--logo-boost` scales a whole row from
+       there; the default row is 1. */
+    --logo-boost: 1;
+    --logo-base: calc(clamp(1.9rem, 1.45rem + 1.2vw, 2.55rem) * var(--logo-boost));
+    --logo-cap: calc(4.75rem * var(--logo-boost));
     --logo-gap: clamp(2.5rem, 5vw, 4.5rem);
     text-align: center;
   }
@@ -116,6 +149,16 @@ const COPIES = 3;
   }
   .logo-wall__item { flex: none; display: flex; align-items: center; justify-content: center; }
 
+  /* A linked logo lightens on hover and on focus; an unlinked one has no
+     cursor and no state, because there is nothing to press. */
+  .logo-wall__link {
+    display: inline-flex;
+    transition: opacity var(--dur) var(--ease);
+  }
+  .logo-wall__link:hover,
+  .logo-wall__link:focus-visible { opacity: 0.6; }
+  .logo-wall__link:focus-visible { outline-offset: 4px; }
+
   .logo-wall__img {
     height: calc(var(--logo-base) * var(--k, 1));
     width: auto;
@@ -125,7 +168,7 @@ const COPIES = 3;
     object-fit: contain;
   }
 
-  /* A partner's name standing in for its logo: heavy, tight type, at the
+  /* A client's name standing in for its logo: heavy, tight type, at the
      optical weight of the marks around it. */
   .logo-wall__type {
     font-family: var(--font-body);
@@ -149,9 +192,7 @@ const COPIES = 3;
   .marquee {
     --marquee-duration: 48s;
     overflow: hidden;
-    /* Tight to the label above, a little more room below, where the page
-       carries on. */
-    padding-block: var(--space-s) var(--space-m);
+    padding-block: var(--space-l);
   }
   .marquee:focus-visible { outline-offset: -2px; }
 
@@ -171,7 +212,8 @@ const COPIES = 3;
   .marquee:hover .marquee__set,
   .marquee:focus-within .marquee__set { animation-play-state: paused; }
 
-  /* Reduced motion: no animation, one copy, wrapped and centred. */
+  /* Reduced motion: no animation, one copy, wrapped and centred, and the
+     logos hold still on hover too. */
   @media (prefers-reduced-motion: reduce) {
     .marquee__track { width: auto; justify-content: center; padding-inline: var(--gutter); }
     .marquee__set {
@@ -182,6 +224,7 @@ const COPIES = 3;
       padding-right: 0;
     }
     .marquee__set[aria-hidden='true'] { display: none; }
+    .logo-wall__link { transition: none; }
   }
 
   @media (max-width: 47.99em) {
