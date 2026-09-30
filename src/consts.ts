@@ -25,7 +25,7 @@ export const SITE_URL = 'https://www.amavisocials.co';
  * The home hero's headline. A line break ("\n") sets where display type
  * breaks; anywhere it's plain text it reads as a space.
  */
-export const TAGLINE = 'Content that connects';
+export const TAGLINE = 'Content that connects.';
 
 /** One sentence of positioning, under the hero and wherever AMAVI is introduced. */
 export const POSITIONING =
@@ -41,10 +41,15 @@ export const POSITIONING =
  * nothing 404s; a cut with no video file shows an outlined "Add video" frame
  * instead.
  *
- * Now: AMAVI's own café clip (IMG_9245.mov, 5.8s, shot 9:16), with a 1s
- * crossfade where it loops. The desktop cut is a 16:9 band across the laptop
- * (1920×1080, 1.9MB); the mobile cut is the whole frame (1080×1920, 1.6MB).
- * MP4 only — see README, "Making the video files".
+ * Now: AMAVI's own logo sting — the wordmark cut into brushed metal, on a
+ * slow push in — with a crossfade where it loops. The desktop cut is the
+ * whole 16:9 frame (2.mp4, 1920×1080, 1.8MB). The mobile cut is a 9:16 crop
+ * of the same clip, taken left of the wordmark (1080×1920, 0.8MB): a portrait
+ * crop keeps a third of a 16:9 frame's width, a phone shows about four fifths
+ * of that, and the wordmark is half the frame — so on phones the hero is the
+ * brushed plate on its own, rather than the wordmark cut in two. A 9:16
+ * export of the sting would replace it. MP4 only — see README, "Making the
+ * video files".
  *
  * TODO(client): temporary fill "until further notice" — replace with the
  * final footage when it's ready: silent, 10–20 seconds and loopable; a

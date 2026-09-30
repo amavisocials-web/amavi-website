@@ -96,9 +96,9 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 
 | Path | What it is |
 |---|---|
-| `/` | Full-screen video hero ("Content that connects") with both buttons; the "Trusted by" logo marquee; what AMAVI is, then the stats over looping video tiles; "Creators are one part of the equation"; how we work |
-| `/about` | Who AMAVI is: the intro, the approach (four services), why AMAVI over a city plan in black, the network, who we are, the philosophy |
-| `/services` | What AMAVI does, goal first: the four areas as an accordion, six sectors, why creator-led |
+| `/` | Full-screen video hero ("Content that connects") with both buttons; the "Trusted by" logo marquee; what AMAVI is; the figures beside a drifting collage of creator work; "Creators are one part of the equation"; the services, as a row you page through |
+| `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting), why AMAVI over a city plan in black |
+| `/services` | What AMAVI does, goal first: five practice areas as an accordion, how we deliver (six steps), six sectors, why creator-led |
 | `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Get in Touch: brands to email, creators to the application |
 | `/privacy` | Privacy policy |
@@ -121,9 +121,12 @@ src/
   layouts/Base.astro     <head>, header, footer — every page uses this
   data/countries.ts      Country codes for the application's country select
   components/            Nav (header and menu), Footer, Hero, Feature,
-                         StatTiles, LoopVideo, Placeholder, ProofLink,
-                         LogoWall, ContactPaths, the creator form, Logo, Fonts
+                         Numbers, ServicesSlider, LoopVideo, Placeholder,
+                         ProofLink, LogoWall, ContactPaths, the creator form,
+                         Logo, Fonts
   scripts/loop-videos.ts   Lazy, visible-only playback for every video
+  scripts/service-accordions.ts  The four areas on /services, opening in place
+  scripts/services-slider.ts  The home page's services row, paged by its arrows
   scripts/creator-form.ts  The application's steps, validation and submission
   pages/                 One file per route
   styles/global.css      Tokens and the shared styles
@@ -160,9 +163,8 @@ and highlights, and a black footer. Six colours, defined once in
 **The exceptions to white** are the footer (full bleed, edge to edge), the
 "Why AMAVI" band on /about — white on black, over a city plan drawn in
 hairlines — and text set over video, which sits on a flat black overlay (the
-hero, once it has footage, and the stat tiles). There are no greys, tints,
-gradients or shadows beyond those overlays and the drawing's own line
-opacities.
+hero and the stat tiles). There are no greys, tints, gradients or shadows
+beyond those overlays and the drawing's own line opacities.
 
 **Separation without colour.** Depth comes from line weight, type scale and
 space. Where a section used to sit on a tint, it now takes `.section--ruled`:
@@ -190,6 +192,7 @@ at the body weight.
 | `--bg` on `--accent` | 9.74:1 | The label on a filled button |
 | `--ink` on `--accent` | 2.16:1 | **Fails** — so a filled button's label is white |
 | `--on-dark` on `--surface-dark` | 21.00:1 | Text on the footer |
+| White on the hero video | ≥ 4.7:1 | Every pixel behind the headline, intro and buttons, over the 0.55 black overlay (measured every 0.4s through both cuts) |
 | White on the stat tiles | ≥ 5.0:1 | On 95% of the pixels behind each label, over a 0.5 black shade (measured on each tile's first frame) |
 | `--accent` on `--surface-dark` | 2.16:1 | **Hover only.** Footer links turn `#341BCA` on hover, with an underline so the state never rests on colour. Never used at rest on black, or for a focus ring there — those are white |
 
@@ -235,6 +238,17 @@ The share image is the PNG placed pixel-for-pixel (never upscaled) on a
 centred. Both it and the favicon are the supplied avatar, white on `#341BCA`:
 the logo, which is one of the places the accent belongs. They appear in
 browser tabs and share previews, not on the page.
+
+### Copy
+
+**No em dashes.** Not anywhere the reader sees: page copy, form labels and
+hints, option lists, error and confirmation text, `aria-label`s. A comma, a
+colon or a full stop instead, whichever the sentence wants. Code comments and
+this file are not copy. To check a build:
+
+```bash
+grep -rl "—" dist --include="*.html"
+```
 
 ### Typefaces
 
@@ -388,6 +402,10 @@ Logos live in `src/assets/logos/` and are declared once in **`src/logos.ts`**.
 - **`scale`** evens out optical weight: a solid black disc and a thin ring
   cover the same area but not the same amount of ink. The comment above the
   manifest explains how the current values were set.
+- **Size.** `--logo-base` in `LogoWall.astro` sets the height and `--logo-cap`
+  the widest any mark may run. Both are set so no client logo is taller or
+  wider than the AMAVI wordmark in the header (79×55 at every width): today
+  the tallest renders 46px and the widest 76px.
 
 **Every logo is solid black** on transparent, with no colour versions. The
 supplied colour artwork was converted in place by:
@@ -438,10 +456,29 @@ are a static row.
   piece of media, alternating sides. Key phrases in the body copy are bold;
   each block ends on a **proof line** (`ProofLink.astro`) — a short claim in
   capitals with a chevron — linking to Services.
-- **Stat tiles** (`StatTiles.astro`). The four figures, each over a looping
-  creator video: four across on a wide screen, two by two on a phone.
+- **The figures** (`Numbers.astro`). A split: a collage of creator work on one
+  side, the figures on the other, each written as a sentence with its number
+  leading the line and a rule between. The collage is a slow vertical loop, in
+  CSS alone: two sub-columns, one climbing and one falling, each holding its
+  tiles twice and travelling exactly one set's height, so the join can't be
+  seen. Top and bottom are masked. It pauses on hover and on focus, runs
+  slower at 48em, and on a phone doesn't run at all — the tiles become a row
+  that scrolls sideways. Under `prefers-reduced-motion` nothing moves.
+- **The services row** (`ServicesSlider.astro`). Six cards on the home page,
+  paged by two circular arrows above them: two cards at a time from 64em, one
+  from 48em, and on a phone no paging at all — the row scrolls and snaps under
+  a finger, which is also what a page without JavaScript gets at every width.
+  A page moves a whole view in one transform, 400ms, so nothing is laid out
+  again as it travels; cards off the page are `inert`, so a Tab can't land
+  behind the edge, and the list is a polite live region. The arrows disable at
+  each end rather than disappearing, and a count sits under the cards. It never
+  moves on its own.
 - **Partners marquee** (`LogoWall.astro`). On the home page it sits directly
-  under the hero, logos only, with no heading of its own.
+  under the hero, logos only, with no heading of its own. The "Trusted by"
+  label, the logos and the statement beneath them are one group: the space
+  inside it is about half a section's, taken off the head's own padding, the
+  marquee's and the two sections' (`.partners` and `.what` in
+  `src/pages/index.astro`), not off a negative margin.
 - **Footer** (`Footer.astro`). Full-bleed black: edge to edge and down to the
   bottom of the page, its own padding holding the content off the edges. The
   same on every page — no props, no per-page variants: the wordmark, what
@@ -462,9 +499,9 @@ shows "Add image" until a picture arrives.
 
 The copy lives in **`src/data/services.ts`**:
 
-- **Four areas**, each a one-line summary (set in italics, under the title), a
-  short intro, a list of services (a name and one line on what the client
-  gets) and a closing line.
+- **Five practice areas**, each a one-line summary (set in italics, under the
+  title), a paragraph, the sub-services it covers as a name and a line each,
+  and a closing line.
 - **Six sectors**, each a sector and the kind of work there. No metrics and no
   client names.
 - **Results** (`CASE_STUDIES`) are still there but **not rendered**: the
@@ -491,8 +528,10 @@ image beside them. One at a time; opening one closes the rest.
 - **Without JavaScript every panel stays open.** The collapsing CSS only
   applies once `src/scripts/service-accordions.ts` marks the list ready, so a
   failed script leaves the page readable rather than sealed shut.
-- Each row keeps its own id, so `/services/#creator-marketing` still opens
-  that area and scrolls to it — on load and on a later hash change.
+- Each row keeps its own id, so `/services/#creator-campaigns` opens that area
+  and scrolls to it — on load and on a later hash change. The ids changed with
+  the practice areas on 29 September 2026; the old ones
+  (`#creator-marketing` and the rest) no longer exist.
 
 ## Visual content
 
@@ -512,12 +551,15 @@ flagged in `src/data/media.ts`, to be replaced first.
   | Desktop, 1920×1080 (16:9) | landscape screens | `hero.mp4`, `hero.webm`, poster `hero.jpg` |
   | Mobile, 1080×1920 (9:16) | portrait screens | `hero-portrait.mp4`, `hero-portrait.webm`, poster `hero-portrait.jpg` |
 
-  **Now:** AMAVI's own café clip (`IMG_9245.mov`, 5.8s, shot 9:16): the
-  desktop cut is a 16:9 band across the laptop, the mobile cut the whole
-  frame, each with a 1s crossfade where it loops. The footage fills the screen
-  edge to edge, the text is white over a flat black overlay (0.45 in
-  `Hero.astro` — measured on this footage, white holds 6.7:1 or better), and
-  the header sits over it. To replace it, drop new files in under these names —
+  **Now:** AMAVI's own logo sting — the wordmark cut into brushed metal, on
+  a slow push in. The desktop cut is the whole 16:9 frame. The mobile cut is
+  a 9:16 crop of the same clip, taken left of the wordmark: a portrait crop
+  keeps a third of a 16:9 frame's width, a phone shows about four fifths of
+  that, and the wordmark is half the frame — so on phones the hero is the
+  brushed plate on its own, rather than the wordmark cut in two. Both have a
+  crossfade where they loop. The footage fills the screen edge to edge, the
+  text is white over a flat black overlay (0.55 in `Hero.astro` — measured on
+  this footage, white holds 4.7:1 or better), and the header sits over it. To replace it, drop new files in under these names —
   **H.264 MP4 plus a WebM, each under ~5MB**, silent and loopable, posters
   from each cut's first frame — and rebuild. Remove a cut and that
   orientation shows the "Add video" frame, with black text.
@@ -555,8 +597,8 @@ cut; `--fade 30` makes the loop seamless). The tile files were made with:
 
 | Output | Source | Options |
 |---|---|---|
-| `hero.mp4` | `IMG_9245.mov` | `--size 1920x1080 --crop 0,1159,2160,1215 --bitrate 3000000 --fade 30` |
-| `hero-portrait.mp4` | the same | `--size 1080x1920 --bitrate 2500000 --fade 30` |
+| `hero.mp4` | `2.mp4` (the logo sting) | `--size 1920x1080 --bitrate 3000000 --fade 24` |
+| `hero-portrait.mp4` | the same | `--size 1080x1920 --crop 400,0,1215,2160 --bitrate 1500000 --fade 24` |
 | `features/creators.mp4` | `16521739_1440_2560_60fps.mp4` | `--size 720x1080 --crop 0,200,1440,2160 --bitrate 1500000 --fade 45` |
 | `features/studio.mp4` | `15636407_1080_1920_30fps.mp4` | `--size 720x1080 --crop 0,150,1080,1620 --bitrate 1200000 --max 12 --fade 30` |
 | `tiles/tile-1.mp4` | `Video-20656.mp4` | `--size 360x640 --bitrate 700000 --max 12` |
@@ -624,11 +666,18 @@ The ones that matter most:
 
 - **ALT Rigatoni licence.** See Typefaces.
 - **Final hero footage**, in two cuts: desktop 16:9 and mobile 9:16. The
-  café clip holds the place for now. See Visual content.
+  logo sting holds the place for now; there is no 9:16 export of it, so on
+  phones the hero shows the brushed plate without the wordmark. A vertical
+  export would replace the mobile cut. See Visual content.
 - **Final media for every slot.** All are temporary fills for now, four of
   them from clips with stock-library names. See `src/data/media.ts`.
 - **Creator handles and consent** for the creator videos, in
   `src/data/tiles.ts`.
+- **The home page's 100+ and 1,000+.** Two of the three figures in "The
+  numbers behind the work" since 29 September 2026, promoted from a line
+  under the list. "100+ partnerships delivered" is ahead of the brief's 61
+  all-time; "1,000+ creators" sits under its 1,100 sourced April–August 2026.
+  Confirm both. Marked `TODO(client)` in `src/pages/index.astro`.
 - **The home page's 92%.** The brief lists "92% net-new audience reach" but
   not how it is measured, and the home stats are the only place it appears.
   Confirm what it measures, or drop the figure.

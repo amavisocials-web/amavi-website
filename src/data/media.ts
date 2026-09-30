@@ -22,7 +22,7 @@ import about3 from '../assets/media/about-3.jpg';
  * TODO(client): temporary fills, "until further notice". Each slot below holds
  * whatever was supplied on 21 September 2026, cropped to the slot's ratio —
  * replace each with the final photograph or footage. Sources:
- *   - cafe photo, and IMG_9245.mov (the café laptop): AMAVI's own
+ *   - cafe photo: AMAVI's own, as is the hero footage (src/consts.ts)
  *   - Video-43037.mp4: AMAVI's MyIrelandBox campaign (creator consent still
  *     to confirm, as for the other creator videos — see src/data/tiles.ts)
  *   - 16521739, 15636407, 6558143, 6374165: supplied clips with stock-library
@@ -59,12 +59,16 @@ export const MEDIA = {
   },
   services: {
     head: cafe,
-    /** Keyed by area id in src/data/services.ts. 2:3. */
+    /**
+     * Keyed by area id in src/data/services.ts. 2:3.
+     * TODO(client): nothing supplied suits Live Experiences — an activation
+     * photograph would — so that one shows "Add image".
+     */
     areas: {
-      'creator-marketing': { image: areaCreatorMarketing, alt: 'A content studio, with a team at their desks' },
-      'brand-campaign-strategy': { image: areaBrandStrategy, alt: 'An office, with a screen reading “Digital Marketing”' },
-      'content-social': { image: areaContentSocial, alt: 'A studio set for a shoot: lights, cameras and a rail of clothes' },
-      'growth-partnerships': { image: areaGrowthPartnerships, alt: 'A creator and a brand founder talking on a bench by the sea' },
+      'creator-community-aor': { image: areaCreatorMarketing, alt: 'A content studio, with a team at their desks' },
+      'creator-campaigns': { image: areaBrandStrategy, alt: 'An office, with a screen reading “Digital Marketing”' },
+      'creator-ugc': { image: areaContentSocial, alt: 'A studio set for a shoot: lights, cameras and a rail of clothes' },
+      'affiliate-marketing': { image: areaGrowthPartnerships, alt: 'A creator and a brand founder talking on a bench by the sea' },
     } as Record<string, ImageSlot | undefined>,
     /**
      * Keyed by sector name in src/data/services.ts. 4:5.

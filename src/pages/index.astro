@@ -2,16 +2,17 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Feature from '../components/Feature.astro';
-import StatTiles, { type Stat } from '../components/StatTiles.astro';
+import Numbers from '../components/Numbers.astro';
 import Frame from '../components/Frame.astro';
-import LoopVideo from '../components/LoopVideo.astro';
 import ProofLink from '../components/ProofLink.astro';
 import LogoWall from '../components/LogoWall.astro';
+import ServicesSlider from '../components/ServicesSlider.astro';
 import Lines from '../components/Lines.astro';
 import { TILES } from '../data/tiles';
 import { MEDIA } from '../data/media';
 import {
-  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, SOCIALS, TAGLINE, POSITIONING, CREATOR_PATH,
+  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, CONTACT_PATH, SOCIALS, TAGLINE, POSITIONING,
+  CREATOR_PATH,
 } from '../consts';
 
 /*
@@ -24,15 +25,49 @@ import {
  */
 
 /**
- * The only figures the stat tiles may show, exactly as supplied — nothing
- * recomputed, no other percentage, and no client named. Tiles 1–4 play
- * behind them.
+ * Two of the five practice areas, in the home page's own words. The other
+ * three — content at scale, affiliate, live experiences — can follow here
+ * when there's copy for them; the column layout takes as many as it's given.
  */
-const stats: Stat[] = [
-  { value: '23%', label: 'above target on creator partnerships' },
-  { value: '47%', label: 'above target for a healthcare client' },
-  { value: '40%', label: 'above target across two client campaigns' },
-  { value: '92%', label: 'new audience reach' },
+const WAYS = [
+  {
+    title: 'Creator & Influencer Community AOR',
+    body: 'Build lasting relevance through creator communities rather than one-off activity. By developing long-term relationships with creators who genuinely fit the brand, we create a group of advocates who keep speaking for you between campaigns, not just during them.',
+  },
+  {
+    title: 'Influencer & Creator Campaigns',
+    body: 'Our campaigns are built around a business objective, not a posting schedule. We source and vet the creators, negotiate the rates, brief the work and manage it through to publication, so each campaign reaches people the brand hasn’t reached before.',
+  },
+  {
+    title: 'Creator UGC Content',
+    body: 'Creator content is one of the most useful assets a brand can own. We produce it in volume, native to the platforms people actually use, and hand it over for your own channels and paid media long after the original post has run.',
+  },
+  {
+    title: 'Affiliate Marketing',
+    body: 'We connect creators, content and commerce so the work can be measured against revenue. Partnerships are structured around performance, with tracking and commission agreed from the start.',
+  },
+  {
+    title: 'Live Experiences',
+    body: 'We bring creators, customers and the brand into the same room. Each activation is built to be worth attending and worth filming, turning a single moment into content that keeps working afterwards.',
+  },
+  {
+    title: 'Production & Content Days',
+    body: 'We shoot and edit in house. A content day gives a brand a library of assets from a single session, and live Q&As put your team and your creators in front of an audience in real time.',
+  },
+];
+
+/**
+ * The four figures, as sentences. Exactly as supplied — nothing recomputed,
+ * and no client, sector or industry named against any of them.
+ */
+const STATS = [
+  /* TODO(client): "100+" is ahead of the brief, which has 61 partnerships
+     all-time; "1,000+" sits under its 1,100 creators sourced (April–August
+     2026), so that one holds. Both are now headline figures — confirm the
+     current counts. */
+  { value: '100+', line: 'partnerships delivered.' },
+  { value: '1,000+', line: 'creators in our network across Europe.' },
+  { value: '92%', line: 'of the people we reached had never seen the brand before.' },
 ];
 
 const schema = {
@@ -60,90 +95,218 @@ const schema = {
   </Hero>
 
   {/* ================= Partners ================= */}
-  <section class="section section--tight" aria-label="Brands we work with">
+  <section class="section section--tight partners" aria-label="Brands we work with">
     <LogoWall marquee eyebrow="Trusted by" />
   </section>
 
-  {/* ================= Results ================= */}
-  <section class="section section--ruled" aria-labelledby="stats-heading">
+  {/* ================= What AMAVI is ================= */}
+  <section class="section what">
     <div class="container">
       <div class="stats__note">
         <p>
-          AMAVI Socials is a creator-led marketing and partnerships agency working with brands
-          across Ireland and Europe. We work in healthcare, wellness, hospitality, food and
-          retail — categories where trust matters more than volume.
+          As a creator-led marketing and partnerships agency, AMAVI Socials builds brands through
+          five key practice areas: Creator &amp; Influencer Community AOR, Influencer &amp; Creator
+          Campaigns, Creator UGC Content-at-scale, Affiliate Marketing, and Live Experiences.
+          Founded by creators, we combine audience insight, creator relationships, content and
+          partnerships to reach people in the places they already spend their attention.
         </p>
         <p>
-          Sometimes the answer is a creator. Sometimes it’s a community, a local business or a
-          partnership nobody else thought to look for. We start with the objective, then build the
-          right mix around it.
+          Working with brands across Europe, we pair strategic thinking with
+          genuine creator relationships to build campaigns that earn attention and deliver
+          measurable results.
         </p>
       </div>
 
-      <p class="eyebrow stats__eyebrow">The numbers behind the work.</p>
-      <h2 id="stats-heading" class="display display--lg stats__title">
-        <Lines text={'Built to reach\nthe people that matter.'} />
-      </h2>
-      <StatTiles stats={stats} tiles={TILES.slice(0, 4)} />
-      <p class="meta stats__source">Selected campaign results across AMAVI client work.</p>
     </div>
   </section>
 
+  {/* ================= Results: the figures beside the work ================= */}
+  <Numbers tiles={TILES.slice(0, 4)} labelledby="stats-heading">
+    <h2 id="stats-heading" class="display display--md">The numbers behind the work</h2>
+
+    <dl class="stat-lines">
+      {STATS.map((stat) => (
+        <div class="stat-line">
+          <dt class="stat-line__value">{stat.value}</dt>
+          <dd class="stat-line__text">{stat.line}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <div class="numbers__foot">
+    </div>
+
+    <p class="numbers__more">
+      <a class="know" href="/about/">
+        <span class="know__text">Get to know AMAVI</span>
+        <svg class="know__arrow" viewBox="0 0 20 10" aria-hidden="true" focusable="false">
+          <path d="M0 5h17.4M13.4 1L18 5l-4.6 4" fill="none" stroke="currentColor" stroke-width="1.25"
+                vector-effect="non-scaling-stroke" />
+        </svg>
+      </a>
+    </p>
+  </Numbers>
+
   {/* ================= Introduction ================= */}
   <Feature ruled labelledby="equation-heading">
-    <p class="eyebrow">More than creator marketing.</p>
     <h2 id="equation-heading" class="display display--lg">
-      <Lines text={'Creators are one part\nof the equation.'} />
+      <Lines text={'Our creators are one part\nof the equation.'} />
     </h2>
     <p class="feature__body">
-      We build campaigns around <strong>the right people, the right partnerships and the right
-      opportunities</strong> — whether that’s a creator, a community, a tourism operator, a brand
-      partnership or a new route to your audience.
+      Our campaigns are built around <strong>the right people, partnerships and right
+      opportunities</strong>, from individual creators and communities to B2B collaborations and
+      new routes to your audience. Every engagement starts with a clear objective. We identify the
+      opportunity and develop the strategy to realise it.
     </p>
-    <p class="feature__body">
-      We start with the goal, find the opportunity and build the strategy around it.
-    </p>
-    <ProofLink href="/about/">Our story</ProofLink>
-    <ProofLink href="/services/">See what we do</ProofLink>
+    <ProofLink href={CONTACT_PATH}>Contact us</ProofLink>
     {/* AMAVI's own campaign board: see src/data/media.ts. */}
     <Frame slot="media" media={MEDIA.home.creators} ratio="2/3" sizes="(min-width: 48em) 22rem, 60vw" />
   </Feature>
 
   {/* ================= How we work ================= */}
-  <Feature reverse ruled labelledby="how-heading">
-    <p class="eyebrow">How we work</p>
-    <h2 id="how-heading" class="display display--lg">
-      <Lines text={'Start with the goal.\nFind the opportunity.'} />
-    </h2>
-    <p class="feature__body">
-      We don’t start with a list of deliverables. We start with <strong>what you want to
-      achieve</strong>.
-    </p>
-    <p class="feature__body">
-      From there, we identify <strong>the people, platforms, partnerships and opportunities</strong>{' '}
-      that can help you get there — then manage the process from strategy through execution.
-    </p>
-    <p class="label">Strategy → Discovery → Execution</p>
-    <p class="feature__body"><strong>One objective. One clear strategy. The right people around it.</strong></p>
-    {/* TODO(client): "How we work" came off the Services page; this block is
-        the fullest description of it now. */}
-    <ProofLink href="/services/">How we work</ProofLink>
-    {/* Temporary fill: see src/data/media.ts. */}
-    <LoopVideo slot="media" src={MEDIA.home.howWeWork.src} ratio="2/3" />
-  </Feature>
+  {/* ================= Services ================= */}
+  <section class="section section--ruled ways" aria-labelledby="ways-heading">
+    <div class="container ways__grid">
+      <div class="ways__head">
+        <h2 id="ways-heading" class="display display--lg">
+          <Lines text={'See the ways\nwe can help you.'} />
+        </h2>
+      </div>
+
+      <div class="ways__body">
+        <ServicesSlider services={WAYS} />
+
+        <p class="ways__more">
+          <ProofLink href="/services/">And many more: see all services</ProofLink>
+        </p>
+      </div>
+    </div>
+  </section>
 </Base>
 
 <style>
   /* A plain centred statement, no heading: what AMAVI is, before the figures. */
+  /* The label, the logos and the paragraph under them are one group, so
+     the space inside it is a fraction of what separates sections: the row
+     belongs to the hero above it and to the statement below it. */
+  .partners { padding-block: clamp(0.875rem, 0.5rem + 1.4vw, 1.575rem); }
+  .what { padding-top: clamp(1.375rem, 0.8rem + 2.6vw, 2.875rem); }
+
+  /* ---- The figures, as sentences: the number leading each line ---- */
+  .stat-lines { display: grid; }
+  .stat-line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-s);
+    padding-block: var(--space-m);
+    border-top: var(--stroke-hair) solid var(--line);
+  }
+  /* A rule between the lines, not around the list. */
+  .stat-line:first-child { padding-top: 0; border-top: none; }
+  .stat-line:last-child { padding-bottom: 0; }
+
+  .stat-line__value {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 64em) and (max-width: 79.99em) {
+    .stat-line__value { font-size: 2rem; }
+  }
+  .stat-line__text { font-weight: var(--weight-secondary); text-wrap: pretty; }
+
+  .numbers__foot { display: grid; gap: var(--space-2xs); }
+
+  /* ---- Get to know AMAVI: the header's link, at body size ---------------- */
+  /* Its own element rather than a footnote — with the column's 24px gap and
+     the link's own tap padding, about 40px of air above the words. */
+  .numbers__more { margin-top: var(--space-3xs); }
+  @media (max-width: 47.99em) { .numbers__more { margin-top: 0; } }
+
+  .know {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    /* 46px tall on a phone, from padding rather than type size. The room on
+       the right is where the arrow slides, so nothing moves around it. */
+    padding-block: 0.75rem;
+    padding-right: var(--space-2xs);
+    color: var(--ink);
+    font-size: var(--text-base);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+  }
+  .know:hover,
+  .know:focus-visible { color: var(--accent); }
+
+  .know__text { position: relative; }
+  /* The rule it rests on, in black: the same hairline the header's link
+     carries, and what stays under prefers-reduced-motion. */
+  .know__text::after,
+  .know__text::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.3em;
+    border-bottom: var(--stroke) solid var(--line);
+  }
+  /* The accent rule, wiped across it from the left. */
+  .know__text::before {
+    border-bottom-color: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur) var(--ease);
+  }
+  .know:hover .know__text::before,
+  .know:focus-visible .know__text::before { transform: scaleX(1); }
+
+  .know__arrow {
+    width: 1.25rem;
+    height: 0.625rem;
+    flex: none;
+    transition: transform var(--dur) var(--ease);
+  }
+  .know:hover .know__arrow,
+  .know:focus-visible .know__arrow { transform: translateX(6px); }
+
+  /* The colour still changes; the arrow stays where it is and the rule is
+     simply there, so the link never looks like less of a link. */
+  @media (prefers-reduced-motion: reduce) {
+    .know,
+    .know__arrow,
+    .know__text::before { transition: none; }
+    .know:hover .know__arrow,
+    .know:focus-visible .know__arrow { transform: none; }
+  }
+
+  /* ---- Services: the heading on one side, the ways on the other ---- */
+  .ways__grid { display: grid; gap: var(--space-xl); }
+  @media (min-width: 64em) {
+    .ways__grid { grid-template-columns: minmax(0, 40fr) minmax(0, 60fr); gap: var(--space-2xl); align-items: start; }
+  }
+  .ways__head { display: grid; gap: var(--space-m); align-content: start; }
+
+  /* A step on from the cards, not one of them: its own space, and centred
+     under the slider once there is room for it. */
+  .ways__more { margin-top: clamp(2rem, 1.2rem + 2vw, 3rem); }
+  @media (min-width: 48em) { .ways__more { text-align: center; } }
+
   .stats__note {
     display: grid;
     gap: var(--space-s);
+    /* A step up from body: this is the page's statement, not running text. */
+    font-size: var(--text-lead);
     max-width: var(--container-narrow);
     margin: 0 auto var(--space-2xl);
     text-align: center;
   }
 
-  .stats__eyebrow { margin-bottom: var(--space-m); }
-  .stats__title { margin-bottom: var(--space-xl); }
-  .stats__source { margin-top: var(--space-m); }
 </style>

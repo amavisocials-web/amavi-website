@@ -1,0 +1,150 @@
+---
+import LoopVideo from './LoopVideo.astro';
+import type { ContentTile } from '../data/tiles';
+
+/**
+ * The figures, beside a collage of creator content.
+ *
+ * Two columns from 64em up — the collage on the left, the text on the right —
+ * and stacked below that, text first, so the numbers are read before the
+ * pictures on a phone.
+ *
+ * The collage is a slow vertical loop: the same idea as the band above the
+ * footer, turned on its side. Two sub-columns, one climbing and one falling,
+ * each holding its tiles twice and travelling exactly one set's height, so
+ * the join can't be seen. Top and bottom are masked, so tiles arrive and
+ * leave rather than being cut off. It stops while anyone hovers it or tabs
+ * into it, runs slower on a tablet, and on a phone it doesn't run at all —
+ * the tiles become one row that scrolls sideways. Under
+ * prefers-reduced-motion nothing moves anywhere.
+ *
+ * Everything in the text column comes from the page, through the default
+ * slot: this file owns the split and the collage, not the words.
+ */
+interface Props {
+  /** Four of them: two per sub-column. */
+  tiles: ContentTile[];
+  labelledby?: string;
+}
+const { tiles, labelledby } = Astro.props;
+
+/** Two ratios, so no two tiles in a column stand the same height. */
+const RATIOS = ['3/4', '9/16', '9/16', '3/4'];
+const shaped = tiles.slice(0, 4).map((tile, i) => ({ ...tile, ratio: RATIOS[i % RATIOS.length] }));
+const columns = [shaped.slice(0, 2), shaped.slice(2)];
+---
+
+<section class="section section--ruled numbers" aria-labelledby={labelledby}>
+  <div class="container numbers__grid">
+    <div class="numbers__text">
+      <slot />
+    </div>
+
+    {/* Decorative: the figures beside it are what the section says. */}
+    <div class="collage">
+      {columns.map((column, i) => (
+        <div class:list={['collage__column', i % 2 === 0 ? 'collage__column--up' : 'collage__column--down']}>
+          {[0, 1].map((copy) => (
+            <div class="collage__set" aria-hidden={copy > 0 ? 'true' : undefined}>
+              {column.map((tile) => (
+                <div class="collage__tile">
+                  <LoopVideo src={tile.src} poster={tile.poster} ratio={tile.ratio} class="collage__media" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .numbers { --loop: 48s; overflow: clip; }
+  /* Slower on a tablet, where the collage sits under the text and is read
+     rather than glanced at. */
+  @media (min-width: 48em) and (max-width: 63.99em) { .numbers { --loop: 72s; } }
+
+  .numbers__grid { display: grid; gap: var(--space-xl); }
+  @media (min-width: 64em) {
+    .numbers__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2xl); align-items: center; }
+    /* Text first in the markup, collage first on the screen. */
+    .collage { order: -1; }
+  }
+  @media (min-width: 80em) {
+    .numbers__grid { grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); }
+  }
+
+  .numbers__text { display: grid; gap: var(--space-m); align-content: start; }
+
+  /* ---- The collage ------------------------------------------------------- */
+  /* A phone gets one row that scrolls, so four portrait tiles can't swallow
+     the screen — and nothing moves on its own. */
+  .collage {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(8rem, 44%);
+    gap: var(--space-s);
+    margin-inline: calc(var(--gutter) * -1);
+    padding: var(--space-2xs) var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .collage::-webkit-scrollbar { display: none; }
+  .collage__column,
+  .collage__set { display: contents; }
+  /* The second copy of each column exists only for the loop. */
+  .collage__set + .collage__set { display: none; }
+  .collage__tile { scroll-snap-align: start; border-radius: 1.25rem; overflow: hidden; }
+  .collage :global(.collage__media) { width: 100%; max-width: 100%; border-radius: inherit; }
+
+  @media (min-width: 48em) {
+    .collage {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      height: clamp(24rem, 46vw, 34rem);
+      margin-inline: 0;
+      padding: 0;
+      overflow: hidden;
+      /* Tiles arrive and leave rather than being cut off hard. */
+      mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+    }
+
+    .collage__column { display: flex; flex-direction: column; }
+    .collage__set {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-s);
+      /* Each set carries its own trailing gap, so one set is exactly one step
+         of the loop and the two copies meet without a seam. */
+      padding-bottom: var(--space-s);
+      animation: tiles-up var(--loop) linear infinite;
+    }
+    .collage__set + .collage__set { display: flex; }
+    .collage__column--down .collage__set { animation-name: tiles-down; }
+    .collage__tile { flex: none; }
+  }
+
+  @keyframes tiles-up {
+    to { transform: translateY(-100%); }
+  }
+  @keyframes tiles-down {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+
+  .collage:hover .collage__set,
+  .collage:focus-within .collage__set { animation-play-state: paused; }
+
+  /* Nothing moves: one copy of each column, standing still. */
+  @media (prefers-reduced-motion: reduce) {
+    .collage__set { animation: none; }
+    .collage__set + .collage__set { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) and (min-width: 48em) {
+    .collage { height: auto; mask-image: none; -webkit-mask-image: none; }
+  }
+</style>

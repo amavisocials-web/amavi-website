@@ -10,21 +10,8 @@ import Lines from '../components/Lines.astro';
  * "Why AMAVI" is the page's one dark band: the copy over an abstract city
  * plan, marked where AMAVI is. The pattern is drawn from a handful of fixed
  * numbers — a design, not a survey map — and is hidden from assistive tech.
- *
- * TODO(client): no team photos supplied, so "Who we are" is names, roles and
- * lines rather than portraits. src/components/Team.astro is scaffolded if you
- * want photographs later.
- */
 
-/**
- * TODO(client): the team — real names, roles and a line or two each. These two
- * entries are placeholders so the section has its shape; replace them, add as
- * many as you like, and the list follows.
  */
-const team = [
-  { name: '[Name]', role: '[Role]', bio: '[TODO(client): a line or two on what they do at AMAVI.]' },
-  { name: '[Name]', role: '[Role]', bio: '[TODO(client): a line or two on what they do at AMAVI.]' },
-];
 
 /**
  * The city plan behind "Why AMAVI": one centre, roads leaving the frame, ring
@@ -51,20 +38,20 @@ const blocks = ANGLES.flatMap((angle, i) =>
 
 const approach = [
   {
-    name: 'Creator Partnerships',
-    body: 'We identify, source and manage creators who make sense for your brand — from one-off campaigns to long-term ambassador relationships.',
+    name: 'Strategy',
+    body: 'Turning business targets into clear campaign ideas, defined audiences and actionable execution plans.',
   },
   {
-    name: 'Campaign Strategy',
-    body: 'We turn a business objective into a clear campaign idea, audience strategy and plan for execution.',
+    name: 'Creator selection',
+    body: 'Vetting and onboarding trusted creators and communities, from single posts to long-term partnerships.',
   },
   {
     name: 'Content',
-    body: 'From creator-led concepts to short-form video, we create content designed to feel native to the platforms where people actually spend their time.',
+    body: 'Guiding creator output from brief to approval, complete with native video production and platform-first editing.',
   },
   {
-    name: 'Brand Partnerships',
-    body: 'We look beyond creators to find businesses, communities and organisations that already have access to the people you want to reach.',
+    name: 'Reporting',
+    body: 'Tracking live metrics and closing every campaign with data-backed insights to drive your next step.',
   },
 ];
 
@@ -89,7 +76,7 @@ const approach = [
           We believe growth starts with people. The right creator, community, business or
           partnership can open the door to an audience a brand hasn’t reached before.
         </p>
-        <p class="lead">Our job is to find that door — and build the strategy to get you through it.</p>
+        <p class="lead">Our job is to find that door, and build the strategy to get you through it.</p>
       </div>
       <a href="/services/" class="btn btn--primary about__cta">Work with us</a>
     </div>
@@ -138,74 +125,20 @@ const approach = [
         <h2 id="why-heading" class="display display--md"><Lines text={'Start with the\nopportunity.\nNot the deliverable.'} /></h2>
       </div>
       <div class="split__body">
-        <p>A campaign doesn’t always need another influencer.</p>
-        <p>Sometimes it needs a creator.</p>
-        <p>Sometimes it needs a community.</p>
-        <p>Sometimes it needs a partnership that puts your brand directly in front of the right audience.</p>
-        <p><strong>We look at the bigger picture, then build the right mix around it.</strong></p>
+        <p>
+          At AMAVI, we believe the right people beat more people. In today’s market, traditional
+          ads get filtered out, but influencer marketing works because it’s rooted in human
+          connection and authentic trust. Delivering high-ROI influencer campaigns is our core
+          specialty. We identify, vet and contract the creators your target audience actually
+          listens to, managing everything from creative strategy to final performance reporting.
+          Backed by an ever-expanding database of over 1,000 creators across Ireland and Europe,
+          every campaign we launch starts further ahead and delivers influence you can measure.
+        </p>
         <p class="label city__caption">Prishtina, Kosovo · 42.66° N 21.16° E</p>
       </div>
     </div>
   </section>
 
-  {/* ================= The network ================= */}
-  <section class="section section--ruled" aria-labelledby="network-heading">
-    <div class="container split">
-      <div class="split__head">
-        <p class="eyebrow">Our network</p>
-        <h2 id="network-heading" class="display display--md">We know who to call.</h2>
-      </div>
-      <div class="split__body">
-        <p>
-          We’ve built a database of over a thousand creators and partners across Ireland — people
-          we’ve worked with, vetted or tracked, organised by audience, niche and location.
-        </p>
-        <p>
-          That network is growing across Europe. Every campaign we run adds to it, which means the
-          next brief starts further ahead than the last one.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  {/* ================= Who we are ================= */}
-  <section class="section section--ruled" aria-labelledby="team-heading">
-    <div class="container split">
-      <div class="split__head">
-        <p class="eyebrow">Who we are</p>
-        <h2 id="team-heading" class="display display--md">A small team that answers the phone.</h2>
-      </div>
-      <ul class="team" role="list">
-        {team.map((member) => (
-          <li class="team__member">
-            <div class="team__who">
-              <h3 class="team__name">{member.name}</h3>
-              <p class="team__role">{member.role}</p>
-            </div>
-            <p class="team__bio">{member.bio}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
-  {/* ================= Philosophy ================= */}
-  <section class="section section--ruled philosophy" aria-labelledby="philosophy-heading">
-    <div class="container container--narrow philosophy__inner">
-      <p class="eyebrow">Our philosophy</p>
-      <h2 id="philosophy-heading" class="display display--md philosophy__line">
-        <Lines text={'The right people\nbeat more people.'} />
-      </h2>
-      <div class="philosophy__body">
-        <p class="lead">Reach is easy to buy.</p>
-        <p class="lead">Relevance isn’t.</p>
-        <p class="lead">
-          We care about finding the people who already have trust, attention and influence within
-          the audiences that matter to your brand.
-        </p>
-      </div>
-    </div>
-  </section>
 </Base>
 
 <style>
@@ -276,30 +209,4 @@ const approach = [
     text-transform: uppercase;
   }
   .approach__body { font-weight: var(--weight-secondary); }
-
-  /* ---------- The team: a ruled list, name and role beside the line ---------- */
-  .team { list-style: none; border-top: var(--stroke) solid var(--line); }
-  .team__member {
-    display: grid;
-    gap: var(--space-3xs);
-    padding-block: var(--space-m);
-    border-bottom: var(--stroke-hair) solid var(--line);
-  }
-  @media (min-width: 64em) {
-    .team__member { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--space-l); align-items: baseline; }
-  }
-  .team__who { display: grid; gap: var(--space-3xs); align-content: start; }
-  .team__name {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-  .team__role { font-size: var(--text-sm); font-weight: var(--weight-secondary); }
-  .team__bio { font-weight: var(--weight-secondary); }
-
-  /* ---------- Philosophy: centred, as on the home page ---------- */
-  .philosophy__inner { display: grid; gap: var(--space-m); justify-items: center; text-align: center; }
-  .philosophy__line { max-width: 22ch; }
-  .philosophy__body { display: grid; gap: var(--space-2xs); justify-items: center; }
 </style>

@@ -1,0 +1,180 @@
+---
+/**
+ * The services, as a row you page through.
+ *
+ * Two cards at a time from 64em, one from 48em, and on a phone no paging at
+ * all: the row simply scrolls and snaps under a finger. The arrows belong to
+ * the paged mode, so they only appear once the script has marked the slider
+ * ready — with no JavaScript the row is the phone's behaviour at every width,
+ * and all six services stay reachable.
+ *
+ * Paging moves by a whole view rather than a card, in one transform, so
+ * nothing reflows as it moves. Cards off the current page are `inert`: they
+ * leave the tab order rather than sitting behind the edge waiting to be
+ * tabbed into and drag the viewport sideways. The list is a polite live
+ * region, so the change is announced rather than happening silently.
+ *
+ * No autoplay: it moves on a press, an arrow key or a swipe, and never on
+ * its own.
+ */
+export interface Service {
+  title: string;
+  body: string;
+}
+
+interface Props {
+  services: Service[];
+}
+const { services } = Astro.props;
+---
+
+<div class="slider" data-slider>
+  {/* Above the cards, so they never sit over the words. */}
+  <div class="slider__bar">
+    <button class="arrow" type="button" data-prev aria-label="Previous services" disabled>
+      <svg viewBox="0 0 10 20" aria-hidden="true" focusable="false">
+        <path d="M9 1L1 10l8 9" fill="none" stroke="currentColor" stroke-width="1.25"
+              vector-effect="non-scaling-stroke" />
+      </svg>
+    </button>
+    <button class="arrow" type="button" data-next aria-label="Next services">
+      <svg viewBox="0 0 10 20" aria-hidden="true" focusable="false">
+        <path d="M1 1l8 9-8 9" fill="none" stroke="currentColor" stroke-width="1.25"
+              vector-effect="non-scaling-stroke" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="slider__viewport" data-viewport>
+    <ul class="slider__track" data-track role="list" aria-live="polite">
+      {services.map((service) => (
+        <li class="way">
+          <h3 class="way__title">{service.title}</h3>
+          <p class="way__body">{service.body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <p class="label slider__count" data-count>1 / {services.length}</p>
+</div>
+
+<script>
+  import '../scripts/services-slider';
+</script>
+
+<style>
+  .slider {
+    --card-gap: var(--space-l);
+    display: grid;
+    gap: var(--space-m);
+  }
+  @media (min-width: 64em) { .slider { --card-gap: var(--space-xl); } }
+
+  /* ---- The row: a swipe by default, paged once the script is ready ------- */
+  .slider__viewport {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Full bleed on a phone, so a card can run to the edge of the screen
+       and the next one shows it has somewhere to go. */
+    margin-inline: calc(var(--gutter) * -1);
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+    scrollbar-width: none;
+  }
+  .slider__viewport::-webkit-scrollbar { display: none; }
+
+  .slider__track {
+    list-style: none;
+    display: flex;
+    align-items: stretch;
+    gap: var(--card-gap);
+  }
+
+  /* One card fills the view; two share it from 64em. Equal height comes from
+     the row itself — every card is as tall as the tallest, so the line under
+     them doesn't move as you page. */
+  .way {
+    flex: 0 0 100%;
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+    scroll-snap-align: start;
+  }
+  @media (min-width: 64em) {
+    .way { flex: 0 0 calc((100% - var(--card-gap)) / 2); }
+  }
+
+  .way__title {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    /* Clearly under the section's heading, clearly over the paragraph. */
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.25rem);
+    line-height: 1.15;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+  @media (min-width: 80em) { .way__title { font-size: 1.375rem; } }
+  .way__body { font-weight: var(--weight-secondary); max-width: 40ch; }
+
+  /* ---- Arrows and count --------------------------------------------------
+     Neither can say anything truthful without the script, so both wait for
+     it: the arrows only page from 48em, the count reads on a phone too,
+     where it follows the swipe. */
+  .slider__bar,
+  .slider__count { display: none; }
+  [data-slider='ready'] .slider__count { display: block; }
+
+  @media (min-width: 48em) {
+    [data-slider='ready'] .slider__viewport {
+      overflow: hidden;
+      scroll-snap-type: none;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+    /* 400ms on the site's ease-out. Transform only: nothing is laid out
+       again as it moves. */
+    [data-slider='ready'] .slider__track { transition: transform 400ms var(--ease); }
+
+    [data-slider='ready'] .slider__bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-2xs);
+    }
+  }
+
+  .arrow {
+    display: inline-grid;
+    place-items: center;
+    /* 44px: the tap target is the button itself. */
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: var(--stroke) solid var(--line);
+    border-radius: 50%;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color var(--dur) var(--ease),
+                border-color var(--dur) var(--ease),
+                color var(--dur) var(--ease),
+                opacity var(--dur) var(--ease);
+  }
+  .arrow svg { width: 0.5rem; height: 1rem; }
+  .arrow:hover:not(:disabled),
+  .arrow:focus-visible {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-dark);
+  }
+  /* At either end: still there, plainly not available. */
+  .arrow:disabled { opacity: 0.3; cursor: default; }
+
+  .slider__count { justify-self: start; }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slider='ready'] .slider__track { transition: none; }
+    .arrow { transition: none; }
+  }
+</style>

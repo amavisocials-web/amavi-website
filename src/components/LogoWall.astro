@@ -86,7 +86,11 @@ const COPIES = 3;
 
 <style>
   .logo-wall {
-    --logo-base: clamp(2.5rem, 1.9rem + 1.6vw, 3.4rem);
+    /* Sized so no client mark stands taller or wider than the AMAVI wordmark
+       in the header — measured against the tallest (The Humble Fishmonger)
+       and the widest (AutismCare Ireland). */
+    --logo-base: clamp(1.9rem, 1.45rem + 1.2vw, 2.55rem);
+    --logo-cap: 4.75rem;
     --logo-gap: clamp(2.5rem, 5vw, 4.5rem);
     text-align: center;
   }
@@ -95,8 +99,12 @@ const COPIES = 3;
     display: grid;
     gap: var(--space-s);
     justify-items: center;
-    padding-bottom: var(--space-l);
+    /* Close to the logos: the label names the row, it doesn't head a
+       section of its own. */
+    padding-bottom: var(--space-s);
   }
+  /* The label reads at the size of the hero's line, not as small print. */
+  .logo-wall__head .eyebrow { font-size: var(--text-lead); }
   /* The heading is display type; the line under it is small body text, so the
      two are never close in size. */
   .logo-wall__intro { font-size: var(--text-sm); font-weight: var(--weight-secondary); max-width: 46ch; }
@@ -111,7 +119,9 @@ const COPIES = 3;
   .logo-wall__img {
     height: calc(var(--logo-base) * var(--k, 1));
     width: auto;
-    max-width: none;
+    /* Nothing wider than the AMAVI wordmark in the header (79px there): a
+       long client wordmark scales down to fit rather than outrunning it. */
+    max-width: var(--logo-cap);
     object-fit: contain;
   }
 
@@ -139,7 +149,9 @@ const COPIES = 3;
   .marquee {
     --marquee-duration: 48s;
     overflow: hidden;
-    padding-block: var(--space-l);
+    /* Tight to the label above, a little more room below, where the page
+       carries on. */
+    padding-block: var(--space-s) var(--space-m);
   }
   .marquee:focus-visible { outline-offset: -2px; }
 

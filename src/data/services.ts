@@ -15,109 +15,129 @@ export interface Service {
 }
 
 export interface ServiceArea {
-  /** Anchor on the page, e.g. /services/#creator-marketing. */
+  /** Anchor on the page, e.g. /services/#creator-campaigns. */
   id: string;
   number: string;
   title: string;
   /** One line under the title, set in italics: what this area is. */
   summary: string;
-  /** Short paragraphs under the title. */
-  intro: string[];
+  /** The paragraph under it. */
+  intro: string;
+  /** What the area actually covers, as a name and a line each. */
   services: Service[];
   /** The line the area closes on. */
   closing: string;
 }
 
+/** The five practice areas, in the order they open on the page. */
 export const SERVICE_AREAS: ServiceArea[] = [
   {
-    id: 'creator-marketing',
+    id: 'creator-community-aor',
     number: '01',
-    title: 'Creator Marketing',
-    summary: 'We find, brief and manage the creators who make sense for your brand.',
-    intro: ['The right creator can give a brand something media buying can’t: trust, relevance and attention.'],
+    title: 'Creator & Influencer Community AOR',
+    summary: 'Creator communities run as an ongoing programme, not a one-off campaign.',
+    intro: 'Build lasting relevance through creator communities rather than one-off activity. By developing long-term relationships with creators who genuinely fit the brand, we create a group of advocates who keep speaking for you between campaigns, not just during them.',
     services: [
       {
-        name: 'Creator Sourcing',
-        description: 'Finding creators based on audience, content, location, values and campaign objectives.',
+        name: 'Strategy',
+        description: 'We build the creative and strategic proposal around your objective, grounded in audience behaviour and what’s actually happening on the platforms, with clear timings and success measures agreed up front.',
       },
       {
-        name: 'Campaign Management',
-        description: 'From outreach and negotiation to briefs, timelines, approvals and delivery.',
+        name: 'Creator sourcing & vetting',
+        description: 'We search on audience rather than follower count, then check every creator for genuine engagement, content quality and brand fit before they reach you.',
       },
-      { name: 'Ambassador Programmes', description: 'Building longer-term relationships between brands and creators.' },
       {
-        name: 'UGC & Creator Content',
-        description:
-          'Content designed to feel natural on social while giving brands assets they can use beyond the creator’s own channels.',
+        name: 'Ambassador programmes',
+        description: 'Longer-term relationships that keep a brand present between campaigns rather than only during them.',
       },
     ],
-    closing: 'One creator or one hundred — we build the right mix.',
+    closing: 'One creator or one hundred. We build the right mix.',
   },
   {
-    id: 'brand-campaign-strategy',
+    id: 'creator-campaigns',
     number: '02',
-    title: 'Brand & Campaign Strategy',
-    summary: 'We turn a business objective into a campaign someone can actually run.',
-    intro: ['Before we choose the platform, creator or format, we need to know what we’re trying to achieve.'],
+    title: 'Influencer & Creator Campaigns',
+    summary: 'Campaigns built around a business objective, managed end to end.',
+    intro: 'Our campaigns are built around a business objective, not a posting schedule. We source and vet the creators, negotiate the rates, brief the work and manage it through to publication, so each campaign reaches people the brand hasn’t reached before.',
     services: [
-      { name: 'Campaign Concepts', description: 'Turning a business objective into an idea people want to engage with.' },
       {
-        name: 'Audience Strategy',
-        description: 'Defining who we’re trying to reach and where they already spend their attention.',
+        name: 'Creator sourcing & vetting',
+        description: 'Deep searches to find creators with real engagement and the right audience, followed by a multi-step check so nothing reaches you that doesn’t fit the brand.',
       },
-      { name: 'Creative Direction', description: 'Building the messaging, content direction and campaign framework.' },
       {
-        name: 'Campaign Planning',
-        description: 'Connecting strategy, creators, content and distribution into one clear plan.',
+        name: 'Contracting & briefing',
+        description: 'We handle agreements, licensing, usage rights and compliance in house, then brief each creator directly so expectations are clear before any content starts.',
+      },
+      {
+        name: 'Campaign management',
+        description: 'From outreach and negotiation through to timelines, approvals and delivery.',
+      },
+      {
+        name: 'Measurement',
+        description: 'Tracking throughout the campaign and a final report against the original objective, including how much of the audience was new to the brand.',
       },
     ],
-    closing: 'The idea comes first. The channel follows.',
+    closing: 'The objective comes first. The channel follows.',
   },
   {
-    id: 'content-social',
+    id: 'creator-ugc',
     number: '03',
-    title: 'Content & Social',
-    summary: 'We make content that looks native to the feed, not to the brand guidelines.',
-    intro: [
-      'Good content shouldn’t look like advertising.',
-      'It should look like something people actually want to watch.',
-    ],
+    title: 'Creator UGC Content',
+    summary: 'Creator content produced in volume, for your channels as well as theirs.',
+    intro: 'Creator content is one of the most useful assets a brand can own. We produce it in volume, native to the platforms people actually use, and hand it over for your own channels and paid media long after the original post has run.',
     services: [
-      { name: 'Content Strategy', description: 'What to say, who to say it to and what formats make sense.' },
-      { name: 'Short-Form Video', description: 'Reels, TikToks and social-first content built around attention.' },
       {
-        name: 'Editing & Creative',
-        description: 'Turning raw footage and creator content into polished, platform-ready assets.',
+        name: 'Content production',
+        description: 'We oversee content from concept through to final cut, with a structured review at each stage. Nothing publishes before you’ve seen it.',
       },
       {
-        name: 'Content Systems',
-        description: 'Repeatable formats and creative frameworks that make content easier to produce consistently.',
+        name: 'Paid amplification',
+        description: 'Creator content works harder when it doesn’t stop at the creator’s channel. We help put it to work across your own social and paid media.',
+      },
+      {
+        name: 'Content systems',
+        description: 'Repeatable formats and frameworks that make content easier to produce consistently.',
       },
     ],
     closing: 'Built for the feed. Made for the brand.',
   },
   {
-    id: 'growth-partnerships',
+    id: 'affiliate-marketing',
     number: '04',
-    title: 'Growth Partnerships',
-    summary: 'We find the businesses and communities that already have your audience.',
-    intro: [
-      'Sometimes the fastest route to a new audience isn’t another post.',
-      'It’s finding the people who already have them.',
-    ],
+    title: 'Affiliate Marketing',
+    summary: 'Creator partnerships structured around performance.',
+    intro: 'We connect creators, content and commerce so the work can be measured against revenue. Partnerships are structured around performance, with tracking and commission agreed from the start.',
     services: [
       {
-        name: 'Partnership Discovery',
-        description: 'Finding businesses, organisations and communities with access to relevant audiences.',
+        name: 'Partnership structure',
+        description: 'Commission, tracking and terms agreed before anything goes live, so everyone knows what success looks like.',
       },
-      { name: 'Outreach', description: 'Researching, identifying and approaching potential partners.' },
-      { name: 'Audience Access', description: 'Creating opportunities to reach people beyond your existing channels.' },
       {
-        name: 'Partnership Strategy',
-        description: 'Building mutually valuable collaborations around a shared audience.',
+        name: 'Creator communities',
+        description: 'We identify the creators whose audiences are most likely to convert, not just the ones with the largest reach.',
+      },
+      {
+        name: 'Measurement',
+        description: 'Reporting tied to revenue rather than impressions alone.',
       },
     ],
-    closing: 'Find the people who already have the audience.',
+    closing: 'Work that can be measured against the till.',
+  },
+  {
+    id: 'live-experiences',
+    number: '05',
+    title: 'Live Experiences',
+    summary: 'Activations that put creators, customers and the brand in the same room.',
+    intro: 'We bring creators, customers and the brand into the same room. Each activation is built to be worth attending and worth filming, turning a single moment into content that keeps working afterwards.',
+    services: [
+      { name: 'Creative production', description: 'Planning and running the activation itself, in person or online.' },
+      { name: 'Talent management', description: 'Sourcing, briefing and looking after the creators on the day.' },
+      {
+        name: 'Content capture',
+        description: 'Everything filmed on the day becomes content the brand can use long after the event has ended.',
+      },
+    ],
+    closing: 'One day of work. Months of content.',
   },
 ];
 
@@ -164,7 +184,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     client: 'A seafood bar',
     objective: 'Reach more of the visitors travelling through the area.',
     approach:
-      'Creators — and research and outreach to the tour operators, bus companies and local partners already bringing those visitors in.',
+      'Creators, plus research and outreach to the tour operators, bus companies and local partners already bringing those visitors in.',
     // TODO(client): no measured outcome was supplied for this one; replace
     // with the figure when there is one.
     result: 'New routes to the audience, beyond social media.',
@@ -173,6 +193,6 @@ export const CASE_STUDIES: CaseStudy[] = [
     client: 'Four brands in healthcare and home services',
     objective: 'A combined target of 40 creator partnerships in five months.',
     approach: 'Creator partnership programmes, from sourcing and outreach to agreements and reporting.',
-    result: '49 partnerships delivered — 9 beyond target.',
+    result: '49 partnerships delivered, 9 beyond target.',
   },
 ];

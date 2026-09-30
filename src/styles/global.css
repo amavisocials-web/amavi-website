@@ -188,6 +188,10 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
   text-wrap: pretty;
 }
 
+/* A number set inside running text: the accent and a heavier weight, at the
+   size of the words around it, so the line height never shifts. */
+.figure { color: var(--accent); font-weight: 700; }
+
 .prose { max-width: var(--measure); }
 .prose p + p { margin-top: var(--space-s); }
 

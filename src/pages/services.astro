@@ -26,20 +26,17 @@ import { SITE_NAME, SITE_URL } from '../consts';
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  itemListElement: SERVICE_AREAS.flatMap((area) => area.services.map((service) => ({ area, service }))).map(
-    ({ area, service }, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      item: {
-        '@type': 'Service',
-        name: service.name,
-        description: service.description,
-        category: area.title,
-        areaServed: { '@type': 'Country', name: 'Ireland' },
-        provider: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
-      },
-    }),
-  ),
+  itemListElement: SERVICE_AREAS.map((area, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'Service',
+      name: area.title,
+      description: area.summary,
+      areaServed: { '@type': 'Country', name: 'Ireland' },
+      provider: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    },
+  })),
 };
 ---
 
@@ -91,9 +88,7 @@ const schema = {
                     <p class="area__number" aria-hidden="true">{area.number}</p>
                     <p class="display display--md area__title">{area.title}</p>
                     <p class="area__summary">{area.summary}</p>
-                    <div class="area__intro">
-                      {area.intro.map((line) => <p class="lead">{line}</p>)}
-                    </div>
+                    <p class="area__intro">{area.intro}</p>
                     <ul class="area__services" role="list">
                       {area.services.map((service) => (
                         <li class="area__service">
@@ -122,8 +117,8 @@ const schema = {
         <p class="eyebrow">Where we work</p>
         <h2 id="sectors-heading" class="display display--md"><Lines text={'Different industries.\nSame approach.'} /></h2>
         <p class="lead">
-          We adapt the strategy to the audience, the objective and the opportunity — not the other
-          way around.
+          We adapt the strategy to the audience, the objective and the opportunity, not the
+          other way around.
         </p>
       </div>
       <ul class="sectors" role="list">
@@ -149,13 +144,13 @@ const schema = {
       <div class="prose why__body">
         <p>Brands don’t build relationships with algorithms. People do.</p>
         <p>
-          Creators bring context, personality and trust to the brands they work with — helping
+          Creators bring context, personality and trust to the brands they work with, helping
           businesses enter conversations that traditional advertising can’t always create.
         </p>
         <p><strong>But creators are only one part of the picture.</strong></p>
         <p>
           We combine creator marketing with content, strategy and partnerships to build campaigns
-          around <strong>the audience — not just the platform</strong>.
+          around <strong>the audience, not just the platform</strong>.
         </p>
       </div>
     </div>
@@ -240,7 +235,9 @@ const schema = {
   }
   /* One line on what the area is, before the case for it. */
   .area__summary { font-style: italic; font-weight: var(--weight-secondary); max-width: var(--measure); }
-  .area__intro { display: grid; gap: var(--space-2xs); }
+  .area__intro { font-weight: var(--weight-secondary); max-width: var(--measure); }
+
+  /* ---------- What an area covers: a ruled table of names and lines ------- */
   .area__services { list-style: none; margin-top: var(--space-s); border-top: var(--stroke) solid var(--line); }
   .area__service {
     display: grid;

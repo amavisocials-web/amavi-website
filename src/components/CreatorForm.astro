@@ -35,7 +35,7 @@ if (!sheetsEndpoint) {
 /* TODO(client): the tiers are still to be supplied. These are the live form's
    bands, left in place so the step works until the new ones arrive. */
 const followerBands = [
-  'Nano — under 5K', 'Micro — 5K to 15K', 'Mid — 15K to 50K', 'Macro — 50K to 150K', 'Major — 150K+',
+  'Nano: under 5K', 'Micro: 5K to 15K', 'Mid: 15K to 50K', 'Macro: 50K to 150K', 'Major: 150K+',
 ];
 const engagementBands = ['Under 2%', '2% – 4%', '4% – 7%', '7%+', 'Not sure'];
 const niches = [
@@ -271,7 +271,7 @@ const total = STEPS.length;
                  aria-describedby="cf-rates-hint cf-rates-error" data-rate-group>
               <span class="field__label" id="cf-rates-label">Rates per format</span>
               <p class="field__hint" id="cf-rates-hint">
-                Whatever you charge for — one is enough. Leave the rest blank.
+                Whatever you charge for. One is enough, so leave the rest blank.
               </p>
               <div class="field-grid rate-grid">
                 {rates.map((r) => (
@@ -300,7 +300,7 @@ const total = STEPS.length;
               Rate notes <span class="field__optional">(optional)</span>
             </label>
             <textarea class="field__control" id="cf-rate-notes" name="rate_notes" rows="3"
-                      placeholder="Bundles, usage rights, exclusivity — anything we should know"></textarea>
+                      placeholder="Bundles, usage rights, exclusivity: anything we should know"></textarea>
           </div>
 
           <div class="field">
@@ -358,7 +358,7 @@ const total = STEPS.length;
       {/* Shown by the script: a validation nudge, or a failed send. Never both. */}
       <p class="field__error" data-form-hint aria-live="polite"></p>
       <div class="form-status" data-form-error tabindex="-1" hidden>
-        We couldn’t submit your application. Please try again in a moment — or email your details
+        We couldn’t submit your application. Please try again in a moment, or email your details
         to{' '}
         <a href={`mailto:${APPLICATIONS_EMAIL}?subject=${encodeURIComponent('Creator application')}`}>
           {APPLICATIONS_EMAIL}
@@ -377,7 +377,7 @@ const total = STEPS.length;
 
   <div class="form-status apply__success" data-form-success tabindex="-1" hidden>
     <h2 class="display display--md">Application received.</h2>
-    <p>Thanks for applying. You’re in the AMAVI network — we’ll come to you when a brief fits your audience.</p>
+    <p>Thanks for applying. You’re in the AMAVI network. We’ll come to you when a brief fits your audience.</p>
   </div>
 </div>
 
