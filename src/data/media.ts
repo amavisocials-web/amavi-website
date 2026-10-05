@@ -4,7 +4,11 @@ import servicesInvoice from '../assets/media/services-invoice.jpg';
 import homeCreators from '../assets/media/home-creators.jpg';
 import areaCreatorCommunity from '../assets/media/area-creator-community.jpg';
 import areaCreatorUgc from '../assets/media/area-creator-ugc.jpg';
-import areaAffiliateMarketing from '../assets/media/area-affiliate-marketing.jpg';
+// Affiliate Marketing came off the service list on 5 October 2026. The file
+// stays in ../assets/media/, deliberately NOT imported: Astro copies every
+// imported image into the build whether or not a page shows it. Uncomment
+// this and its entry below if the area comes back.
+// import areaAffiliateMarketing from '../assets/media/area-affiliate-marketing.jpg';
 import seaCliffs from '../assets/media/sector-seafood.jpg';
 import sectorHealthcare from '../assets/media/sector-healthcare.jpg';
 import sectorWellness from '../assets/media/sector-wellness.jpg';
@@ -78,8 +82,12 @@ export const MEDIA = {
       'creator-community-aor': { image: areaCreatorCommunity, alt: 'Someone holding an oversized phone showing a fashion brand’s online shop' },
       'creator-campaigns': null,
       'creator-ugc': { image: areaCreatorUgc, alt: 'A grid of small printed creator photographs pinned to a steel sheet' },
+      // TODO(client): nothing supplied suits Founder & Personal Brand or
+      // Mobile First Organic Content, the two areas added on 5 October 2026,
+      // so both open on their paragraph alone rather than on "Add image".
+      'founder-personal-brand': null,
       'live-experiences': null,
-      'affiliate-marketing': { image: areaAffiliateMarketing, alt: 'Someone filming a flat lay of printed campaign shots on a phone mounted on a tripod', align: 'body' },
+      'mobile-first-organic': null,
     } as Record<string, ImageSlot | null | undefined>,
     /**
      * Keyed by sector name in src/data/services.ts. 4:5.

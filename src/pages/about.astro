@@ -19,39 +19,19 @@ import { MEDIA } from '../data/media';
 const approach = [
   {
     name: 'Strategy',
-    body: 'We transform your business goals into a sharp campaign concept, precise audience targeting and a structured delivery roadmap.',
+    body: 'We turn your business goals into a clear strategy, creative direction and campaign roadmap. We work closely with your internal team throughout to stay aligned, adapt where needed and make sure every move is in the right direction.',
   },
   {
     name: 'Creator selection',
-    body: 'We discover, vet and contract the creators and communities your audience genuinely trusts, from single activations to long-term brand ambassador programmes.',
+    body: 'We discover, vet and manage the creators and communities your audience genuinely trusts, from one-off campaigns to long-term ambassador programmes, keeping in mind your aesthetic, current business goals and long term vision.',
   },
   {
     name: 'Content & production',
-    body: 'We manage creator briefs through to final approval, providing native video editing and production so every asset fits seamlessly onto its platform.',
+    body: 'We manage the process from briefing to final delivery, creating platform-native content that feels authentic to the creator and the brand.',
   },
   {
-    name: 'Reporting & analytics',
-    body: 'We track performance in real time and deliver clear, actionable post-campaign reporting to ensure every future move is grounded in data.',
-  },
-];
-
-/** What the work is for, in the same ruled list as the approach above it. */
-const commitment = [
-  {
-    name: 'Driving authentic, sustainable growth',
-    body: 'We make it our mission to make your brand as culturally relevant and commercially successful as it can be.',
-  },
-  {
-    name: 'Every touchpoint counts',
-    body: 'Every creator brief, video frame and campaign activation is an opportunity to generate a real response with a tangible result.',
-  },
-  {
-    name: 'End-to-end precision',
-    body: 'From initial strategy and creator matchmaking to native production, legal compliance and data-driven reporting, we handle every detail under one roof.',
-  },
-  {
-    name: 'Network advantage',
-    body: 'Powered by a curated database of over 1,000 vetted creators and partners across Ireland and Europe, every campaign we launch starts further ahead.',
+    name: 'Reporting & optimisation',
+    body: 'We track performance throughout each campaign and turn the data into clear insights, using what we learn to continuously improve what comes next.',
   },
 ];
 
@@ -68,10 +48,12 @@ const commitment = [
       <div class="about__lead">
         <p class="lead">
           We are a <strong>creator-led marketing and partnerships agency</strong> for ambitious
-          brands across Ireland and Europe. In a world overwhelmed by noise, reach is easy to buy.
-          Relevance isn’t. We focus on what actually moves the needle: authentic human connection,
-          trusted voices and measurable commercial results. We solve brand growth problems rather
-          than become one.
+          brands across Europe. In a world overwhelmed by noise, reach is easy to buy.
+          Relevance isn’t.
+        </p>
+        <p class="lead">
+          We focus on what actually moves the needle: authentic human connection, trusted voices
+          and measurable commercial results.
         </p>
       </div>
     </div>
@@ -83,7 +65,7 @@ const commitment = [
     <div class="container split">
       <div class="split__head">
         <p class="eyebrow">Our approach</p>
-        <h2 id="approach-heading" class="display display--md"><Lines text={'Full-funnel influencer,\ndigital and social campaigns.'} /></h2>
+        <h2 id="approach-heading" class="display display--md"><Lines text={'Strategy-led creator,\ncontent & social campaigns.'} /></h2>
       </div>
       <ul class="approach" role="list">
         {approach.map((item) => (
@@ -112,30 +94,12 @@ const commitment = [
       </div>
       <div class="split__body">
         <p>
-          A campaign doesn’t always need another influencer. Sometimes it needs a creator, an
+          A campaign doesn’t always need one macro influencer. Sometimes it needs a creator, an
           active community, or a strategic partnership that puts your brand directly in front of
           the audience that matters. We look at the bigger picture first, then assemble the exact
           mix to deliver on your commercial targets.
         </p>
       </div>
-    </div>
-  </section>
-
-  {/* ================= Our commitment ================= */}
-  <section class="section" aria-labelledby="commitment-heading">
-    <div class="container split">
-      <div class="split__head">
-        <p class="eyebrow">Our commitment</p>
-        <h2 id="commitment-heading" class="display display--md"><Lines text={'What you get when\nyou work with us.'} /></h2>
-      </div>
-      <ul class="approach" role="list">
-        {commitment.map((item) => (
-          <li class="approach__item">
-            <h3 class="row-label">{item.name}</h3>
-            <p class="approach__body">{item.body}</p>
-          </li>
-        ))}
-      </ul>
     </div>
   </section>
 

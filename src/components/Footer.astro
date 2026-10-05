@@ -1,7 +1,7 @@
 ---
 import Logo from './Logo.astro';
 import Lines from './Lines.astro';
-import { SOCIALS, SITE_NAME, CONTACT_PATH, CREATOR_PATH, CONTACT_EMAIL } from '../consts';
+import { SOCIALS, SITE_NAME, CONTACT_PATH, CREATOR_PATH, CONTACT_EMAIL, APPLICATIONS_EMAIL } from '../consts';
 
 /**
  * The footer: black, full bleed — edge to edge and down to the bottom of the
@@ -16,7 +16,7 @@ const year = new Date().getFullYear();
 
 const pages = [
   { label: 'Home', href: '/' },
-  { label: 'Services', href: '/services/' },
+  // Services, temporarily off the site (5 October 2026): see src/pages/_services.astro.
   { label: 'About', href: '/about/' },
   { label: 'Creator Network', href: CREATOR_PATH },
   { label: 'Contact', href: CONTACT_PATH },
@@ -28,7 +28,7 @@ const pages = [
     <div class="footer-grid">
       <div class="footer-brand">
         <Logo size="lg" variant="white" />
-        <p class="meta footer-tag"><Lines text={'Creator-led marketing & partnerships.\nIreland & EU.'} /></p>
+        <p class="meta footer-tag">Europe &amp; ROW</p>
       </div>
 
       <nav class="footer-col" id="footer-nav" aria-label="Footer">
@@ -41,8 +41,12 @@ const pages = [
       <div class="footer-col">
         <h2 class="label footer-heading">Contact</h2>
         <ul role="list">
-          <li><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></li>
-          <li>Ireland &amp; EU</li>
+          {/* Who each address is for, set like a column heading: two ways in,
+              named, rather than one address and a region. */}
+          <li><span class="label footer-who">Brands</span>
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></li>
+          <li><span class="label footer-who">Talent</span>
+            <a href={`mailto:${APPLICATIONS_EMAIL}`}>{APPLICATIONS_EMAIL}</a></li>
         </ul>
       </div>
 
@@ -99,6 +103,12 @@ const pages = [
   /* A little tighter where a pointer, not a thumb, does the choosing. */
   @media (min-width: 48em) { .footer-col ul { gap: var(--space-3xs); } }
   .footer-col li { font-size: var(--text-sm); overflow-wrap: anywhere; }
+
+  /* Who the address under it is for. Set like the column headings above,
+     a shade quieter, so the two pairs read as pairs rather than four
+     separate lines. */
+  .footer-who { display: block; margin-bottom: var(--space-3xs); opacity: 0.6; }
+  .footer-col li + li:has(.footer-who) { margin-top: var(--space-2xs); }
 
   /* White links; the accent marks hover, with an underline so the state
      never rests on colour alone. */

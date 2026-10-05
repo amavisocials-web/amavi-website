@@ -63,5 +63,8 @@ const { variant = 'brand', size = 'sm' } = Astro.props;
 
   /* Two steps up the scale from where it started, at the client's direction. */
   .wordmark--sm { font-size: 1.6875rem; }
-  .wordmark--lg { font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem); }
+  /* Two steps down the scale (5 October 2026): the footer wordmark closes
+     the page, it does not announce it. 1.25^2 = 1.5625, so every stop of
+     the clamp is divided by that. */
+  .wordmark--lg { font-size: clamp(1.6rem, 1.024rem + 2.3vw, 2.88rem); }
 </style>

@@ -1,0 +1,210 @@
+---
+import Frame from './Frame.astro';
+import type { ServiceArea } from '../data/services';
+import type { ImageSlot } from '../data/media';
+
+/**
+ * The practice areas, as a numbered index that opens in place.
+ *
+ * One component, two readers. On /services each panel carries the area's
+ * paragraph, the services it covers and a picture; on the home page the same
+ * rows open on the paragraph alone (`detail={false}`), so the two lists are
+ * the same list and the copy lives once, in src/data/services.ts.
+ *
+ * It is built to work without JavaScript: every panel is in the page and open
+ * until src/scripts/service-accordions.ts marks the list ready, which is what
+ * turns the collapsing CSS on. A failed script therefore leaves the page
+ * readable rather than sealed shut.
+ *
+ * Each row keeps its own id, so /services/#creator-campaigns opens that area
+ * and scrolls to it.
+ */
+interface Props {
+  areas: ServiceArea[];
+  /**
+   * The full panel: the services the area covers, and a picture beside them.
+   * False gives the paragraph alone, which is what the home page shows.
+   */
+  detail?: boolean;
+  /** Pictures by area id, for the detailed list. See src/data/media.ts. */
+  media?: Record<string, ImageSlot | null | undefined>;
+  /** Heading level for each row, to keep the page's outline valid. */
+  level?: 2 | 3;
+  /**
+   * Prefix for the ids, where two lists could otherwise collide. The row's
+   * own anchor id is left alone.
+   */
+  idPrefix?: string;
+}
+const { areas, detail = true, media = {}, level = 2, idPrefix = '' } = Astro.props;
+const H = `h${level}` as 'h2' | 'h3';
+const SH = `h${(level + 1) as 3 | 4}` as 'h3' | 'h4';
+---
+
+<ol class="areas" role="list" data-accordion>
+  {areas.map((area) => {
+    // `null` is an area that runs without a picture; `undefined` is one still
+    // waiting for one, which the frame shows as "Add image".
+    const picture = detail ? media[area.id] : null;
+    const trigger = `${idPrefix}${area.id}-trigger`;
+    const panel = `${idPrefix}${area.id}-panel`;
+    return (
+      <li class="area" id={area.id} data-area data-open="true">
+        <H class="area__heading">
+          <button type="button" class="area__trigger" id={trigger}
+                  aria-expanded="true" aria-controls={panel} data-trigger>
+            <span class="area__index" aria-hidden="true">{area.number}</span>
+            <span class="area__name">{area.title}</span>
+            <svg class="area__chevron" viewBox="0 0 10 20" aria-hidden="true">
+              <path d="M1 1l8 9-8 9" fill="none" stroke="currentColor" stroke-width="1.25" vector-effect="non-scaling-stroke" />
+            </svg>
+          </button>
+        </H>
+
+        <div class="area__panel" id={panel} role="region" aria-labelledby={trigger} data-panel>
+          <div class="area__inner">
+            <div class:list={['area__grid', {
+              'area__grid--wide': picture === null,
+              'area__grid--aligned': picture?.align === 'body',
+            }]}>
+              {/* The row above is the heading; here the number and title are
+                  the panel's opening, set large. Head and body are separate
+                  so a picture can start level with either. */}
+              <div class="area__head">
+                <p class="area__number" aria-hidden="true">{area.number}</p>
+                <p class="display display--md area__title">{area.title}</p>
+              </div>
+
+              <div class="area__body">
+                <p class="area__description">{area.description}</p>
+                {detail && area.services.length > 0 && (
+                  <ul class="area__services" role="list">
+                    {area.services.map((service) => (
+                      <li class="area__service">
+                        <SH class="row-label">{service.name}</SH>
+                        <p class="area__service-desc">{service.description}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              {picture !== null && <Frame media={picture} ratio="2/3" class="area__media" />}
+            </div>
+          </div>
+        </div>
+      </li>
+    );
+  })}
+</ol>
+
+<script>
+  import '../scripts/service-accordions';
+</script>
+
+<style>
+  /* ---------- The areas: an index that opens in place ----------
+     Each row keeps the index's look — number, title, chevron, a hairline
+     under each — and the chevron turns down when its panel is open. */
+  .areas { list-style: none; border-top: var(--stroke) solid var(--line); }
+  .area { border-bottom: var(--stroke) solid var(--line); scroll-margin-top: var(--header-h); }
+
+  .area__trigger {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-s);
+    width: 100%;
+    min-height: 2.75rem;
+    padding: var(--space-s) 0;
+    text-align: left;
+    color: var(--ink);
+    cursor: pointer;
+    transition: color var(--dur) var(--ease);
+  }
+  .area__index { font-size: var(--text-sm); font-weight: var(--weight-strong); color: var(--accent); }
+  .area__name {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .area__chevron { width: 0.7rem; height: 1.4rem; transition: transform var(--dur) var(--ease); }
+  .area__trigger:hover { color: var(--accent); }
+  .area__trigger:hover .area__chevron { transform: translateX(0.3rem); }
+  .area__trigger[aria-expanded='true'] .area__chevron,
+  .area__trigger[aria-expanded='true']:hover .area__chevron { transform: rotate(90deg); }
+
+  /* The panel opens on its own height: 0fr to 1fr animates, and the inner
+     box clips what doesn't fit yet. Until the script marks the list ready,
+     nothing collapses — so a page without JavaScript shows all six. */
+  .area__panel { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--dur) var(--ease); }
+  .area__inner { min-height: 0; overflow: hidden; }
+  [data-accordion='ready'] .area[data-open='false'] .area__panel { grid-template-rows: 0fr; }
+  @media (prefers-reduced-motion: reduce) {
+    .area__panel { transition: none; }
+  }
+
+  /* ---------- Inside a panel: text beside a portrait image ---------- */
+  /* The panel ends on its last row, so the tail below it is short. */
+  .area__grid { display: grid; gap: var(--space-m); padding-bottom: var(--space-l); }
+  .area__grid--wide { padding-bottom: var(--space-m); }
+  .area :global(.area__media) { width: min(100%, 16rem); margin-top: var(--space-l); }
+
+  @media (min-width: 48em) {
+    .area__grid {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: var(--space-xl);
+      align-items: start;
+    }
+    .area__head { grid-column: 1; grid-row: 1; }
+    .area__body { grid-column: 1; grid-row: 2; }
+    .area :global(.area__media) {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      width: min(100%, 22rem);
+      justify-self: end;
+      margin-top: 0;
+    }
+    /* Level with the paragraph instead, leaving the number and title clear. */
+    .area__grid--aligned :global(.area__media) { grid-row: 2; }
+    /* An area with no picture: one column across the panel, and less of a
+       tail below it now that nothing has to match an image's height. The
+       paragraph keeps its measure, so the lines stay readable at full width. */
+    .area__grid--wide { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .area__head,
+  .area__body { display: grid; gap: var(--space-m); align-content: start; }
+  /* The area's number: the one large accent mark in the list. */
+  .area__number {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(2.1875rem, 1.5rem + 2.69vw, 3.75rem);
+    line-height: 0.85;
+    color: var(--accent);
+  }
+  .area__description { font-weight: var(--weight-secondary); max-width: var(--measure); }
+
+  /* ---------- What an area covers: names and lines, held apart by space ----
+     No rules in here: the space between the rows is what separates them, so
+     an open panel reads as a set of blocks rather than a table. The rules
+     between 01–06 in the index are a different thing and stay. */
+  .area__services {
+    list-style: none;
+    display: grid;
+    gap: var(--space-l);
+    margin-top: var(--space-m);
+  }
+  .area__service { display: grid; gap: var(--space-3xs); }
+  /* The label moves beside its line only at 80em: beside a picture, the text
+     column at 64em leaves the description about 34 characters wide, which is
+     a column too narrow to read comfortably. */
+  @media (min-width: 64em) { .area__services { gap: var(--space-xl); } }
+  @media (min-width: 80em) {
+    .area__service { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); column-gap: var(--space-m); align-items: baseline; }
+  }
+  .area__service-desc { font-weight: var(--weight-secondary); }
+</style>

@@ -1,7 +1,7 @@
 ---
 /**
  * The home page's full-screen opening: headline, one line of positioning and
- * the buttons (the `actions` slot), over video. A page can add a subline, a
+ * the buttons (the `actions` slot), centred over video. A page can add a subline, a
  * short line of services under the buttons, and large entry points beneath;
  * the home page uses none of the three. The copy comes from the page
  * (src/pages/index.astro).
@@ -34,7 +34,7 @@ interface Props {
   /** "\n" marks a line break. */
   title: string;
   intro: string;
-  /** A few words under the headline, each closed by an accent full stop. */
+  /** A few words under the headline, divided by an accent rule: "Brands | Creators". */
   subline?: string[];
   /** Short list of services, set in small capitals under the buttons. */
   services?: string[];
@@ -90,7 +90,7 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
       {subline.length > 0 && (
         <p class="hero__subline enter enter--2">
           {subline.map((word, i) => (
-            <>{i > 0 && ' '}<span class="hero__word">{word}<span class="hero__stop">.</span></span></>
+            <>{i > 0 && <span class="hero__divider" aria-hidden="true">|</span>}<span class="hero__word">{word}</span></>
           ))}
         </p>
       )}
@@ -178,7 +178,7 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     .hero[data-desktop='video'] .hero__inner { padding-top: var(--header-h); }
     .hero[data-desktop='video'] .hero__media { display: block; }
     .hero[data-desktop='video'] .hero__label { visibility: hidden; }
-    .hero[data-desktop='video'] .hero__stop { color: inherit; }
+    .hero[data-desktop='video'] .hero__divider { color: inherit; opacity: 0.6; }
     .hero__video--mobile { display: none; }
   }
   @media (orientation: portrait) {
@@ -189,23 +189,30 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     .hero[data-mobile='video'] .hero__inner { padding-top: var(--header-h); }
     .hero[data-mobile='video'] .hero__media { display: block; }
     .hero[data-mobile='video'] .hero__label { visibility: hidden; }
-    .hero[data-mobile='video'] .hero__stop { color: inherit; }
+    .hero[data-mobile='video'] .hero__divider { color: inherit; opacity: 0.6; }
     .hero__video--desktop { display: none; }
     .hero__label-note--desktop { display: none; }
     .hero__label-note--mobile { display: inline; }
   }
 
   /* ---- Words -------------------------------------------------------------- */
+  /* Centred on the frame, not ranged left: the headline, the line under it,
+     the positioning and the buttons share one axis down the middle. */
   .hero__body {
     display: grid;
+    justify-items: center;
     gap: var(--space-s);
     padding: 0 var(--space-l) var(--space-l);
     max-width: 72rem;
+    margin-inline: auto;
+    text-align: center;
   }
   .hero__title { max-width: 24ch; font-size: clamp(1.5625rem, 0.95rem + 2.37vw, 2.9375rem); }
 
-  /* Four words, each closed by an accent full stop — white over footage,
-     where the accent on black would all but disappear. */
+  /* The two audiences, divided by an upright rule: the label for the two
+     buttons under it. The rule is drawn in the accent, and inherits the text's
+     own colour over footage, where the accent on black would all but
+     disappear (see the overrides above). */
   .hero__subline {
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
@@ -215,7 +222,7 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     text-transform: uppercase;
   }
   .hero__word { white-space: nowrap; }
-  .hero__stop { color: var(--accent); }
+  .hero__divider { margin-inline: 0.75em; color: var(--accent); font-weight: 400; }
 
   .hero__intro {
     max-width: 46ch;
@@ -225,7 +232,7 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     text-wrap: pretty;
   }
 
-  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-2xs); }
+  .hero__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-s); margin-top: var(--space-2xs); }
   .hero__actions:empty { display: none; }
   .hero__services { margin-top: var(--space-2xs); line-height: 1.6; }
 

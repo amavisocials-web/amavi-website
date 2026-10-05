@@ -1,10 +1,12 @@
 /**
- * The service areas on /services, as an accordion.
+ * The practice areas, as an accordion. Drives every list on the page, so the
+ * home page's and /services' are the same behaviour (src/components/
+ * ServiceList.astro).
  *
  * Layered on markup that works without it: every panel is in the page, open,
- * so with no JavaScript the page reads as four sections under their headings.
- * This script marks the list "ready" — which is what turns the collapsing CSS
- * on — and then closes them all.
+ * so with no JavaScript the page reads as a set of sections under their
+ * headings. This script marks each list "ready" — which is what turns the
+ * collapsing CSS on — and then closes them all.
  *
  * Each trigger is a real button inside its heading, so Enter and Space toggle
  * and Tab moves between them. A closed panel is `inert`: its links leave the
@@ -23,9 +25,8 @@ interface Item {
 
 import { prefersReducedMotion as reducedMotion } from './lib/motion';
 
-const list = document.querySelector<HTMLElement>('[data-accordion]');
-
-if (list) {
+/** Every accordion on the page, each opening and closing on its own. */
+for (const list of document.querySelectorAll<HTMLElement>('[data-accordion]')) {
   const items: Item[] = [...list.querySelectorAll<HTMLElement>('[data-area]')].flatMap((root) => {
     const trigger = root.querySelector<HTMLButtonElement>('[data-trigger]');
     const panel = root.querySelector<HTMLElement>('[data-panel]');
@@ -38,7 +39,7 @@ if (list) {
     item.panel.inert = !open;
   };
 
-  /** Opening one closes the rest; passing null closes everything. */
+  /** Opening one closes the rest of that list; passing null closes everything. */
   const openOnly = (chosen: Item | null) => items.forEach((item) => setOpen(item, item === chosen));
 
   // Only now does the CSS collapse anything, so a page without this script

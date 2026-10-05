@@ -25,7 +25,7 @@ export const SITE_URL = 'https://www.amavisocials.co';
  * The home hero's headline. A line break ("\n") sets where display type
  * breaks; anywhere it's plain text it reads as a space.
  */
-export const TAGLINE = 'Content that connects.';
+export const TAGLINE = 'Content that connects';
 
 /** One sentence of positioning, under the hero and wherever AMAVI is introduced. */
 export const POSITIONING =
@@ -119,11 +119,13 @@ export const SOCIALS = [
 export const RESPONSE_TIME = 'We reply to every enquiry within two working days.';
 
 /**
- * Where the agency works, not where it is registered. The brief describes
- * AMAVI as working with Irish brands; it never says the agency is based in
- * Ireland, so no copy claims that.
+ * Where the agency works, not where it is registered: the standalone region
+ * label, used wherever the reach is stated rather than described. Widened
+ * from "Ireland" on 5 October 2026. Prose that names countries for a reason
+ * is left alone, for example "brands across Ireland, UK, Netherlands,
+ * France, Germany and the Balkans" on the home page.
  */
-export const REGION = 'Ireland';
+export const REGION = 'Europe & ROW';
 
 export interface NavLink {
   label: string;
@@ -134,7 +136,7 @@ export interface NavLink {
 /** "Get in Touch" is rendered separately, as the header's one button. */
 export const NAV_LINKS: NavLink[] = [
   { label: 'About', href: '/about/' },
-  { label: 'Services', href: '/services/' },
+  // Services, temporarily off the site (5 October 2026): see src/pages/_services.astro.
   { label: 'Become a Creator', href: CREATOR_PATH },
 ];
 

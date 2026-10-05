@@ -6,9 +6,10 @@ import Numbers from '../components/Numbers.astro';
 import Frame from '../components/Frame.astro';
 import ProofLink from '../components/ProofLink.astro';
 import LogoWall from '../components/LogoWall.astro';
-import ServicesSlider from '../components/ServicesSlider.astro';
+import ServiceList from '../components/ServiceList.astro';
 import Lines from '../components/Lines.astro';
 import { TILES } from '../data/tiles';
+import { SERVICE_AREAS } from '../data/services';
 import { MEDIA } from '../data/media';
 import {
   SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, CONTACT_PATH, SOCIALS, TAGLINE, POSITIONING,
@@ -25,38 +26,6 @@ import {
  */
 
 /**
- * Two of the five practice areas, in the home page's own words. The other
- * three — content at scale, affiliate, live experiences — can follow here
- * when there's copy for them; the column layout takes as many as it's given.
- */
-const WAYS = [
-  {
-    title: 'Creator & Influencer Community AOR',
-    body: 'Build lasting relevance through creator communities rather than one-off activity. By developing long-term relationships with creators who genuinely fit the brand, we create a group of advocates who keep speaking for you between campaigns, not just during them.',
-  },
-  {
-    title: 'Influencer & Creator Campaigns',
-    body: 'Our campaigns are built around a business objective, not a posting schedule. We source and vet the creators, negotiate the rates, brief the work and manage it through to publication, so each campaign reaches people the brand hasn’t reached before.',
-  },
-  {
-    title: 'Creator UGC Content',
-    body: 'Creator content is one of the most useful assets a brand can own. We produce it in volume, native to the platforms people actually use, and hand it over for your own channels and paid media long after the original post has run.',
-  },
-  {
-    title: 'Affiliate Marketing',
-    body: 'We connect creators, content and commerce so the work can be measured against revenue. Partnerships are structured around performance, with tracking and commission agreed from the start.',
-  },
-  {
-    title: 'Live Experiences',
-    body: 'We bring creators, customers and the brand into the same room. Each activation is built to be worth attending and worth filming, turning a single moment into content that keeps working afterwards.',
-  },
-  {
-    title: 'Production & Content Days',
-    body: 'We shoot and edit in house. A content day gives a brand a library of assets from a single session, and live Q&As put your team and your creators in front of an audience in real time.',
-  },
-];
-
-/**
  * The four figures, as sentences. Exactly as supplied — nothing recomputed,
  * and no client, sector or industry named against any of them.
  */
@@ -67,7 +36,7 @@ const STATS = [
      current counts. */
   { value: '100+', line: 'partnerships delivered.' },
   { value: '1,000+', line: 'creators in our network across Europe.' },
-  { value: '92%', line: 'of the people we reached had never seen the brand before.' },
+  { value: '92%', line: 'net-new audience reached.' },
 ];
 
 const schema = {
@@ -77,19 +46,19 @@ const schema = {
   url: SITE_URL,
   description: SITE_DESCRIPTION,
   email: CONTACT_EMAIL,
-  areaServed: 'IE',
+  areaServed: 'Europe',
   sameAs: SOCIALS.map((s) => s.url),
 };
 ---
 
 <Base
-  title="Creator-Led Marketing and Partnerships Agency, Ireland"
+  title="Creator-Led Marketing and Partnerships Agency, Europe & ROW"
   description={SITE_DESCRIPTION}
   schema={schema}
 >
-  <Hero title={TAGLINE} intro={POSITIONING}>
+  <Hero title={TAGLINE} intro={POSITIONING} subline={['Brands', 'Creators']}>
     <Fragment slot="actions">
-      <a href="/services/" class="btn btn--primary">Work with us</a>{' '}
+      <a href={CONTACT_PATH} class="btn btn--primary">Work with us</a>{' '}
       <a href={CREATOR_PATH} class="btn btn--secondary">Join the creator network</a>
     </Fragment>
   </Hero>
@@ -104,16 +73,18 @@ const schema = {
     <div class="container">
       <div class="stats__note">
         <p>
-          As a creator-led marketing and partnerships agency, AMAVI Socials builds brands through
-          five key practice areas: Creator &amp; Influencer Community AOR, Influencer &amp; Creator
-          Campaigns, Creator UGC Content-at-scale, Affiliate Marketing, and Live Experiences.
-          Founded by creators, we combine audience insight, creator relationships, content and
-          partnerships to reach people in the places they already spend their attention.
+          Founded by creators, AMAVI Socials builds brands through five key practice areas:
+          Creator &amp; Influencer Community Agency of Record, Influencer &amp; Creator Campaigns,
+          Creator UGC Content-at-scale, Affiliate Marketing, and Live Experiences.
         </p>
         <p>
-          Working with brands across Europe, we pair strategic thinking with
-          genuine creator relationships to build campaigns that earn attention and deliver
-          measurable results.
+          We combine audience insight, creator relationships, content and partnerships to reach
+          people in the places they already spend their attention.
+        </p>
+        <p>
+          Working with brands across Ireland, UK, Netherlands, France, Germany and the Balkans, we
+          pair strategic thinking with genuine creator relationships to build monthly campaigns
+          that earn attention and deliver measurable results.
         </p>
       </div>
 
@@ -124,11 +95,11 @@ const schema = {
   <Numbers tiles={TILES.slice(0, 4)} labelledby="stats-heading">
     <h2 id="stats-heading" class="display display--md">The numbers behind the work</h2>
 
-    <dl class="stat-lines">
+    <dl class="figures">
       {STATS.map((stat) => (
-        <div class="stat-line">
-          <dt class="stat-line__value">{stat.value}</dt>
-          <dd class="stat-line__text">{stat.line}</dd>
+        <div class="figures__item">
+          <dt class="figures__value">{stat.value}</dt>
+          <dd class="figures__label">{stat.line}</dd>
         </div>
       ))}
     </dl>
@@ -138,18 +109,29 @@ const schema = {
     </p>
   </Numbers>
 
-  {/* ================= Introduction ================= */}
-  <Feature labelledby="equation-heading">
-    <h2 id="equation-heading" class="display display--lg">
-      <Lines text={'Our creators are one part\nof the equation.'} />
+  {/* ================= Case study ================= */}
+  {/* TODO(client): the partner is unnamed, and the three figures are the
+      client's own wording as supplied. Confirm whether the healthcare partner
+      may be named, and whether the figures can be published as they stand. */}
+  <Feature labelledby="case-heading">
+    <p class="eyebrow">Case study</p>
+    <h2 id="case-heading" class="display display--lg">
+      Building an always-on creator strategy for our healthcare partner
     </h2>
     <p class="feature__body">
-      Our campaigns are built around <strong>the right people, partnerships and right
-      opportunities</strong>, from individual creators and communities to B2B collaborations and
-      new routes to your audience. Every engagement starts with a clear objective. We identify the
-      opportunity and develop the strategy to realise it.
+      Starting with no established influencer marketing strategy, we built a creator programme
+      designed to make influencer marketing a consistent part of the wider growth strategy.
     </p>
-    <ProofLink href={CONTACT_PATH}>Contact us</ProofLink>
+    <p class="feature__body">
+      By combining strategic creator selection, authentic storytelling, ongoing partnership
+      management and performance-led optimisation, the programme grew from individual
+      collaborations into an always-on network of creators.
+    </p>
+    <p class="feature__body">
+      In the initial six months of our partnership, the company saw <strong>60% revenue
+      growth</strong>, and has since launched <strong>100+ creator partnerships</strong> with{' '}
+      <strong>25 active partnerships currently running and fully managed by AMAVI Socials</strong>.
+    </p>
     {/* AMAVI's own campaign board: see src/data/media.ts. */}
     <Frame slot="media" media={MEDIA.home.creators} ratio="2/3" sizes="(min-width: 48em) 22rem, 60vw" />
   </Feature>
@@ -160,16 +142,14 @@ const schema = {
     <div class="container ways__grid">
       <div class="ways__head">
         <h2 id="ways-heading" class="display display--lg">
-          <Lines text={'See the ways\nwe can help you.'} />
+          <Lines text={'See the ways\nwe can help you'} />
         </h2>
       </div>
 
       <div class="ways__body">
-        <ServicesSlider services={WAYS} />
-
-        <p class="ways__more">
-          <ProofLink href="/services/">View more details</ProofLink>
-        </p>
+        {/* The same rows as the services page, opening on the paragraph
+            alone: no services under them and no pictures. */}
+        <ServiceList areas={SERVICE_AREAS} detail={false} level={3} />
       </div>
     </div>
   </section>
@@ -183,29 +163,31 @@ const schema = {
   .partners { padding-block: clamp(0.875rem, 0.5rem + 1.4vw, 1.575rem); }
   .what { padding-top: clamp(1.375rem, 0.8rem + 2.6vw, 2.875rem); }
 
-  /* ---- The figures, as sentences: the number leading each line ---- */
-  .stat-lines { display: grid; }
-  /* No rules: the figures stand apart on space alone. */
-  .stat-lines { gap: var(--space-l); }
-  .stat-line {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: baseline;
-    gap: var(--space-s);
-  }
+  /* ---- The figures: the number, and what it counts under it ----
+     Side by side on one baseline, the number and its line read as one
+     sentence and the eye has nothing to catch on. Stacked, with the number
+     in the accent and the line in body text under it, each figure is a
+     figure first: the number is the thing being shown, the line is the
+     caption. No rules between them; the space does that work. */
+  .figures { display: grid; gap: var(--space-l); }
+  .figures__item { display: grid; gap: var(--space-3xs); }
 
-  .stat-line__value {
+  .figures__value {
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
     font-weight: 600;
     font-size: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem);
     line-height: 1;
     letter-spacing: -0.01em;
+    color: var(--accent);
   }
   @media (min-width: 64em) and (max-width: 79.99em) {
-    .stat-line__value { font-size: 2rem; }
+    .figures__value { font-size: 2rem; }
   }
-  .stat-line__text { font-weight: var(--weight-secondary); text-wrap: pretty; }
+  /* Not the light body weight the rest of the column runs: under a 40px
+     number the light cut all but disappears, and the pair stops reading as
+     a figure and its caption. */
+  .figures__label { font-weight: 400; text-wrap: pretty; }
 
   /* Its own element rather than a footnote: with the column's 24px gap, about
      40px of air above the words, and 32 on a phone. */
@@ -219,10 +201,6 @@ const schema = {
   }
   .ways__head { display: grid; gap: var(--space-m); align-content: start; }
 
-  /* A step on from the cards, not one of them: its own space, and centred
-     under the slider once there is room for it. */
-  .ways__more { margin-top: clamp(2rem, 1.2rem + 2vw, 3rem); }
-  @media (min-width: 48em) { .ways__more { text-align: center; } }
 
   .stats__note {
     display: grid;

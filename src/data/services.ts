@@ -1,7 +1,12 @@
 /**
- * What AMAVI does, for /services: four areas, each with its services, the
- * sectors the work spans, and a few results. Edit the copy here; the page
- * needn't change.
+ * What AMAVI does: six areas, each with its paragraph and the services it
+ * covers, plus the sectors the work spans and a few results. One file, two
+ * readers: the home page's accordion and /services. Edit the copy here; the
+ * pages needn't change.
+ *
+ * The list went from five areas to six on 5 October 2026: Affiliate Marketing
+ * came off, Founder & Personal Brand and Mobile First Organic Content came on,
+ * and Influencer & Creator Campaigns was renamed Creator-Led Campaigns.
  *
  * Positioning: a creator-led marketing and partnerships agency. Creator
  * marketing is the strongest speciality, never the limit — the goal comes
@@ -19,22 +24,26 @@ export interface ServiceArea {
   id: string;
   number: string;
   title: string;
-  /** One line under the title, set in italics: what this area is. */
-  summary: string;
-  /** The paragraph under it. */
-  intro: string;
-  /** What the area actually covers, as a name and a line each. */
+  /**
+   * The service, in a paragraph. This is the whole description: it opens the
+   * panel on both pages, and on the home page it is all a panel shows. It
+   * replaced the italic summary line and the separate intro on 5 October 2026.
+   */
+  description: string;
+  /**
+   * What the area covers, as a name and a line each. Only /services shows
+   * these; an empty list is an area that opens on its paragraph alone.
+   */
   services: Service[];
 }
 
-/** The five practice areas, in the order they open on the page. */
+/** The six practice areas, in the order they open on the page. */
 export const SERVICE_AREAS: ServiceArea[] = [
   {
     id: 'creator-community-aor',
     number: '01',
     title: 'Creator & Influencer Community AOR',
-    summary: 'Always-on creator programmes that drive sustained brand relevance, not short-lived spikes.',
-    intro: 'Build lasting audience relevance through ongoing creator communities rather than isolated campaigns. By cultivating genuine, long-term relationships with creators who mirror your brand values, we build a dedicated network of brand advocates who champion your business continuously.',
+    description: 'Build lasting relevance through creator communities instead of one-off campaigns. We work as an extension of your brand, building genuine creator relationships that keep your brand part of the conversation year-round.',
     services: [
       {
         name: 'Strategy',
@@ -51,11 +60,13 @@ export const SERVICE_AREAS: ServiceArea[] = [
     ],
   },
   {
+    // The id predates the title: "Influencer & Creator Campaigns" became
+    // "Creator-Led Campaigns" on 5 October 2026, and the anchor stays so
+    // /services/#creator-campaigns keeps working.
     id: 'creator-campaigns',
     number: '02',
-    title: 'Influencer & Creator Campaigns',
-    summary: 'Full-funnel creator campaigns built around commercial goals and managed end-to-end.',
-    intro: 'We design campaigns to deliver measurable business outcomes, not just impressions. From creator discovery and fee negotiation to contract compliance, briefing, and delivery, we handle every detail so your brand consistently unlocks new, high-converting audiences.',
+    title: 'Creator-Led Campaigns',
+    description: 'We source and vet the creators, negotiate the rates, brief the work and manage it through to publication, so each campaign reaches people the brand hasn\u2019t reached before.',
     services: [
       {
         name: 'Creator Sourcing & Vetting',
@@ -79,8 +90,7 @@ export const SERVICE_AREAS: ServiceArea[] = [
     id: 'creator-ugc',
     number: '03',
     title: 'Creator UGC Content',
-    summary: 'High-performing creator assets produced at scale for both organic and paid media.',
-    intro: 'Authentic creator content is one of the most powerful conversion assets a brand can leverage. We produce high-volume, platform-native content and deliver full usage rights so assets continue driving ROI across your paid ad channels long after the original post.',
+    description: 'Create authentic, platform-native content at scale. We manage creators from sourcing to briefing and delivery, giving your brand a steady stream of content built for your audience and channels.',
     services: [
       {
         name: 'Content Production',
@@ -97,32 +107,19 @@ export const SERVICE_AREAS: ServiceArea[] = [
     ],
   },
   {
-    id: 'affiliate-marketing',
+    id: 'founder-personal-brand',
     number: '04',
-    title: 'Affiliate Marketing',
-    summary: 'Performance-driven creator partnerships structured directly around revenue.',
-    intro: 'We connect creative content directly to commercial revenue. By structuring creator partnerships around trackable performance and transparent commission structures, every campaign dollar is directly accountable to bottom-line growth.',
-    services: [
-      {
-        name: 'Partnership Structure',
-        description: 'Clear commission models, attribution tracking, and commercial terms established up front to align goals and maximize ROI.',
-      },
-      {
-        name: 'Creator Communities',
-        description: 'Targeting creators with high-intent audiences and proven conversion records rather than focusing strictly on follower counts.',
-      },
-      {
-        name: 'Measurement & Attribution',
-        description: 'Granular sales tracking and financial reporting that measure success by revenue generated rather than vanity impressions.',
-      },
-    ],
+    title: 'Founder & Personal Brand',
+    description: 'We help founders turn their expertise and personality into a strong social presence, from positioning and content strategy to ongoing content creation and management.',
+    // TODO(client): no sub-services supplied for this area yet, so the panel
+    // opens on the paragraph alone. Add them here and the rows appear.
+    services: [],
   },
   {
     id: 'live-experiences',
     number: '05',
     title: 'Live Experiences',
-    summary: 'High-impact activations that bring creators, communities, and brands into the same room.',
-    intro: 'We design experiential events that bring creators, key partners, and customers face-to-face. Each activation is engineered to deliver an unforgettable real-world experience while generating an ecosystem of digital content that extends campaign life for months.',
+    description: 'Bring your brand, creators and audience together through live experiences designed to drive engagement, conversation and content. From online Q&As to in-person activations, we manage the experience from concept to execution.',
     services: [
       { name: 'Creative Production', description: 'End-to-end concepting, planning, and execution for live, hybrid, and digital brand activations.' },
       { name: 'Talent Management', description: 'Curation, briefing, and dedicated on-site coordination for creators and brand VIPs.' },
@@ -131,6 +128,15 @@ export const SERVICE_AREAS: ServiceArea[] = [
         description: 'Professional multi-platform content capture on the day, providing a rich library of assets for ongoing marketing.',
       },
     ],
+  },
+  {
+    id: 'mobile-first-organic',
+    number: '06',
+    title: 'Mobile First Organic Content',
+    description: 'Mobile content is one of the most useful assets a brand can own. We create high-volume, iPhone-shot content that feels native to the platforms people actually use, ready for your organic channels and paid media.',
+    // TODO(client): no sub-services supplied for this area yet, so the panel
+    // opens on the paragraph alone. Add them here and the rows appear.
+    services: [],
   },
 ];
 

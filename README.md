@@ -12,7 +12,7 @@ applications land in a Google Sheet, with Netlify Forms keeping a backup copy.
 
 The layout takes its pacing and patterns from musetheagency.com — full-screen
 video hero, large split entry points, stats over looping video, proof lines
-that lead to Services, a clients marquee, and a footer of contact routes — as
+that lead to the practice areas, a clients marquee, and a footer of contact routes — as
 AMAVI's own implementation: original code, AMAVI's copy and media, nothing of
 MUSE's reused.
 
@@ -96,40 +96,74 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 
 | Path | What it is |
 |---|---|
-| `/` | Full-screen video hero ("Content that connects") with both buttons; the "Trusted by" logo marquee; what AMAVI is; the figures beside a drifting collage of creator work; "Creators are one part of the equation"; the services, as a row you page through |
-| `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting), the philosophy over a photograph in black, the commitment, and the closing invitation |
-| `/services` | What AMAVI does, goal first: five practice areas as an accordion, why AMAVI in four points, the closing invitation, the client logos |
+| `/` | Full-screen video hero ("Content that connects"), copy centred, with "Brands \| Creators" under the headline and the two buttons under that; the "Trusted by" logo marquee; what AMAVI is, in three paragraphs; the three figures beside a drifting collage of creator work; the case study; the six services, as an accordion |
+| `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting and optimisation), the philosophy over a photograph in black, and the closing invitation |
 | `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
-| `/contact` | Get in Touch: brands to email, creators to the application |
+| `/contact` | Get in touch, the heading centred: brands to email, creators to the application. Nothing else on the page |
 | `/privacy` | Privacy policy |
 
-`/creators` redirects to `/become-a-creator`.
+`/creators` redirects to `/become-a-creator`. **`/services` is temporarily off
+the site** — see below.
+
+### Services, temporarily off the site
+
+Taken down on 5 October 2026, at the client's request, without deleting any of
+the work. `src/pages/services.astro` was renamed **`src/pages/_services.astro`**:
+Astro ignores any file in `src/pages/` whose name starts with an underscore, so
+the route does not build, is not in the sitemap, and 404s on the site's own 404
+page. The page, its data, its components and its images are all still here.
+
+Four links were taken out with it. **To restore the page, rename the file back
+and put these back:**
+
+| Where | What |
+|---|---|
+| `src/consts.ts`, `NAV_LINKS` | `{ label: 'Services', href: '/services/' }`, after About |
+| `src/components/Footer.astro`, `pages` | the same entry, after Home |
+| `src/pages/index.astro`, the hero | the first button pointed at `/services/`; it points at `CONTACT_PATH` now |
+| `src/pages/index.astro`, the services section | a "see all services" link under the accordion |
+
+Each is marked with a comment naming this file. The accordion on the home page
+reads the same `src/data/services.ts`, so the service copy stays live and in one
+place while the page is down.
+
+Two things to check when it comes back: the "Services invoice" photograph at the
+top of the page still lists the old five services, including Affiliate
+Marketing, and `src/data/media.ts` still imports two pictures that only that
+page renders, so they ship on every build while it is off.
 
 ## Project structure
 
 ```
 src/
   consts.ts              Site-wide constants: email, nav, socials, positioning,
-                         tagline, hero video path
-  logos.ts               Client logo manifest and optical sizing
-  data/services.ts       The five service areas, the sectors (kept, not rendered), and the results
-  data/tiles.ts          Creator videos: tiles 1–4 play behind the home stats
+                         tagline, region label, hero video path
+  data/clients.ts        Client manifest: logo, site, clearance, optical sizing
+  data/services.ts       The six practice areas, read by both accordions; the
+                         sectors and results (kept, not rendered)
+  data/tiles.ts          Creator videos: tiles 1–4 play behind the home figures
+  data/media.ts          Every image and video slot, by page
+  data/countries.ts      Country codes for the application's country field
   lib/media.ts           Build-time checks for files in public/
   assets/
     amavi-socials-logo.png   The supplied logo — favicon and share image only
     logos/                   Client logos, solid black on transparent
   layouts/Base.astro     <head>, header, footer — every page uses this
-  data/countries.ts      Country codes for the application's country select
   components/            Nav (header and menu), Connect (the closing
                          invitation), Footer, Hero, Feature, Numbers,
-                         ServicesSlider, LoopVideo, Placeholder, ProofLink,
-                         LogoWall, ContactPaths, the creator form, Logo, Fonts
+                         ServiceList (the practice areas, on both pages),
+                         LoopVideo, Placeholder, ProofLink, LogoWall,
+                         ContactPaths, the creator form, Logo, Lines, Frame,
+                         Fonts. ServicesSlider is kept but unused: the home
+                         page's carousel became the accordion on 5 Oct 2026
   scripts/lib/motion.ts    One prefers-reduced-motion query, shared
   scripts/loop-videos.ts   Lazy, visible-only playback for every video
-  scripts/service-accordions.ts  The four areas on /services, opening in place
-  scripts/services-slider.ts  The home page's services row, paged by its arrows
+  scripts/service-accordions.ts  Every practice-area accordion, opening in place
+  scripts/services-slider.ts  Unused, with its component
+  scripts/country-combobox.ts  The country field, as a combobox you type into
   scripts/creator-form.ts  The application's steps, validation and submission
-  pages/                 One file per route
+  pages/                 One file per route. A leading underscore takes a file
+                         out of routing: _services.astro is off the site
   styles/global.css      Tokens and the shared styles
 scripts/brand-assets.mjs Generates the favicon and share image
 scripts/logos-mono.mjs   Converts client logos to solid black
@@ -137,10 +171,25 @@ scripts/encode-video.swift  Encodes video files (macOS; see "Making the video fi
 scripts/google-sheets-handler.gs  The Apps Script that writes applications to
                          a Google Sheet (see "Creator applications → Google Sheets")
 public/                  favicon, share image, robots.txt
-public/media/            The hero's videos (none yet); tiles/ holds the creator videos
+public/media/            The hero's video and poster, desktop and portrait;
+                         tiles/ holds the creator videos
 public/fonts/            ALT Rigatoni goes here once licensed (see Typefaces)
 .env.example             The one environment variable, PUBLIC_SHEETS_ENDPOINT
 ```
+
+---
+
+## Where AMAVI works
+
+The standalone region label is **`REGION` in `src/consts.ts`**, and it reads
+**"Europe & ROW"** since 5 October 2026 (it was "Ireland & EU"). It is the
+label used wherever the reach is simply stated: the footer under the wordmark,
+the privacy policy, the home page's title and its Organization schema.
+
+Prose that names countries for a reason is **not** this label and was left
+alone: "brands across Europe" on /about, "1,000+ creators in our network across
+Europe" and "Working with brands across Ireland, UK, Netherlands, France,
+Germany and the Balkans" on the home page.
 
 ---
 
@@ -277,6 +326,24 @@ this file are not copy. To check a build:
 
 ```bash
 grep -rl "—" dist --include="*.html"
+```
+
+**Mind the space before an inline tag.** Astro trims the newline between text
+and an element, the way JSX does, so a paragraph broken like this renders
+`with25`:
+
+```astro
+<p>
+  ... partnerships with
+  <strong>25 active partnerships</strong>.
+</p>
+```
+
+End the line with `{' '}`, or keep the opening tag on the same line. To check a
+build for the whole class of it:
+
+```bash
+grep -rnoE '[^[:space:]>]<(strong|em|b|i|a)[ >]' dist --include="*.html"
 ```
 
 ### Typefaces
@@ -492,11 +559,18 @@ are a static row.
   beneath. Without JavaScript the menu button is a link to the footer's list
   of pages. Over hero footage the header is see-through with white contents
   until the hero has scrolled past.
-- **Hero** (`Hero.astro`). Full screen: headline, one line of positioning and
-  the two buttons, over video. It can also take a subline of words with accent
-  full stops, a line of services under the buttons, and large entry points
-  beneath (**For Brands**, **For Creators**) — the home page uses none of the
-  three, so the hero is headline, sentence, buttons.
+- **Hero** (`Hero.astro`). Full screen and **centred**: the headline, the
+  subline, one line of positioning and the two buttons share one axis down the
+  middle, over video. The subline is the words of `subline` divided by an
+  accent rule — "Brands | Creators" on the home page, which labels the two
+  buttons under it. It can also take a line of services under the buttons and
+  large entry points beneath; the home page uses neither.
+
+  Centring the copy moved it onto the engraved wordmark in the footage, so the
+  overlay was re-measured there rather than assumed: over the whole copy block,
+  every frame of both cuts, white holds **4.84:1** on the desktop cut and
+  **10.6:1** on the portrait one at the current 0.55. Re-measure if the footage
+  or the copy's position changes.
 - **Feature blocks** (`Feature.astro`). One text column beside one portrait
   piece of media, alternating sides. Key phrases in the body copy are bold;
   each block ends on a **proof line** (`ProofLink.astro`) — a short claim in
@@ -509,15 +583,11 @@ are a static row.
   seen. Top and bottom are masked. It pauses on hover and on focus, runs
   slower at 48em, and on a phone doesn't run at all — the tiles become a row
   that scrolls sideways. Under `prefers-reduced-motion` nothing moves.
-- **The services row** (`ServicesSlider.astro`). Six cards on the home page,
-  paged by two circular arrows above them: two cards at a time from 64em, one
-  from 48em, and on a phone no paging at all — the row scrolls and snaps under
-  a finger, which is also what a page without JavaScript gets at every width.
-  A page moves a whole view in one transform, 400ms, so nothing is laid out
-  again as it travels; cards off the page are `inert`, so a Tab can't land
-  behind the edge, and the list is a polite live region. The arrows disable at
-  each end rather than disappearing, and a count sits under the cards. It never
-  moves on its own.
+- **The services** (`ServiceList.astro`). The same numbered accordion the
+  services page uses, 01 to 06 with a hairline between the rows, opening on
+  each service's paragraph alone. See "The areas are an accordion" below. It
+  replaced a paged carousel on 5 October 2026; `ServicesSlider.astro` and its
+  script are still in the repo, unused.
 - **Partners marquee** (`LogoWall.astro`). On the home page it sits directly
   under the hero, logos only, with no heading of its own. The "Trusted by"
   label, the logos and the statement beneath them are one group: the space
@@ -525,21 +595,39 @@ are a static row.
   marquee's and the two sections' (`.partners` and `.what` in
   `src/pages/index.astro`), not off a negative margin.
 - **The closing invitation** (`Connect.astro`). The last section on /about,
-  and the one that closes the practice areas on /services: the label, "What
-  can we do for you?" with a circle drawn around the last word, and Reach out,
+  and the one that closes the practice areas on /services: the label, "Who are
+  **YOU** trying to reach?" with a circle drawn around YOU, and **Bring Us In**,
   which leads to Get in touch. It is a component rather than part of the
-  layout, so putting it at the end of another page is one line on that page. The
-  circle is a stroked path stretched to whatever that word measures, so it
+  layout, so putting it at the end of another page is one line on that page.
+
+  The circle is a stroked path stretched to whatever that word measures, so it
   stays around it at every size and in either display face, and its stroke
-  stays even because it doesn't scale with the box. The pill and the round
-  arrow beside it are one link, not two — one tab stop, one destination — and
-  they fill and empty together, the arrow nudging right on hover.
+  stays even because it doesn't scale with the box. The word never breaks, so
+  the ring sits on it however the line wraps.
+
+  It **draws itself on** when the section first reaches the screen, and then
+  stops watching: a mark being made, not an effect that repeats. The circle is
+  complete in the markup and nothing takes it away until the observer has
+  actually reported, so no IntersectionObserver, a renderer holding callbacks
+  back, or a script that failed to load each leaves the finished circle rather
+  than none at all. `prefers-reduced-motion` leaves it finished too.
+
+  The pill and the round arrow beside it are one link, not two — one tab stop,
+  one destination — and they fill and empty together, the arrow nudging right
+  on hover.
 - **Footer** (`Footer.astro`). Full-bleed black: edge to edge and down to the
   bottom of the page, its own padding holding the content off the edges. The
-  same on every page — no props, no per-page variants: the wordmark, what
-  AMAVI is, the sign-off, then three columns (**Site**, **Contact**,
-  **Follow**) and the small print. No dividing rules, and no closing call to
-  action: each page ends on its own last section.
+  same on every page — no props, no per-page variants: the wordmark, the region
+  label under it, then three columns (**Site**, **Contact**, **Follow**) and the
+  small print. No dividing rules, and no closing call to action: each page ends
+  on its own last section.
+
+  Changed on 5 October 2026: the wordmark came **two steps down the type
+  scale** (`.wordmark--lg`, every stop of the clamp divided by 1.25²) so it
+  closes the page rather than announcing it; the tagline lockup became the
+  region label **Europe & ROW**; and the Contact column became two labelled
+  addresses, **Brands** to `CONTACT_EMAIL` and **Talent** to
+  `APPLICATIONS_EMAIL`, each label set like the column headings.
 
 ### Placeholders
 
@@ -551,11 +639,17 @@ moves nothing else on the page. Every slot is filled with temporary media
 
 ## Services
 
-The copy lives in **`src/data/services.ts`**:
+The copy lives in **`src/data/services.ts`**, read by two pages:
 
-- **Five practice areas**, each a one-line summary (set in italics, under the
-  title), a paragraph, the sub-services it covers as a name and a line each,
-  and a closing line.
+- **Six practice areas**, each a title and one paragraph, plus the sub-services
+  it covers as a name and a line each. The list went from five to six on 5
+  October 2026: Affiliate Marketing came off, Founder & Personal Brand and
+  Mobile First Organic Content came on, and Influencer & Creator Campaigns was
+  renamed Creator-Led Campaigns. The same change merged each area's italic
+  summary line and its intro paragraph into the one `description` the panel
+  opens on.
+- Those two new areas have **no sub-services yet** (`TODO(client)`), so their
+  panels open on the paragraph alone.
 - **Six sectors** (`SECTORS`) and **results** (`CASE_STUDIES`) are still
   there but **not rendered**. The Results section came off the page on 28
   September 2026; the sectors, with their images, came off on 30 September,
@@ -563,30 +657,34 @@ The copy lives in **`src/data/services.ts`**:
   section returns, and their images are still keyed by sector name in
   `src/data/media.ts`.
 
-Add, reorder or edit entries and the page lays itself out. The "Why AMAVI"
-four points are in `src/pages/services.astro` itself. The page closes on the
-client logos in full colour: `<LogoWall marquee colour eyebrow="Trusted by" />`,
-the same marquee the home page runs in black.
+Add, reorder or edit entries and both lists lay themselves out. The "Why AMAVI"
+four points are in `src/pages/_services.astro` itself.
 
 ### The areas are an accordion
 
-The numbered list is both the page's index and its content: a row opens in
-place to the area's number, title, intro, services and closing line, with its
-image beside them. One at a time; opening one closes the rest.
+**`src/components/ServiceList.astro`**, the same component on both pages: the
+numbered list is both an index and its content, and a row opens in place to the
+area's number, title and paragraph. One at a time; opening one closes the rest.
 
-- Each trigger is a `<button>` inside its `<h2>`, with `aria-expanded` and
+- `/services` passes `media` and gets the full panel: the paragraph, the
+  services the area covers, and a picture beside them.
+- The **home page** passes `detail={false}` and gets the paragraph alone, with
+  no sub-services and no pictures. It also passes `level={3}`, because its rows
+  sit under the section's own `<h2>`.
+- Each trigger is a `<button>` inside its heading, with `aria-expanded` and
   `aria-controls`; each panel is a `role="region"` labelled by its trigger.
-  Enter and Space toggle, Tab moves between the four triggers.
+  Enter and Space toggle, Tab moves between the triggers.
 - A closed panel is `inert`, so nothing inside it is focusable or read out.
 - It opens by animating `grid-template-rows` from `0fr` to `1fr`, and holds
   still under `prefers-reduced-motion`.
 - **Without JavaScript every panel stays open.** The collapsing CSS only
-  applies once `src/scripts/service-accordions.ts` marks the list ready, so a
-  failed script leaves the page readable rather than sealed shut.
+  applies once `src/scripts/service-accordions.ts` marks a list ready, so a
+  failed script leaves the page readable rather than sealed shut. The script
+  drives every `[data-accordion]` on the page, each independently.
 - Each row keeps its own id, so `/services/#creator-campaigns` opens that area
   and scrolls to it — on load and on a later hash change. The ids changed with
-  the practice areas on 29 September 2026; the old ones
-  (`#creator-marketing` and the rest) no longer exist.
+  the practice areas on 29 September 2026; `#creator-campaigns` survived the
+  renaming of 5 October, and `#affiliate-marketing` no longer exists.
 
 ## Visual content
 

@@ -5,11 +5,18 @@ import { CONTACT_PATH } from '../consts';
  * The closing invitation, above the footer: a label, one question, and one
  * way to answer it.
  *
- * The circle around "you" is drawn rather than typeset — a single stroked
+ * The circle around "YOU" is drawn rather than typeset — a single stroked
  * path stretched to whatever that word measures, so it stays around the word
  * at every size and in either display face, with an even stroke because it
- * doesn't scale with the box. It is decoration, hidden from assistive tech,
- * and drawn in the accent so it reads as a mark made on the page.
+ * doesn't scale with the box. The word never breaks, so the ring sits on it
+ * however the line wraps. It is decoration, hidden from assistive tech, and
+ * drawn in the accent so it reads as a mark made on the page.
+ *
+ * It draws itself on when the section first comes into view, as a hand would
+ * make it. The ring is complete in the markup and the script arms it — the
+ * same way round as the accordion — so a page without JavaScript shows the
+ * finished circle rather than nothing at all. Under prefers-reduced-motion
+ * the script leaves it alone and it is simply there.
  *
  * The pill and the circle beside it are one link, not two: one tab stop, one
  * destination, and both fill or empty together.
@@ -23,17 +30,17 @@ import { CONTACT_PATH } from '../consts';
     <p class="eyebrow connect__eyebrow">Connect</p>
 
     <h2 id="connect-heading" class="display connect__line">
-      What can we do for <span class="connect__word">you<svg
+      Who are <span class="connect__word">YOU<svg
           class="connect__ring" viewBox="0 0 120 72" preserveAspectRatio="none"
-          aria-hidden="true" focusable="false">
+          aria-hidden="true" focusable="false" data-ring>
         <path d="M100 11C74 1 30 4 14 20 0 34 6 54 32 62c28 8 66 4 78-12 9-12 4-28-18-39"
               fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"
-              vector-effect="non-scaling-stroke" />
-      </svg></span>?
+              vector-effect="non-scaling-stroke" pathLength="1" />
+      </svg></span> trying to reach?
     </h2>
 
     <a class="connect__action" href={CONTACT_PATH}>
-      <span class="connect__pill">Reach out</span>
+      <span class="connect__pill">Bring Us In</span>
       <span class="connect__arrow" aria-hidden="true">
         <svg viewBox="0 0 22 12" focusable="false">
           <path d="M0 6h19M14.5 1L20 6l-5.5 5" fill="none" stroke="currentColor"
@@ -43,6 +50,44 @@ import { CONTACT_PATH } from '../consts';
     </a>
   </div>
 </section>
+
+<script>
+  import { prefersReducedMotion } from '../scripts/lib/motion';
+
+  /*
+   * Draw the circle when the section first reaches the screen, then stop
+   * watching: it is a mark being made, not an effect that repeats.
+   *
+   * The circle is complete in the markup and nothing here takes it away
+   * until the observer has actually reported. That is deliberate: if the
+   * observer never fires — no IntersectionObserver, a renderer that holds
+   * callbacks back, a script that failed to load — the circle is simply
+   * there, which is what it was before it animated. Taking it away first
+   * and drawing it later would mean any of those leaves no circle at all.
+   *
+   * Anyone who asks for reduced motion is left with the finished circle too.
+   */
+  const ring = document.querySelector<SVGSVGElement>('[data-ring]');
+
+  if (ring && !prefersReducedMotion() && 'IntersectionObserver' in window) {
+    const watcher = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          // Either from 'armed', which animates, or already drawn, which is
+          // the section being on screen from the start: nothing to animate.
+          ring.dataset.ring = 'drawn';
+          watcher.disconnect();
+        } else if (!ring.dataset.ring) {
+          // Not reached yet, so there is room to take the circle away and
+          // let it be drawn on arrival.
+          ring.dataset.ring = 'armed';
+        }
+      }
+    }, { threshold: 0.35 });
+
+    watcher.observe(ring.closest('.connect') ?? ring);
+  }
+</script>
 
 <style>
   .connect__inner { display: grid; gap: var(--space-m); }
@@ -78,7 +123,22 @@ import { CONTACT_PATH } from '../consts';
     pointer-events: none;
   }
 
-  /* ---- Reach out: two shapes, one link ----------------------------------- */
+  /* pathLength="1" makes the dash maths independent of the path's real
+     length, so one unit is the whole stroke. Drawn by default: only a
+     running script arms it, and only then does it have anywhere to draw
+     from. */
+  .connect__ring path { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  .connect__ring[data-ring='armed'] path { stroke-dashoffset: 1; }
+  .connect__ring[data-ring='drawn'] path {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 900ms var(--ease);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .connect__ring path,
+    .connect__ring[data-ring] path { stroke-dashoffset: 0; transition: none; }
+  }
+
+  /* ---- Bring us in: two shapes, one link --------------------------------- */
   .connect__action {
     display: inline-flex;
     align-items: center;
