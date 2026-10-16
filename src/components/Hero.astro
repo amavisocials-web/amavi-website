@@ -1,7 +1,25 @@
 ---
 /**
- * The home page's full-screen opening: headline, one line of positioning and
- * the buttons (the `actions` slot), centred over video. A page can add a subline, a
+ * The home page's full-screen opening: a headline and the two ways in,
+ * centred on both axes over video.
+ *
+ * It is the headline and two words, nothing else: the line of positioning and
+ * the pair of filled buttons came off on 6 October 2026, so the only thing to
+ * click is the choice between the two audiences.
+ *
+ * The two words are set in white, not the accent. They were asked for in the
+ * accent, and the accent has been measured against this footage each time it
+ * changed, over the whole copy block, every 0.2s through the loop, with the
+ * overlay composited in:
+ *
+ *   #341BCA   1.00:1   the blue meets the darkened plate at its own luminance
+ *   #8B0000   1.00:1   the same, and a heavier overlay made it worse, because
+ *                      darkening the backdrop moves it towards a dark accent
+ *   #FFEE8C   1.18:1   a surface, not a text colour, and this one is black
+ *   #FFFFFF   4.82:1   which is why the words are white
+ *
+ * Re-measure before putting the accent back, and only if the footage changes:
+ * no overlay strength rescues a colour this close to the plate. A page can add a subline, a
  * short line of services under the buttons, and large entry points beneath;
  * the home page uses none of the three. The copy comes from the page
  * (src/pages/index.astro).
@@ -30,18 +48,26 @@ export interface Entry {
   href: string;
 }
 
+export interface Way {
+  label: string;
+  href: string;
+}
+
 interface Props {
   /** "\n" marks a line break. */
   title: string;
-  intro: string;
-  /** A few words under the headline, divided by an accent rule: "Brands | Creators". */
+  /** The two ways in, as oversized word links under the headline. */
+  ways?: Way[];
+  /** One line under the headline. Unused on the home page since 6 Oct 2026. */
+  intro?: string;
+  /** A few words under the headline, divided by an accent rule. */
   subline?: string[];
   /** Short list of services, set in small capitals under the buttons. */
   services?: string[];
   /** Large entry points under the hero, one per audience. */
   entries?: Entry[];
 }
-const { title, intro, subline = [], services = [], entries = [] } = Astro.props;
+const { title, ways = [], intro, subline = [], services = [], entries = [] } = Astro.props;
 
 const desktop = videoFiles(HERO_VIDEO);
 const mobile = videoFiles(`${HERO_VIDEO}-portrait`);
@@ -94,7 +120,17 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
           ))}
         </p>
       )}
-      <p class="hero__intro enter enter--2">{intro}</p>
+      {ways.length > 0 && (
+        <nav class="hero__ways enter enter--2" aria-label="Choose your route">
+          {ways.map((way, i) => (
+            <>
+              {i > 0 && <span class="hero__ways-rule" aria-hidden="true"></span>}
+              <a class="hero__way" href={way.href}>{way.label}</a>
+            </>
+          ))}
+        </nav>
+      )}
+      {intro && <p class="hero__intro enter enter--2">{intro}</p>}
       <div class="hero__actions enter enter--3"><slot name="actions" /></div>
       {services.length > 0 && <p class="label hero__services enter enter--3">{services.join(' · ')}</p>}
     </div>
@@ -135,7 +171,10 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     position: relative;
     isolation: isolate;
     display: grid;
-    grid-template-rows: minmax(5rem, 1fr) auto auto;
+    /* An equal share of the height above and below the words, so the
+       headline and the two ways sit in the middle of the frame rather
+       than along its bottom edge. */
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
     overflow: hidden;
     color: var(--hero-fg);
     border: var(--stroke) solid var(--line);
@@ -144,17 +183,42 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
 
   .hero__media { position: absolute; inset: 0; z-index: -1; display: none; }
   .hero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  /* The wordmark sits hard against the right of the frame, so what a window
-     narrower than 16:9 crops has to come off the left, where there is nothing
-     but plate. Tied to the current footage: centre it again if that changes. */
+  /* The footage of 13 October 2026 is a wall of campaign work with someone
+     pinning a sheet to it, and the person is right of centre: holding the
+     frame to the right keeps them in shot on a window narrower than 16:9,
+     and what gets cropped is wall. Tied to this footage. */
   .hero__video--desktop { object-position: right center; }
-  /* Black, part-transparent, flat: enough that the white text holds on the
-     footage's brightest frames. Measured on the current footage (the logo
-     sting), every 0.4s through both cuts, over the area the text covers: at
-     0.55, white holds at least 4.7:1 on every pixel (4.5:1 needed). Brushed
-     metal throws a highlight the café clip never did, which is why this is
-     0.55 and not 0.45. Re-measure if the footage changes. */
-  .hero__overlay { position: absolute; inset: 0; background: var(--surface-dark); opacity: 0.55; }
+  /* Two layers of black, not one. The footage is a wall of printed sheets:
+     bright, and busy in exactly the middle of the frame where the words sit,
+     so a flat overlay strong enough to carry white text there would flatten
+     the whole picture.
+
+     The flat layer holds the corners at 0.66, where the footage still reads.
+     Over it, a soft pool of extra darkness centred on the words brings the
+     middle to about 0.80, and fades out before the edges.
+
+     Measured on this footage, every 0.2s through the whole 7s loop, over the
+     boxes the headline and the two labels actually occupy, with both layers
+     composited: white holds at least 11.42:1 on the desktop cut at 1280 and
+     9.20:1 on the portrait one at 375, against the 4.5:1 the labels need and
+     the 3:1 the headline needs. The worst frame of both is around 5s, where
+     the sheet being pinned catches the most light. It was 0.55 and 0.73 until
+     16 October 2026, which measured 8.00:1 and 6.44:1 and read lighter than
+     the client wanted. Re-measure if the footage changes.
+
+     Translucent blacks written out, as --divider-line is: the token is the
+     colour, and these are strengths of it. */
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(118% 82% at 50% 50%,
+        rgb(0 0 0 / 0.40) 0%,
+        rgb(0 0 0 / 0.30) 42%,
+        rgb(0 0 0 / 0.12) 68%,
+        rgb(0 0 0 / 0) 84%),
+      rgb(0 0 0 / 0.66);
+  }
 
   .hero__label {
     align-self: center;
@@ -175,7 +239,12 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     .hero[data-desktop='video'],
     .hero[data-desktop='video'] .hero__inner { padding: 0; border-style: none; border-radius: 0; }
     .hero[data-desktop='video'] { min-height: 100svh; margin-top: calc(var(--header-h) * -1); }
-    .hero[data-desktop='video'] .hero__inner { padding-top: var(--header-h); }
+    .hero[data-desktop='video'] .hero__inner {
+      /* Matched top and bottom: the top keeps the words clear of the
+         header, and the bottom keeps the content box symmetric, so
+         centring in it centres them on the frame. */
+      padding-block: var(--header-h);
+    }
     .hero[data-desktop='video'] .hero__media { display: block; }
     .hero[data-desktop='video'] .hero__label { visibility: hidden; }
     .hero[data-desktop='video'] .hero__divider { color: inherit; opacity: 0.6; }
@@ -186,7 +255,12 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     .hero[data-mobile='video'],
     .hero[data-mobile='video'] .hero__inner { padding: 0; border-style: none; border-radius: 0; }
     .hero[data-mobile='video'] { min-height: 100svh; margin-top: calc(var(--header-h) * -1); }
-    .hero[data-mobile='video'] .hero__inner { padding-top: var(--header-h); }
+    .hero[data-mobile='video'] .hero__inner {
+      /* Matched top and bottom: the top keeps the words clear of the
+         header, and the bottom keeps the content box symmetric, so
+         centring in it centres them on the frame. */
+      padding-block: var(--header-h);
+    }
     .hero[data-mobile='video'] .hero__media { display: block; }
     .hero[data-mobile='video'] .hero__label { visibility: hidden; }
     .hero[data-mobile='video'] .hero__divider { color: inherit; opacity: 0.6; }
@@ -201,8 +275,11 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
   .hero__body {
     display: grid;
     justify-items: center;
-    gap: var(--space-s);
-    padding: 0 var(--space-l) var(--space-l);
+    align-content: center;
+    gap: var(--space-m);
+    /* Even on all four sides: nothing is anchored to an edge now, and the
+       side padding is what keeps the headline off the glass on a phone. */
+    padding: var(--space-l);
     max-width: 72rem;
     margin-inline: auto;
     text-align: center;
@@ -230,6 +307,70 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     font-size: var(--text-lead);
     line-height: 1.55;
     text-wrap: pretty;
+  }
+
+  /* ---- The two ways in: words, not buttons ------------------------------ */
+  /* Side by side with a hairline between them, wrapping onto two lines only
+     if a screen is too narrow to hold both. */
+  .hero__ways {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.75rem, 0.4rem + 1.1vw, 1.5rem);
+  }
+  .hero__ways-rule {
+    flex: none;
+    width: var(--stroke);
+    height: 1.4em;
+    background: currentColor;
+    opacity: 0.4;
+  }
+
+  .hero__way {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    /* A target before it is a word: never under 44px. */
+    min-height: 2.75rem;
+    padding-inline: 0.2em;
+    font-family: var(--font-body);
+    font-size: clamp(0.9375rem, 0.75rem + 0.8vw, 1.375rem);
+    font-weight: 700;
+    letter-spacing: var(--tracking-caps);
+    line-height: 1.2;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: inherit;
+    /* A shade under full white at rest, so hover has somewhere to go. */
+    opacity: 0.85;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  /* The underline wipes in from the left rather than appearing whole. */
+  .hero__way::after {
+    content: '';
+    position: absolute;
+    left: 0.2em;
+    right: 0.2em;
+    bottom: 0.7em;
+    height: var(--stroke-mark, 2px);
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 200ms var(--ease);
+  }
+  .hero__way:hover,
+  .hero__way:focus-visible { opacity: 1; }
+  .hero__way:hover::after,
+  .hero__way:focus-visible::after { transform: scaleX(1); }
+  /* White, so the ring reads against the footage rather than against the
+     page it is not on. */
+  .hero__way:focus-visible { outline-color: currentColor; outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__way,
+    .hero__way::after { transition: none; }
   }
 
   .hero__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-s); margin-top: var(--space-2xs); }
@@ -290,7 +431,7 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
   }
 
   @media (max-width: 47.99em) {
-    .hero__body { padding: 0 var(--space-m) var(--space-l); }
+    .hero__body { padding: var(--space-m); }
     .hero__intro { font-size: var(--text-base); }
     .entry { padding: var(--space-s) var(--space-m); }
   }

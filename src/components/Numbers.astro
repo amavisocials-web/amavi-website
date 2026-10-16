@@ -107,10 +107,10 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
       height: clamp(24rem, 46vw, 34rem);
       margin-inline: 0;
       padding: 0;
+      /* A hard edge top and bottom: the tiles are cut off by the box rather
+         than faded out into the page. The soft mask came off on 16 October
+         2026. */
       overflow: hidden;
-      /* Tiles arrive and leave rather than being cut off hard. */
-      mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
-      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
     }
 
     .collage__column { display: flex; flex-direction: column; }
@@ -145,6 +145,6 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
     .collage__set + .collage__set { display: none; }
   }
   @media (prefers-reduced-motion: reduce) and (min-width: 48em) {
-    .collage { height: auto; mask-image: none; -webkit-mask-image: none; }
+    .collage { height: auto; }
   }
 </style>

@@ -11,12 +11,24 @@
 
 :root {
   /* --- Colour ------------------------------------------------------------ */
-  --bg:     #FFFFFF;   /* every background, bar the dark surfaces below */
-  --ink:    #000000;   /* all text */
+  /* A warm off-white, not paper white: every background, bar the dark
+     surfaces below. It is also what sits on an accent fill, so a filled
+     button's label is this rather than pure white. */
+  --bg:     #F2F0EF;
+  /* Not pure black: a near-black with a trace of warmth in it, so the type
+     sits on the off-white ground rather than cutting into it. Every piece
+     of text and every heading. Rules and borders are --line, which is
+     still black. */
+  --ink:    #222021;
   --line:   #000000;   /* every rule, divider, border, field outline, table line */
   /* The accent appears only on: the logo, links, button fills and outlines,
      hover and pressed states, focus rings, and small marks such as the active
-     nav indicator. Nowhere else. */
+     nav indicator. Nowhere else.
+
+     One token, because #341BCA works in both roles: 9.74:1 as text on white
+     and 9.74:1 under white as a fill. It was briefly split in two, for a pale
+     yellow that could only ever be a background; the blue needs no such
+     split. */
   --accent: #341BCA;
 
   /* The only exceptions to the white background: the footer, and the flat
@@ -30,11 +42,15 @@
   --on-dark:       #FFFFFF;   /* text, links, outlines and focus on black */
 
   /* Contrast, measured:
-       ink on bg       21.00:1   passes everything
-       accent on bg     9.74:1   links, the logo, focus rings (need 3:1)
-       bg on accent     9.74:1   the label on a filled button — the one place
-                                 on white that text is not black, because
-                                 black on #341BCA is only 2.16:1 and fails AA
+       ink on bg       14.26:1   passes everything. Text held back from full
+                                 strength needs watching: at 0.7 of the ink it
+                                 is 5.63:1 and passes, at 0.6 it is 4.14:1 and
+                                 fails what small text needs
+       accent on bg     8.58:1   links, the logo, focus rings (need 3:1)
+       bg on accent     8.58:1   the label on a filled button — the one place
+                                 on the light ground that text is not black,
+                                 because black on #341BCA is only 2.16:1 and
+                                 fails AA
        on-dark on dark 21.00:1   text on the footer
        accent on dark   2.16:1   hover only, on dark links: never at rest,
                                  and never for a focus ring (needs 3:1) */
@@ -136,7 +152,14 @@ html {
 /* A link to an anchor lands clear of the fixed header. */
 [id] { scroll-margin-top: var(--header-h); }
 
+/* A column the height of the screen at least, with the main area taking the
+   slack: the footer sits at the bottom of the viewport on a short page and at
+   the end of the content on a long one, without any page doing viewport-height
+   arithmetic of its own. */
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
   margin: 0;
   background: var(--bg);
   color: var(--ink);
@@ -148,6 +171,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+
+main { flex: 1; }
 
 h1, h2, h3, h4, p, figure, blockquote, dl, dd { margin: 0; }
 ul, ol { margin: 0; padding: 0; }
@@ -377,7 +402,8 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
 /* --- Focus and accessibility -------------------------------------------
    The accent ring is 9.74:1 against white (focus indicators need 3:1), and
    the offset leaves a white gap so it stays distinct even around a filled
-   accent button. */
+   accent button. On a dark surface the ring turns white: the accent is only
+   2.16:1 there (see .surface-dark above). */
 :focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
 
 .visually-hidden {
@@ -405,6 +431,25 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
   transition: top var(--dur) var(--ease);
 }
 .skip-link:focus { top: var(--space-s); }
+
+/* --- The journal's cover preview ----------------------------------------
+   Built and positioned by src/scripts/journal-preview.ts, which only runs
+   where there is a fine pointer and motion is welcome, so these rules are
+   never reached on a phone. No radius and no shadow: the picture is the
+   whole of it. */
+.journal-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: 280px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms var(--ease);
+  will-change: transform;
+}
+.journal-preview[data-shown] { opacity: 1; }
+.journal-preview img { display: block; width: 100%; height: auto; }
 
 /* --- Motion: one considered moment on load, nothing else ---------------- */
 @keyframes rise {

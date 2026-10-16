@@ -59,6 +59,14 @@ export const POSITIONING =
  */
 export const HERO_VIDEO = '/media/hero';
 
+/**
+ * The accent, for the one place CSS cannot reach: the theme-color meta tag,
+ * which tints the browser's own chrome. It mirrors `--accent` in
+ * src/styles/global.css, which is the source of truth for everything else.
+ * Change both together.
+ */
+export const ACCENT = '#341BCA';
+
 export const SITE_DESCRIPTION =
   'AMAVI Socials is a creator-led marketing and partnerships agency helping brands reach new audiences through the right people, relationships and opportunities';
 
@@ -136,6 +144,7 @@ export interface NavLink {
 /** "Get in Touch" is rendered separately, as the header's one button. */
 export const NAV_LINKS: NavLink[] = [
   { label: 'About', href: '/about/' },
+  { label: 'Journal', href: '/journal/' },
   // Services, temporarily off the site (5 October 2026): see src/pages/_services.astro.
   { label: 'Become a Creator', href: CREATOR_PATH },
 ];

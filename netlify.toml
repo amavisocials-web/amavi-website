@@ -5,8 +5,8 @@
 # is the PUBLIC_SHEETS_ENDPOINT environment variable (set it in the Netlify UI
 # — see README), and Netlify Forms keeps a backup copy of every one. The form
 # is detected automatically at deploy time.
-# The /creators redirect is defined in astro.config.mjs, not here, so the
-# destination URL is only ever written down once.
+# The /creators and /services redirects are defined in astro.config.mjs, not
+# here, so each destination URL is only ever written down once.
 
 [build]
   command = "npm run build"

@@ -1,28 +1,64 @@
 ---
 import Base from '../layouts/Base.astro';
-import ContactPaths from '../components/ContactPaths.astro';
+import ContactRoutes from '../components/ContactRoutes.astro';
+import { RESPONSE_TIME } from '../consts';
+
+/**
+ * Get in touch: the heading and one line of instruction on the left, the two
+ * routes on the right.
+ *
+ * The addresses are not repeated here. They were, as a labelled list under the
+ * heading, until 6 October 2026: they say the same thing as the two routes
+ * beside them and as the footer's contact column on every page, and three
+ * copies of the same two mailto links is two too many. Each route carries the
+ * one way in that belongs to it.
+ *
+ * Nothing here sets a viewport height. The body is a column the height of the
+ * screen at least, with main taking the slack (src/styles/global.css), so the
+ * footer is at the bottom of a short page and after the content on a long one.
+ */
 ---
 
 <Base
   title="Get in Touch"
   description="Brands: email AMAVI Socials to start a campaign with the right creators, communities and partners. Creators: apply to join the AMAVI creator network."
 >
-  <section class="section page-head">
-    <div class="container">
-      <h1 class="display display--lg">Get in touch</h1>
-    </div>
-  </section>
+  <section class="section contact">
+    <div class="container contact__grid">
+      <div class="contact__intro">
+        <h1 class="contact__title">Get in touch</h1>
+        <p class="contact__lead">{RESPONSE_TIME} Select an option to get started.</p>
+      </div>
 
-  <section class="section section--tight contact-section">
-    <div class="container">
-      <ContactPaths level={2} size="page" />
+      <div class="contact__routes">
+        <ContactRoutes />
+      </div>
     </div>
   </section>
 </Base>
 
 <style>
-  /* The heading, centred on the container. The cards below are untouched. */
-  .page-head { padding-bottom: var(--space-l); text-align: center; }
-  .contact-section { padding-top: 0; }
+  .contact__grid { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 64em) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
+      column-gap: var(--space-xl);
+    }
+  }
 
+  .contact__intro { display: grid; gap: var(--space-s); align-content: start; }
+
+  /* A page title, not a display line: between the section-head and page-title
+     steps, which lands at about 34px on a desktop. */
+  .contact__title {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 1.05rem + 1.4vw, 2.125rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+
+  .contact__lead { font-size: var(--text-lead); font-weight: var(--weight-secondary); max-width: 34ch; text-wrap: pretty; }
 </style>

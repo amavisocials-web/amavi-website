@@ -1,0 +1,314 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Subscribe from '../../components/Subscribe.astro';
+import SharePost from '../../components/SharePost.astro';
+import JournalRow from '../../components/JournalRow.astro';
+import { publishedPosts, otherPosts, formatDate, isoDate, journalPath } from '../../lib/journal';
+import { SITE_NAME, SITE_URL } from '../../consts';
+
+/**
+ * One journal post.
+ *
+ * Drafts never reach here: getStaticPaths reads the same published list as the
+ * listing and the feed, so a post marked `draft: true` has no page to find.
+ *
+ * The column is the point of the page. Running text is capped near 68
+ * characters, which is what makes a long piece readable end to end; the header
+ * and the cover sit wider, so the article opens out and then narrows to be
+ * read.
+ */
+export async function getStaticPaths() {
+  const posts = await publishedPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, subtitle, excerpt, date, readingTime, image, substackUrl } = post.data;
+const next = await otherPosts(post.id);
+
+const url = new URL(journalPath(post.id), SITE_URL).href;
+// Where the piece first appeared wins the canonical, so Substack and this page
+// are not read as two competing copies of the same article.
+const canonical = substackUrl || undefined;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description: excerpt,
+  datePublished: isoDate(date),
+  author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+  publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical ?? url },
+  ...(image ? { image: new URL(image, SITE_URL).href } : {}),
+};
+---
+
+<Base
+  title={title}
+  description={excerpt}
+  ogImage={image || undefined}
+  ogType="article"
+  canonical={canonical}
+  schema={schema}
+>
+  {/* Revealed by the script, so it never appears without one driving it. */}
+  <div class="progress" data-reading-progress hidden>
+    <div class="progress__fill"></div>
+  </div>
+
+  <article class="post" data-article>
+    <header class="section post__head">
+      <div class="container post__head-inner">
+        <a class="post__back post__back--top" href="/journal/">
+          <svg class="post__back-arrow" viewBox="0 0 22 12" aria-hidden="true" focusable="false">
+            <path d="M22 6H3M7.5 1L2 6l5.5 5" fill="none" stroke="currentColor"
+                  stroke-width="1.5" vector-effect="non-scaling-stroke" />
+          </svg>
+          Back to journal
+        </a>
+        <p class="post__meta">
+          <time datetime={isoDate(date)}>{formatDate(date)}</time>
+          {readingTime && <> &middot; {readingTime} min read</>}
+        </p>
+        <h1 class="display post__title">{title}</h1>
+        {subtitle && <p class="post__lead">{subtitle}</p>}
+      </div>
+
+      {image && (
+        <div class="container post__cover">
+          <img src={image} alt="" loading="eager" decoding="async" />
+        </div>
+      )}
+    </header>
+
+    <div class="container">
+      <div class="prose post__body">
+        <Content />
+      </div>
+    </div>
+  </article>
+
+  <div class="container">
+    <div class="post__foot">
+      {substackUrl && (
+        <p class="post__origin">
+          This piece first appeared on our <a href={substackUrl} target="_blank" rel="noopener noreferrer">Substack</a>.
+        </p>
+      )}
+
+      <Subscribe level={2} />
+
+      <SharePost url={url} title={title} />
+    </div>
+  </div>
+
+  {next.length > 0 && (
+    <section class="section section--ruled" aria-labelledby="next-heading">
+      <div class="container">
+        <p class="eyebrow" id="next-heading">Next</p>
+        <div class="post__next">
+          {next.map((other) => <JournalRow post={other} level={3} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <div class="container">
+    <p class="post__return">
+      <a class="post__back" href="/journal/">
+        <svg class="post__back-arrow" viewBox="0 0 22 12" aria-hidden="true" focusable="false">
+          <path d="M22 6H3M7.5 1L2 6l5.5 5" fill="none" stroke="currentColor"
+                stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        </svg>
+        Back to journal
+      </a>
+    </p>
+  </div>
+</Base>
+
+<script>
+  import '../../scripts/reading-progress';
+</script>
+
+<style>
+  /* ---- Reading progress -------------------------------------------------- */
+  /* Along the bottom edge of the header, over the hairline that is already
+     there: the yellow line is the track and the ink fills it. The accent
+     itself would be invisible on its own line, and 1.18:1 on white. */
+  .progress {
+    position: fixed;
+    top: calc(var(--header-h) - 2px);
+    left: 0;
+    right: 0;
+    z-index: 51;
+    height: 2px;
+    pointer-events: none;
+  }
+  .progress__fill {
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  /* ---- The header: centred, with room ------------------------------------ */
+  .post__head-inner {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-m);
+    text-align: center;
+  }
+
+  .post__meta {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    /* See the note on .jrow__date: 0.6 of #222021 misses AA at this size. */
+    opacity: 0.7;
+  }
+
+  /* Capped so it breaks over two or three lines instead of running the width
+     of the page. */
+  .post__title {
+    font-size: var(--display-lg);
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+
+  /* A standing subtitle rather than the first line of the article. */
+  .post__lead {
+    font-size: var(--text-lead);
+    font-weight: var(--weight-secondary);
+    line-height: 1.6;
+    max-width: 56ch;
+    opacity: 0.7;
+    text-wrap: pretty;
+  }
+
+  .post__cover { margin-top: clamp(2rem, 1.2rem + 3.4vw, 3.5rem); }
+  .post__cover img { width: 100%; height: auto; border-radius: 0; }
+
+  /* ---- The article ------------------------------------------------------- */
+  .post__body {
+    /* The most important setting on the page. */
+    max-width: 68ch;
+    margin-inline: auto;
+    padding-bottom: var(--section-y);
+    font-size: var(--text-lead);
+    font-weight: var(--weight-body);
+    line-height: 1.7;
+  }
+
+  /* Many of the paragraphs in these pieces are a single line, on purpose, so
+     the space between them has to carry the rhythm. */
+  .post__body :global(p) { margin-block: 0 1.35em; }
+  .post__body :global(p:last-child) { margin-bottom: 0; }
+
+  /* A section announces itself: a lot of room above, less beneath. */
+  .post__body :global(h2) {
+    margin-block: 2.4em 0.7em;
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    font-size: var(--display-md);
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+  .post__body :global(h2:first-child) { margin-top: 0; }
+
+  /* The site's eyebrow, used as a sub-head. */
+  .post__body :global(h3) {
+    margin-block: 2em 0.6em;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+  }
+
+  .post__body :global(strong) { font-weight: var(--weight-strong); }
+
+  /* Larger than the words around it, held off the margin by an accent rule,
+     and no fill behind it. */
+  .post__body :global(blockquote) {
+    margin: 2em 0;
+    padding-left: var(--space-m);
+    border-left: var(--stroke-mark) solid var(--accent);
+    font-size: clamp(1rem, 0.9rem + 0.45vw, 1.25rem);
+    font-weight: var(--weight-secondary);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .post__body :global(blockquote p:last-child) { margin-bottom: 0; }
+
+  .post__body :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: var(--stroke);
+    transition: text-decoration-thickness var(--dur) var(--ease);
+  }
+  .post__body :global(a:hover) { text-decoration-thickness: var(--stroke-mark); }
+
+  .post__body :global(ul),
+  .post__body :global(ol) { margin-block: 0 1.35em; padding-left: 1.25em; }
+  .post__body :global(li) { margin-bottom: 0.6em; }
+  .post__body :global(li:last-child) { margin-bottom: 0; }
+
+  /* Sparingly: a thin rule where the piece changes direction. */
+  .post__body :global(hr) {
+    margin-block: 2.6em;
+    border: 0;
+    border-top: var(--stroke) solid var(--divider-line);
+  }
+
+  .post__body :global(img) { width: 100%; height: auto; margin-block: 2em; }
+
+  /* ---- The foot of the post ---------------------------------------------- */
+  .post__foot {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-xl);
+    max-width: 68ch;
+    margin-inline: auto;
+    padding-bottom: var(--section-y);
+  }
+  /* The one line about Substack belongs to the article above it, not to the
+     block below, so it sits closer to the text than to the ask. */
+  .post__origin { margin-top: calc(var(--space-xl) * -1 + var(--space-s)); }
+
+  /* The way back, after everything else. */
+  .post__return { padding-bottom: var(--section-y); }
+  /* At the top it is a small step above the date, not a heading of its own. */
+  .post__back--top { margin-bottom: var(--space-2xs); }
+  .post__origin { font-size: var(--text-sm); font-weight: var(--weight-secondary); opacity: 0.7; }
+
+  .post__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: 2.75rem;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .post__back-arrow { width: 1.1rem; height: 0.6rem; transition: transform var(--dur) var(--ease); }
+  .post__back:hover { color: var(--accent); }
+  .post__back:hover .post__back-arrow { transform: translateX(-3px); }
+
+  .post__next > :global(.jrow) { border-top: var(--stroke) solid var(--divider-line); }
+  .post__next > :global(.jrow:last-child) { border-bottom: var(--stroke) solid var(--divider-line); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post__back-arrow { transition: none; }
+    .post__back:hover .post__back-arrow { transform: none; }
+  }
+</style>

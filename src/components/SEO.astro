@@ -8,16 +8,27 @@ interface Props {
   ogImage?: string;
   /** Appends "| AMAVI Socials" unless the title already stands alone. */
   standaloneTitle?: boolean;
+  /**
+   * Overrides the canonical URL. A journal post that first appeared on
+   * Substack points there, so the two copies are not read as competing.
+   */
+  canonical?: string;
+  ogType?: 'website' | 'article';
 }
 
-const { title, description, ogImage = '/og.png', standaloneTitle = false } = Astro.props;
+const {
+  title, description, ogImage = '/og.png', standaloneTitle = false,
+  canonical: canonicalOverride, ogType = 'website',
+} = Astro.props;
 
 const pageTitle = standaloneTitle ? title : `${title} | ${SITE_NAME}`;
 // Astro builds to directory format (/about/index.html), and @astrojs/sitemap
 // emits trailing slashes to match. Canonical and og:url must agree with both,
 // or every page canonicalises to a URL that only exists as a redirect.
 const path = Astro.url.pathname;
-const canonical = new URL(path.endsWith('/') ? path : `${path}/`, SITE_URL).href;
+const canonical = canonicalOverride ?? new URL(path.endsWith('/') ? path : `${path}/`, SITE_URL).href;
+// og:url stays this page's own address even when the canonical points away.
+const ogUrl = new URL(path.endsWith('/') ? path : `${path}/`, SITE_URL).href;
 const ogImageUrl = new URL(ogImage, SITE_URL).href;
 ---
 
@@ -25,11 +36,11 @@ const ogImageUrl = new URL(ogImage, SITE_URL).href;
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
 
-<meta property="og:type" content="website" />
+<meta property="og:type" content={ogType} />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:title" content={pageTitle} />
 <meta property="og:description" content={description} />
-<meta property="og:url" content={canonical} />
+<meta property="og:url" content={ogUrl} />
 <meta property="og:image" content={ogImageUrl} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />

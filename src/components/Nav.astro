@@ -5,6 +5,10 @@ import { NAV_LINKS, CONTACT_PATH, CREATOR_PATH, BRAND_ENQUIRY_MAILTO, CONTACT_EM
 /**
  * The header: a menu button on the left, the wordmark in the centre, Get in
  * touch on the right. It stays at the top of the screen as the page scrolls.
+ * It carried a 2px accent line along its bottom edge between 5 and 9 October
+ * 2026; nothing draws that edge now, and the shadow that fades in on scroll
+ * is what separates the header from the page.
+ *
  * Over hero footage it has no background and white contents until the hero
  * has scrolled past; everywhere else it is white with a hairline under it.
  *
@@ -79,6 +83,29 @@ const links = [{ label: 'Home', href: '/' }, ...NAV_LINKS, { label: 'Get in Touc
   const menu = document.querySelector<HTMLElement>('[data-menu]');
   const hero = document.querySelector<HTMLElement>('.hero');
 
+  /*
+   * The shadow under the header, once the page has moved past the top. One
+   * rAF in flight at a time: scroll fires far more often than the screen is
+   * painted, so reading and writing once per frame is all the work there is
+   * to do.
+   */
+  if (header) {
+    let queued = false;
+    const SHOWN_FROM = 40;
+
+    const sync = () => {
+      queued = false;
+      header.classList.toggle('is-scrolled', window.scrollY > SHOWN_FROM);
+    };
+
+    sync();
+    window.addEventListener('scroll', () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(sync);
+    }, { passive: true });
+  }
+
   // Over hero footage, the header turns solid once the hero is behind it.
   if (header && hero) {
     const height = () => header.getBoundingClientRect().height;
@@ -136,10 +163,36 @@ const links = [{ label: 'Home', href: '/' }, ...NAV_LINKS, { label: 'Get in Touc
     top: 0;
     z-index: 50;
     height: var(--header-h);
+    /* Frosted: what is under the header stays faintly readable through it,
+       rather than disappearing behind a white band. The solid colour is the
+       fallback and is replaced below where the blur is supported. */
     background: var(--bg);
     color: var(--ink);
-    border-bottom: var(--stroke-hair) solid var(--line);
-    transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
+    transition:
+      background-color 0.3s var(--ease),
+      color 0.3s var(--ease),
+      box-shadow 250ms var(--ease);
+  }
+
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .site-header {
+      /* The page's own ground, held back so what passes under the header
+         stays faintly readable through it. Mixed from the token rather
+         than written out, so the background follows --bg; a browser
+         without color-mix drops this and keeps the solid fallback. */
+      background: color-mix(in srgb, var(--bg) 72%, transparent);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      backdrop-filter: blur(16px) saturate(140%);
+    }
+  }
+
+
+  /* Nothing under the header at the top of the page; once the page has moved
+     past it, a soft shadow fades in and says the header is above the content. */
+  .site-header.is-scrolled { box-shadow: 0 1px 24px rgb(0 0 0 / 0.07); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header { transition: background-color 0.3s var(--ease), color 0.3s var(--ease); }
   }
 
   /* Over hero footage — and only while the hero is still behind it — the
@@ -147,16 +200,14 @@ const links = [{ label: 'Home', href: '/' }, ...NAV_LINKS, { label: 'Get in Touc
      screen depends on orientation, so this does too. */
   @media (orientation: landscape) {
     :global(body:has(.hero[data-desktop='video'])) .site-header:not(.is-past-hero):not(.is-menu-open) {
-      background: none;
+      background: rgb(0 0 0 / 0.3);
       color: var(--on-dark);
-      border-bottom-style: none;
     }
   }
   @media (orientation: portrait) {
     :global(body:has(.hero[data-mobile='video'])) .site-header:not(.is-past-hero):not(.is-menu-open) {
-      background: none;
+      background: rgb(0 0 0 / 0.3);
       color: var(--on-dark);
-      border-bottom-style: none;
     }
   }
 

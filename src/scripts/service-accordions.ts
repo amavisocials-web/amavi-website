@@ -1,7 +1,13 @@
 /**
- * The practice areas, as an accordion. Drives every list on the page, so the
- * home page's and /services' are the same behaviour (src/components/
- * ServiceList.astro).
+ * Every accordion on the site: the practice areas on the home page and
+ * /services (src/components/ServiceList.astro), and the two routes on Get in
+ * touch (src/components/ContactRoutes.astro). One list is one accordion, and
+ * a page may carry several.
+ *
+ * The markup contract: [data-accordion] on the list, [data-accordion-item] on
+ * each row, with [data-trigger] and [data-panel] inside it. The script sets
+ * data-open on the row and marks the list ready, which is what the component's
+ * own CSS collapses on.
  *
  * Layered on markup that works without it: every panel is in the page, open,
  * so with no JavaScript the page reads as a set of sections under their
@@ -27,7 +33,7 @@ import { prefersReducedMotion as reducedMotion } from './lib/motion';
 
 /** Every accordion on the page, each opening and closing on its own. */
 for (const list of document.querySelectorAll<HTMLElement>('[data-accordion]')) {
-  const items: Item[] = [...list.querySelectorAll<HTMLElement>('[data-area]')].flatMap((root) => {
+  const items: Item[] = [...list.querySelectorAll<HTMLElement>('[data-accordion-item]')].flatMap((root) => {
     const trigger = root.querySelector<HTMLButtonElement>('[data-trigger]');
     const panel = root.querySelector<HTMLElement>('[data-panel]');
     return trigger && panel ? [{ root, trigger, panel }] : [];
@@ -56,6 +62,9 @@ for (const list of document.querySelectorAll<HTMLElement>('[data-accordion]')) {
 
   const openFromHash = ({ focus = false } = {}) => {
     const id = decodeURIComponent(location.hash.slice(1));
+    // No hash is not a match for a row without an id: without this, an empty
+    // string finds the first row whose id is "" and opens it on every load.
+    if (!id) return;
     const match = items.find((item) => item.root.id === id);
     if (!match) return;
     openOnly(match);

@@ -98,8 +98,10 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 |---|---|
 | `/` | Full-screen video hero ("Content that connects"), copy centred, with "Brands \| Creators" under the headline and the two buttons under that; the "Trusted by" logo marquee; what AMAVI is, in three paragraphs; the three figures beside a drifting collage of creator work; the case study; the six services, as an accordion |
 | `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting and optimisation), the philosophy over a photograph in black, and the closing invitation |
+| `/journal` | Notes on the work: every published post as a row, newest first |
+| `/journal/[slug]` | One post. Built from a markdown file; see Journal below |
 | `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
-| `/contact` | Get in touch, the heading centred: brands to email, creators to the application. Nothing else on the page |
+| `/contact` | Two columns: the heading and one line of instruction on the left; Brand? and Creator?, opening in place onto a card each, on the right |
 | `/privacy` | Privacy policy |
 
 `/creators` redirects to `/become-a-creator`. **`/services` is temporarily off
@@ -110,8 +112,17 @@ the site** — see below.
 Taken down on 5 October 2026, at the client's request, without deleting any of
 the work. `src/pages/services.astro` was renamed **`src/pages/_services.astro`**:
 Astro ignores any file in `src/pages/` whose name starts with an underscore, so
-the route does not build, is not in the sitemap, and 404s on the site's own 404
-page. The page, its data, its components and its images are all still here.
+the route does not build. The page, its data, its components and its images are
+all still here.
+
+**`/services` redirects to `/contact`** (added 7 October 2026, in
+`astro.config.mjs` alongside the older `/creators` one), so an old link or an
+old search result lands somewhere useful instead of on the 404 page. Astro
+writes that as a stub page carrying a meta refresh, `robots: noindex` and a
+canonical pointing at `/contact/` — so nothing canonical or indexable names
+`/services` — and the sitemap filter keeps both redirects out of
+`sitemap-0.xml`. Both destinations live only in `astro.config.mjs`, never in
+`netlify.toml`, so each URL is written down once.
 
 Four links were taken out with it. **To restore the page, rename the file back
 and put these back:**
@@ -121,7 +132,8 @@ and put these back:**
 | `src/consts.ts`, `NAV_LINKS` | `{ label: 'Services', href: '/services/' }`, after About |
 | `src/components/Footer.astro`, `pages` | the same entry, after Home |
 | `src/pages/index.astro`, the hero | the first button pointed at `/services/`; it points at `CONTACT_PATH` now |
-| `src/pages/index.astro`, the services section | a "see all services" link under the accordion |
+| `src/pages/index.astro`, the services section | a "see all services" link under the accordion, removed rather than repointed |
+| `astro.config.mjs` | drop `/services` from `redirects` and from `REDIRECTED` |
 
 Each is marked with a comment naming this file. The accordion on the home page
 reads the same `src/data/services.ts`, so the service copy stays live and in one
@@ -138,6 +150,9 @@ page renders, so they ship on every build while it is off.
 src/
   consts.ts              Site-wide constants: email, nav, socials, positioning,
                          tagline, region label, hero video path
+  content.config.ts      The journal collection and its schema
+  content/journal/       One markdown file per post, plus its own README
+  lib/journal.ts         The published list, the ordering and the date formats
   data/clients.ts        Client manifest: logo, site, clearance, optical sizing
   data/services.ts       The six practice areas, read by both accordions; the
                          sectors and results (kept, not rendered)
@@ -152,15 +167,22 @@ src/
   components/            Nav (header and menu), Connect (the closing
                          invitation), Footer, Hero, Feature, Numbers,
                          ServiceList (the practice areas, on both pages),
+                         ContactRoutes (the two questions on Get in touch),
+                         JournalRow (one post as a row, on the listing and
+                         under a post),
                          LoopVideo, Placeholder, ProofLink, LogoWall,
-                         ContactPaths, the creator form, Logo, Lines, Frame,
-                         Fonts. ServicesSlider is kept but unused: the home
-                         page's carousel became the accordion on 5 Oct 2026
+                         the creator form, Logo, Lines, Frame, Fonts.
+                         ServicesSlider and ContactPaths are kept but unused:
+                         the home page's carousel became the accordion, and
+                         the contact cards became the two routes, both on
+                         5 Oct 2026
   scripts/lib/motion.ts    One prefers-reduced-motion query, shared
   scripts/loop-videos.ts   Lazy, visible-only playback for every video
   scripts/service-accordions.ts  Every practice-area accordion, opening in place
   scripts/services-slider.ts  Unused, with its component
   scripts/country-combobox.ts  The country field, as a combobox you type into
+  scripts/journal-preview.ts  The cover that follows the cursor on /journal
+  scripts/reading-progress.ts The line along the header on a post page
   scripts/creator-form.ts  The application's steps, validation and submission
   pages/                 One file per route. A leading underscore takes a file
                          out of routing: _services.astro is off the site
@@ -197,20 +219,21 @@ Germany and the Balkans" on the home page.
 
 ### Colour
 
-White backgrounds, black text, black hairline rules, `#341BCA` for accents
+Off-white backgrounds, near-black text, black hairline rules, `#341BCA` for accents
 and highlights, and a black footer. Six colours, defined once in
-`src/styles/global.css`, and — with the section divider's two translucent
-shades below — the only colour values anywhere in the codebase:
+`src/styles/global.css`, and — with the two translucent shades below — the
+only colour values anywhere in the codebase:
 
 | Token | Value | Use |
 |---|---|---|
-| `--bg` | `#FFFFFF` | Every background. No tinted, grey or alternating sections |
-| `--ink` | `#000000` | All text |
+| `--bg` | `#F2F0EF` | Every background, bar the dark surfaces. A warm off-white, not paper white. No tinted, grey or alternating sections |
+| `--ink` | `#222021` | All text and every heading. A near-black with a trace of warmth, so the type sits on the ground rather than cutting into it. **Rules are `--line`, which is still pure black** |
 | `--line` | `#000000` | Every rule, divider, border, field outline and table line |
-| `--accent` | `#341BCA` | Accents and highlights: the logo, links, button fills and outlines, hover and pressed states, focus rings, the hero's full stops, area and step numbers, the application's progress bar — wherever musetheagency.com uses its red |
+| `--accent` | `#341BCA` | Accents and highlights: the logo, links, button fills and outlines, hover and pressed states, focus rings, accordion and step numbers, the drawn circle, the reading-progress line. One token: the blue reads both as text on white and under white as a fill, at 9.74:1 either way |
 | `--surface-dark` | `#000000` | The footer, and the flat overlay under text on video |
 | `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on black and on video |
 | `--divider-line` | `rgb(0 0 0 / 0.06)`, and `rgb(255 255 255 / 0.10)` under `.surface-dark` | The few lines left between sections |
+| `--tint` | `rgb(0 0 0 / 0.04)` | A row under the pointer, where a fill of the accent would read as a block of colour rather than a state |
 
 **The exceptions to white** are the footer (full bleed, edge to edge), the
 "Our philosophy" band on /about — white over a photograph under a black
@@ -265,16 +288,17 @@ at the body weight.
 
 | Pairing | Ratio | |
 |---|---|---|
-| `--ink` on `--bg` | 21.00:1 | Every piece of text |
-| `--accent` on `--bg` | 9.74:1 | Links and the logo, at any size |
-| `--bg` on `--accent` | 9.74:1 | The label on a filled button |
+| `--ink` on `--bg` | 14.26:1 | Every piece of text |
+| `--ink` at 0.7 on `--bg` | 5.63:1 | Text held back: dates, reading times, standing lines. **0.6 is 4.14:1 and fails what small text needs** — that is the floor to watch now that the ink is not pure black |
+| `--accent` on `--bg` | 8.58:1 | Links and the logo, at any size |
+| `--bg` on `--accent` | 8.58:1 | The label on a filled button |
 | `--ink` on `--accent` | 2.16:1 | **Fails** — so a filled button's label is white |
 | `--on-dark` on `--surface-dark` | 21.00:1 | Text on the footer |
 | White on the hero video | ≥ 4.7:1 | Every pixel behind the headline, intro and buttons, over the 0.55 black overlay (measured every 0.4s through both cuts) |
 | White on the stat tiles | ≥ 5.0:1 | On 95% of the pixels behind each label, over a 0.5 black shade (measured on each tile's first frame) |
 | `--accent` on `--surface-dark` | 2.16:1 | **Hover only.** Footer links turn `#341BCA` on hover, with an underline so the state never rests on colour. Never used at rest on black, or for a focus ring there — those are white |
 
-That last row is the one exception to black text: the primary button is an
+That last row is the one exception to near-black text: the primary button is an
 accent fill with a white label, because black on `#341BCA` fails AA. On hover
 it inverts to an accent outline with an accent label; pressed, it refills.
 The secondary button is a black outline that takes the accent on hover.
@@ -313,9 +337,20 @@ npm run brand:assets
 
 The share image is the PNG placed pixel-for-pixel (never upscaled) on a
 1200×630 canvas of its own exact background colour, with the wordmark
-centred. Both it and the favicon are the supplied avatar, white on `#341BCA`:
+centred. Both it and the favicon are the supplied avatar, white on `#341BCA`
+(**still blue** — see below):
 the logo, which is one of the places the accent belongs. They appear in
 browser tabs and share previews, not on the page.
+
+The accent went `#341BCA` → `#8B0000` → `#FFEE8C` → `#341BCA` over 6–9 October
+2026 and is back where it started, so the three generated assets — which are
+built from the supplied avatar PNG and read its background out of the file
+rather than from the token — **match again without being regenerated**. If the
+accent ever moves away from `#341BCA` for good, they need the logo re-supplied
+in the new colour and then `npm run brand:assets`. The `theme-color` meta tag
+follows the accent through `ACCENT` in `src/consts.ts`, the one value that has
+to be kept in step with `--accent` by hand, because a meta tag cannot read a
+CSS custom property.
 
 ### Copy
 
@@ -553,24 +588,65 @@ are a static row.
 
 ## Layout
 
+**The footer sits at the bottom.** `body` is a flex column at least `100svh`
+tall and `main` takes the slack (`src/styles/global.css`), so a short page
+ends with the footer on the bottom edge of the screen and a long one ends with
+it after the content. **No page should do viewport-height arithmetic of its
+own** — `/contact` did, with `min-height: calc(100svh - var(--header-h))` on
+its own wrapper, and the result was a page a footer's height taller than its
+contents with nothing in the gap. That was taken out on 5 October 2026.
+
+
 - **Header.** A menu button on the left, the wordmark centred, "Get in touch"
-  on the right; it stays at the top as the page scrolls. The menu is a
+  on the right; it stays at the top as the page scrolls. It is **frosted**
+  rather than solid: white at 0.72 with a 16px blur and a little added
+  saturation, so what passes under it stays faintly readable. The blur is
+  inside an `@supports`, and a browser without it gets the solid white that is
+  declared first. **Nothing draws its bottom edge**: the solid rule came off
+  with the frost, and a 2px accent line that replaced it came off again on 9
+  October 2026. A soft shadow fades in over 250ms once the page has scrolled
+  past 40px —
+  toggled by a class from a scroll listener that does its reading and writing
+  once per frame, in one `requestAnimationFrame`. Under
+  `prefers-reduced-motion` the shadow appears without fading. The menu is a
   full-screen panel of the site's pages, set large, with the contact routes
   beneath. Without JavaScript the menu button is a link to the footer's list
   of pages. Over hero footage the header is see-through with white contents
-  until the hero has scrolled past.
-- **Hero** (`Hero.astro`). Full screen and **centred**: the headline, the
-  subline, one line of positioning and the two buttons share one axis down the
-  middle, over video. The subline is the words of `subline` divided by an
-  accent rule — "Brands | Creators" on the home page, which labels the two
-  buttons under it. It can also take a line of services under the buttons and
-  large entry points beneath; the home page uses neither.
+  until the hero has scrolled past. There the frost is **black at 0.3** with
+  the same blur, so the white wordmark and links hold.
+- **Hero** (`Hero.astro`). Full screen, and **centred on both axes**: the
+  headline and, under it, the two ways in — **Brands** to `/contact` and
+  **Creators** to `/become-a-creator` — share a column down the middle of the
+  frame. The inner box takes the header's height as padding at the top *and*
+  the bottom, so centring in it centres on the frame rather than 40px below it.
 
-  Centring the copy moved it onto the engraved wordmark in the footage, so the
-  overlay was re-measured there rather than assumed: over the whole copy block,
-  every frame of both cuts, white holds **4.84:1** on the desktop cut and
-  **10.6:1** on the portrait one at the current 0.55. Re-measure if the footage
-  or the copy's position changes.
+  The two ways are oversized word links, not buttons: uppercase, letter-spaced,
+  the same size as each other, side by side with a hairline between, 22px at
+  1280 down to 15px on a phone, each at least 44px tall and wrapping onto two
+  lines only if a screen cannot hold both. Hover and focus wipe an underline in
+  from the left over 200ms and lift them from 0.85 to full white; under
+  `prefers-reduced-motion` the underline appears without the wipe.
+
+  **They are white, not the accent**, and that is measured rather than
+  preferred. Every accent this site has had was measured against this footage,
+  over the copy block, every 0.2s through the loop, with the overlay
+  composited in:
+
+  | | |
+  |---|---|
+  | `#341BCA` | **1.00:1** — the blue meets the darkened plate at its own luminance |
+  | `#8B0000` | **1.00:1** — the same, and a heavier overlay made it worse, because darkening the backdrop moves it towards a dark accent |
+  | `#FFEE8C` | **1.18:1** — a surface, not a text colour, and this one is black |
+  | `#FFFFFF` | **4.82:1** — which is why the words are white |
+
+  The header band over the same frames holds **11.21:1**. Re-measure before
+  putting the accent back, and only if the footage changes: no overlay
+  strength rescues a colour this close to the plate.
+
+  The line of positioning and the pair of filled buttons came off on 6 October
+  2026: the only thing to click in the hero is the choice between the two
+  audiences. The component still accepts `intro`, `subline`, `services` and
+  `entries`; the home page passes none of them.
 - **Feature blocks** (`Feature.astro`). One text column beside one portrait
   piece of media, alternating sides. Key phrases in the body copy are bold;
   each block ends on a **proof line** (`ProofLink.astro`) — a short claim in
@@ -615,12 +691,45 @@ are a static row.
   The pill and the round arrow beside it are one link, not two — one tab stop,
   one destination — and they fill and empty together, the arrow nudging right
   on hover.
+- **Get in touch** (`ContactRoutes.astro`, laid out by `src/pages/contact.astro`).
+  Two columns from 64em: the heading and one line of instruction on the left at
+  40%, the two questions on the right at 60%. Below 64em the left column stacks
+  above the right.
+
+  **Brand?** and **Creator?** sit one above the other with a single rule
+  between them, and only one is ever open, so the two routes never compete for
+  the same screen. Each row is as tall as its contents, about 72px closed. An
+  open route shows **one card and one way in**: a line of copy, the button, and
+  a note saying what pressing it does.
+
+  A closed row **fills with the accent** on hover and on keyboard focus, with
+  its question and mark in white on it (9.74:1); it is clickable across its whole width, by an overlay on the button
+  that is only there while the row is closed, so an open route's own link stays
+  clickable.
+
+  The question is the largest thing in its column and never wraps. The display
+  face is 125% stretched, so "Creator?" measures about 9.7 times its own font
+  size, which the clamp allows for down to a 320px screen.
+
+  **Taken out on 6 October 2026**, as redundancy rather than design: the two
+  addresses listed again under the heading (they are in the footer of every
+  page, and each route carries its own), the address repeated as text under the
+  button inside the panel, the photograph cropped to a strip inside the panel,
+  and the accent-filled hover on a closed row. The questions came down about a
+  third at the same time, and the rows with them.
 - **Footer** (`Footer.astro`). Full-bleed black: edge to edge and down to the
   bottom of the page, its own padding holding the content off the edges. The
   same on every page — no props, no per-page variants: the wordmark, the region
   label under it, then three columns (**Site**, **Contact**, **Follow**) and the
   small print. No dividing rules, and no closing call to action: each page ends
   on its own last section.
+
+  The grid is **two columns from 48em and four from 64em**: four columns on a
+  tablet left the contact column about 130px wide, and
+  `partnerships@amavisocials.com` needs about 175, so `overflow-wrap: anywhere`
+  broke it mid-word into ".c om". The addresses are set a step down from the
+  rest of the column and wrap only as a last resort, and Contact is given the
+  widest of the three columns because it carries the longest line.
 
   Changed on 5 October 2026: the wordmark came **two steps down the type
   scale** (`.wordmark--lg`, every stop of the clamp divided by 1.25²) so it
@@ -662,7 +771,8 @@ four points are in `src/pages/_services.astro` itself.
 
 ### The areas are an accordion
 
-**`src/components/ServiceList.astro`**, the same component on both pages: the
+**`src/components/ServiceList.astro`**, the same component on both pages, and
+the same script as Get in touch's two routes: the
 numbered list is both an index and its content, and a row opens in place to the
 area's number, title and paragraph. One at a time; opening one closes the rest.
 
@@ -704,18 +814,44 @@ flagged in `src/data/media.ts`, to be replaced first.
   | Desktop, 1920×1080 (16:9) | landscape screens | `hero.mp4`, `hero.webm`, poster `hero.jpg` |
   | Mobile, 1080×1920 (9:16) | portrait screens | `hero-portrait.mp4`, `hero-portrait.webm`, poster `hero-portrait.jpg` |
 
-  **Now:** AMAVI's own logo sting — the wordmark cut into brushed metal, on
-  a slow push in. The desktop cut is the whole 16:9 frame. The mobile cut is
-  a 9:16 crop of the same clip, taken left of the wordmark: a portrait crop
-  keeps a third of a 16:9 frame's width, a phone shows about four fifths of
-  that, and the wordmark is half the frame — so on phones the hero is the
-  brushed plate on its own, rather than the wordmark cut in two. Both have a
-  crossfade where they loop. The footage fills the screen edge to edge, the
-  text is white over a flat black overlay (0.55 in `Hero.astro` — measured on
-  this footage, white holds 4.7:1 or better), and the header sits over it. To replace it, drop new files in under these names —
-  **H.264 MP4 plus a WebM, each under ~5MB**, silent and loopable, posters
-  from each cut's first frame — and rebuild. Remove a cut and that
-  orientation shows the "Add video" frame, with black text.
+  **Now:** AMAVI's own studio footage, supplied 13 October 2026 as a 2880×2160
+  QuickTime and cut on 16 October. It is several scenes in seven seconds: a
+  wall of campaign work being pinned up, "Amavi" written on a whiteboard, two
+  people shooting by a window. Both cuts come from that one source, each
+  cropped from the 4:3 frame and given a 24-frame crossfade so the loop has no
+  seam:
+
+  | Cut | Crop from the source | Encoded |
+  |---|---|---|
+  | Desktop 16:9 | `0,270,2880,1620` — centred, top and bottom trimmed | 1920×1080, 3.2 Mbps, 2.6MB |
+  | Mobile 9:16 | `832,0,1215,2160` — centred horizontally | 1080×1920, 1.9 Mbps, 1.6MB |
+
+  The desktop cut is held to the right (`object-position: right center`), so a
+  window narrower than 16:9 crops wall rather than the person.
+
+  **The overlay is two layers, not one**, because this footage is bright and
+  busy in the middle of the frame where the words sit. A flat black at 0.66
+  holds the corners, and a radial pool over it brings the middle to about 0.80
+  before fading out before the edges, so the picture still reads at the
+  corners. Measured on this footage, every 0.2s through the whole loop, over
+  the boxes the headline and the two labels actually occupy, with both layers
+  composited:
+
+  | Width | Cut | Worst white |
+  |---|---|---|
+  | 1280 | desktop | 11.42:1 |
+  | 375 | portrait | 9.20:1 |
+
+  against the 4.5:1 the 22px labels need and the 3:1 the headline needs. The
+  worst frame of each is around 5s. It was 0.55 and 0.73 first, measuring
+  8.00:1 and 6.44:1, and was darkened on the client's word.
+
+  To replace it, drop new files in under these names — **H.264 MP4 (a WebM is
+  optional), each under ~5MB**, silent and loopable, posters from each cut's
+  first frame — and **re-measure the overlay**: it is tuned to this footage,
+  not to a number. `scripts/encode-video.swift` does the cutting; see "Making
+  the video files". Remove a cut and that orientation shows the "Add video"
+  frame, with black text.
 - **Stat tiles** — tiles 1–4 of `src/data/tiles.ts` (`public/media/tiles/`),
   creator videos from AMAVI's campaigns, behind the four figures. Tile 5 isn't
   used: its burned-in captions read badly as a silent loop.
@@ -772,6 +908,60 @@ copy beside its output (`*.sb-*`): delete it, or it will be published from
 ```bash
 node -e "require('sharp')('tile-2.png').jpeg({ quality: 75, mozjpeg: true }).toFile('public/media/tiles/tile-2.jpg')"
 ```
+
+---
+
+## Journal
+
+**Adding a post is adding a file.** One markdown file in
+`src/content/journal/` becomes a row on `/journal`, a page of its own, an item
+in the feed and an entry in the sitemap. No route is registered by hand and no
+code changes. The instructions for whoever writes the next one are in
+`src/content/journal/README.md`, written for someone who does not read code.
+
+- **The collection** is `src/content.config.ts`: title, excerpt and date are
+  required; reading time, tags, a cover, a Substack URL and `draft` are not.
+  `README.md` is excluded from the glob, so the instructions are not a post.
+- **One list, four readers.** `publishedPosts()` in `src/lib/journal.ts` drops
+  drafts and sorts by date, newest first, and the listing, each post page, the
+  "next" rows and the feed all read from it. A draft therefore has no row, no
+  page, no feed item and no sitemap entry — verified by building with one.
+- **The row** (`JournalRow.astro`) is shared by the listing and the "next"
+  block, so the two cannot drift. The whole row is the link. On hover the title
+  steps right 12px and takes the accent while an arrow fades into the space it
+  left: the arrow is positioned in that gap rather than inserted, so nothing
+  reflows. Under `prefers-reduced-motion` the colour changes and nothing moves.
+- **Cover images never appear in a row.** `journal-preview.ts` fades one in
+  beside the cursor instead, 280px wide over 200ms, and only where there is a
+  fine pointer and motion is welcome — a phone never builds the element. A post
+  without a cover simply has nothing to show, and a journal where no post has
+  one behaves as though the script were not there.
+- **The reading column is the most important setting on a post page**: 68
+  characters, measured, at every width from 768 up. Body text is a step up from
+  the site default at a 1.7 line height, and the paragraph gap is deliberately
+  close to one line, because these pieces use consecutive single-line
+  paragraphs and they have to breathe rather than stack.
+- **Reading progress** is a 2px accent line along the bottom edge of the
+  header, on nothing: it had the header's own accent hairline as a track until
+  that line was removed on 9 October 2026, and it draws on the page itself
+  now. It measures the
+  article, not the document, so it is full when the last line of the piece has
+  been read rather than when the footer has gone by. Hidden in the markup and
+  revealed only by the script, so reduced motion gets nothing to undo.
+- **SEO.** Per-post title and description from the excerpt, `og:type=article`,
+  the cover as the share image when there is one and the site card when not,
+  and Article structured data with headline, datePublished and author. **When
+  `substackUrl` is set the canonical points at Substack**, so the two copies
+  are not read as competing; `og:url` still names this page. The feed is at
+  `/journal/rss.xml`, written by hand in `src/pages/journal/rss.xml.ts` rather
+  than through a dependency.
+
+### Still to come
+
+The first post, `why-fashion-month-still-matters.md`, has its frontmatter and
+its six section headings in place but **no body text yet** — it is marked
+`TODO(client)` in the file. Its `substackUrl` and `image` are empty for the
+same reason.
 
 ---
 

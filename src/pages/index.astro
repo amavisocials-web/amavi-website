@@ -12,7 +12,7 @@ import { TILES } from '../data/tiles';
 import { SERVICE_AREAS } from '../data/services';
 import { MEDIA } from '../data/media';
 import {
-  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, CONTACT_PATH, SOCIALS, TAGLINE, POSITIONING,
+  SITE_NAME, SITE_URL, SITE_DESCRIPTION, CONTACT_EMAIL, CONTACT_PATH, SOCIALS, TAGLINE,
   CREATOR_PATH,
 } from '../consts';
 
@@ -56,12 +56,10 @@ const schema = {
   description={SITE_DESCRIPTION}
   schema={schema}
 >
-  <Hero title={TAGLINE} intro={POSITIONING} subline={['Brands', 'Creators']}>
-    <Fragment slot="actions">
-      <a href={CONTACT_PATH} class="btn btn--primary">Work with us</a>{' '}
-      <a href={CREATOR_PATH} class="btn btn--secondary">Join the creator network</a>
-    </Fragment>
-  </Hero>
+  <Hero title={TAGLINE} ways={[
+    { label: 'Brands', href: CONTACT_PATH },
+    { label: 'Creators', href: CREATOR_PATH },
+  ]} />
 
   {/* ================= Partners ================= */}
   <section class="section section--tight partners" aria-label="Brands we work with">

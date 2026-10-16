@@ -18,6 +18,7 @@ const pages = [
   { label: 'Home', href: '/' },
   // Services, temporarily off the site (5 October 2026): see src/pages/_services.astro.
   { label: 'About', href: '/about/' },
+  { label: 'Journal', href: '/journal/' },
   { label: 'Creator Network', href: CREATOR_PATH },
   { label: 'Contact', href: CONTACT_PATH },
 ];
@@ -89,10 +90,18 @@ const pages = [
   }
   @media (min-width: 48em) {
     .footer-grid {
-      grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       column-gap: var(--space-l);
-      row-gap: var(--space-m);
+      row-gap: var(--space-l);
       align-items: start;
+    }
+  }
+  @media (min-width: 64em) {
+    .footer-grid {
+      /* Contact takes the widest of the three: it carries the longest line on
+         the page, and an address that breaks mid-word reads as a typo. */
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.8fr) minmax(0, 1.4fr) minmax(0, 0.8fr);
+      row-gap: var(--space-m);
     }
   }
 
@@ -102,7 +111,10 @@ const pages = [
   .footer-col ul { list-style: none; display: grid; gap: var(--space-2xs); }
   /* A little tighter where a pointer, not a thumb, does the choosing. */
   @media (min-width: 48em) { .footer-col ul { gap: var(--space-3xs); } }
-  .footer-col li { font-size: var(--text-sm); overflow-wrap: anywhere; }
+  .footer-col li { font-size: var(--text-sm); overflow-wrap: break-word; }
+  /* The addresses set a step down, so the longest of them holds one line
+     in its column at every width. */
+  .footer-col a[href^='mailto:'] { font-size: var(--text-xs); }
 
   /* Who the address under it is for. Set like the column headings above,
      a shade quieter, so the two pairs read as pairs rather than four

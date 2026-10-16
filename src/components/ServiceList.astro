@@ -49,7 +49,7 @@ const SH = `h${(level + 1) as 3 | 4}` as 'h3' | 'h4';
     const trigger = `${idPrefix}${area.id}-trigger`;
     const panel = `${idPrefix}${area.id}-panel`;
     return (
-      <li class="area" id={area.id} data-area data-open="true">
+      <li class="area" id={area.id} data-accordion-item data-open="true">
         <H class="area__heading">
           <button type="button" class="area__trigger" id={trigger}
                   aria-expanded="true" aria-controls={panel} data-trigger>

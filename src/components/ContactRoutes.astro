@@ -1,0 +1,208 @@
+---
+import { CONTACT_EMAIL, BRAND_ENQUIRY_MAILTO, CREATOR_PATH } from '../consts';
+
+/**
+ * Get in touch, as two routes: one question each, opening in place.
+ *
+ * The page asks who you are before it tells you anything, and only one answer
+ * is ever on screen: opening one route closes the other. That separation is
+ * the point, so the two never compete.
+ *
+ * A route opens onto one card and one way in. It carried three until 6 October
+ * 2026 — a button, the same address again as text under it, and a photograph
+ * cropped to a strip — which made the panel look like a landing page and left
+ * the reader choosing between two identical routes. The address a brand needs
+ * is the button's own `mailto:`, and it is in the footer of every page.
+ *
+ * Each row is as tall as its contents: space above and below the question, and
+ * whatever the open card adds. Rules between the rows carry the structure, and
+ * hovering a closed row tints it rather than filling it.
+ *
+ * Built on the same accordion as the practice areas
+ * (src/scripts/service-accordions.ts): [data-accordion] on the list,
+ * [data-accordion-item] on each row, [data-trigger] and [data-panel] inside.
+ * The script marks the list ready, and only then does the CSS below collapse
+ * anything, so a page whose script never runs shows both routes open rather
+ * than two words and no way through.
+ *
+ * Each trigger is a real button inside its heading, so Enter and Space toggle
+ * and Tab moves between the two. A closed panel is `inert`: its link leaves
+ * the tab order rather than sitting invisible but reachable. A closed row is
+ * clickable across its whole width, by an overlay on the button that is only
+ * there while it is closed, so an open route's own link stays clickable.
+ */
+const ROUTES = [
+  {
+    id: 'brand',
+    question: 'Brand?',
+    body: 'Tell us what you sell and who you want in front of it.',
+    note: `Opens an email to ${CONTACT_EMAIL}, with a few prompts already in it.`,
+    cta: 'Email us',
+    href: BRAND_ENQUIRY_MAILTO,
+    style: 'btn--primary',
+  },
+  {
+    id: 'creator',
+    question: 'Creator?',
+    body: 'One application puts you in front of every brand we work with. We come to you when a brief fits.',
+    note: 'Six short steps, and nothing to send us afterwards.',
+    cta: 'Join the Creator Network',
+    href: CREATOR_PATH,
+    style: 'btn--secondary',
+  },
+] as const;
+---
+
+<div class="routes" data-accordion>
+  {ROUTES.map((route) => (
+    <div class="route" data-accordion-item data-open="true">
+      <h2 class="route__heading">
+        <button type="button" class="route__trigger" id={`route-${route.id}-trigger`}
+                aria-expanded="true" aria-controls={`route-${route.id}-panel`} data-trigger>
+          <span class="route__question">{route.question}</span>
+          {/* A plus that becomes a minus: the upright stroke turns flat onto
+              the other one, over the same time the row takes to open. */}
+          <span class="route__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.5"
+                    vector-effect="non-scaling-stroke" />
+              <line class="route__mark-bar" x1="12" y1="2" x2="12" y2="22" stroke="currentColor"
+                    stroke-width="1.5" vector-effect="non-scaling-stroke" />
+            </svg>
+          </span>
+        </button>
+      </h2>
+
+      <div class="route__panel" id={`route-${route.id}-panel`} role="region"
+           aria-labelledby={`route-${route.id}-trigger`} data-panel>
+        <div class="route__inner">
+          <div class="route__card">
+            <p class="route__text">{route.body}</p>
+            <a class:list={['btn', route.style, 'route__cta']} href={route.href}>{route.cta}</a>
+            <p class="route__note">{route.note}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  import '../scripts/service-accordions';
+</script>
+
+<style>
+  /* ---- The pair ---------------------------------------------------------- */
+  /* Rules, not blocks: one line between the two routes, and the column they
+     sit in closes them off at either end. */
+  .route { position: relative; min-width: 0; overflow: hidden; }
+  .route + .route { border-top: var(--stroke) solid var(--line); }
+
+  /* ---- The question ------------------------------------------------------ */
+  .route__trigger {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-m);
+    width: 100%;
+    /* A row is a target before it is a line of type, and no taller than it
+       has to be to stay one. */
+    min-height: 4.5rem;
+    padding: var(--space-s) var(--space-s) var(--space-s) 0;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 250ms var(--ease);
+  }
+  .route__trigger:focus-visible { outline-offset: -6px; }
+
+  /* Closed, the whole row is the target, not just the words. Taken away once
+     the row is open, so its own link stays clickable. */
+  [data-accordion='ready'] .route[data-open='false'] .route__trigger::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .route__question {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-weight: 600;
+    /* The largest thing in this column and nothing more: about a third down
+       from where it started, so it leads the column instead of filling it. */
+    font-size: clamp(1.375rem, 0.9rem + 1.95vw, 2.25rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    /* It never breaks: the display face is set at 125% stretch, so "Creator?"
+       measures about 9.7x its own font size, which the size above allows for
+       down to a 320px screen. */
+    white-space: nowrap;
+    transition: color 250ms var(--ease);
+  }
+
+  /* An open route carries its question in the accent: you are in it. */
+  .route[data-open='true'] .route__question { color: var(--accent); }
+
+  /* ---- The mark at the far right ----------------------------------------- */
+  .route__mark { display: inline-flex; color: currentColor; }
+  .route__mark svg { width: clamp(1rem, 0.8rem + 0.8vw, 1.3rem); height: auto; }
+  .route__mark-bar {
+    transform-origin: 50% 50%;
+    transition: transform 400ms var(--ease);
+  }
+  .route[data-open='true'] .route__mark-bar { transform: rotate(90deg); }
+  .route[data-open='true'] .route__mark { color: var(--accent); }
+
+  /* ---- Hover and focus: the row fills ----------------------------------- */
+  /* The row takes the accent and its words turn white on it, 9.74:1 — the
+     same pairing as a primary button. */
+  [data-accordion='ready'] .route[data-open='false'] .route__trigger:hover,
+  [data-accordion='ready'] .route[data-open='false'] .route__trigger:focus-visible {
+    background: var(--accent);
+  }
+  [data-accordion='ready'] .route[data-open='false'] .route__trigger:hover .route__question,
+  [data-accordion='ready'] .route[data-open='false'] .route__trigger:hover .route__mark,
+  [data-accordion='ready'] .route[data-open='false'] .route__trigger:focus-visible .route__question,
+  [data-accordion='ready'] .route[data-open='false'] .route__trigger:focus-visible .route__mark {
+    color: var(--on-dark);
+  }
+
+  /* ---- The panel --------------------------------------------------------- */
+  /* 0fr to 1fr animates the panel's own height, and the inner box clips what
+     does not fit yet. Nothing collapses until the script marks the list
+     ready. */
+  .route__panel { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 400ms var(--ease); }
+  .route__inner { min-height: 0; overflow: hidden; }
+  [data-accordion='ready'] .route[data-open='false'] .route__panel { grid-template-rows: 0fr; }
+
+  /* One card, one way in: the line, the button, and what pressing it does. */
+  .route__card {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-s);
+    max-width: 44ch;
+    margin-bottom: var(--space-m);
+    padding: var(--space-m);
+    border: var(--stroke) solid var(--line);
+  }
+  .route__text { font-size: var(--text-lead); font-weight: var(--weight-secondary); text-wrap: pretty; }
+  .route__cta { min-height: 2.75rem; padding-block: 0.85em; }
+  .route__note { font-size: var(--text-sm); font-weight: var(--weight-secondary); opacity: 0.7; text-wrap: pretty; }
+
+  /* ---- Phone ------------------------------------------------------------- */
+  @media (max-width: 47.99em) {
+    .route__trigger { gap: var(--space-s); padding-right: 0; }
+    /* The button takes the width it has: a full-width target is easier to hit
+       than a centred one, and it is never under 44px tall. */
+    .route__card { justify-items: stretch; max-width: none; padding: var(--space-s); }
+    .route__cta { width: 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .route__trigger,
+    .route__panel,
+    .route__question,
+    .route__mark-bar { transition: none; }
+  }
+</style>

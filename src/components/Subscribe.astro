@@ -1,0 +1,148 @@
+---
+import { CONTACT_EMAIL } from '../consts';
+
+/**
+ * The subscribe block: the publication's one ask, on the journal landing page
+ * and at the foot of every post.
+ *
+ * One component, two placements, so the copy and the behaviour exist once.
+ *
+ * It is a real form first. The markup posts to Netlify Forms on its own —
+ * name, method, action and the hidden form-name input are what Netlify's
+ * build-time detection looks for — so with no JavaScript it still submits and
+ * the address is still captured. The script then takes it over to submit in
+ * place, which is the only reason the four states exist.
+ *
+ * TODO(client): where subscribers should end up is not decided. Netlify Forms
+ * is holding them in the meantime, and ENDPOINT below is the single place to
+ * change: point it at Mailchimp, Substack's own endpoint or anything else and
+ * nothing above or below needs touching. The submissions collected until then
+ * are exportable from the Netlify UI.
+ */
+const FORM_NAME = 'journal-subscribe';
+
+/** The one place the destination is decided. Empty posts to Netlify Forms. */
+const ENDPOINT = '';
+
+interface Props {
+  /** Heading level, so each page keeps a valid outline. */
+  level?: 2 | 3;
+}
+const { level = 2 } = Astro.props;
+const H = `h${level}` as 'h2' | 'h3';
+---
+
+<div class="subscribe" data-subscribe data-state="idle" data-endpoint={ENDPOINT || undefined}>
+  <div class="subscribe__words">
+    <H class="display display--md subscribe__heading">Get it in your inbox</H>
+    <p class="subscribe__line">
+      One piece a week on creator marketing, culture and the work. No pitches.
+    </p>
+  </div>
+
+  <form
+    class="subscribe__form"
+    name={FORM_NAME}
+    method="POST"
+    action="/journal/"
+    data-netlify="true"
+    netlify-honeypot="company_website"
+    data-subscribe-form
+  >
+    <input type="hidden" name="form-name" value={FORM_NAME} />
+    <p class="honeypot" aria-hidden="true">
+      <label>Leave this empty <input name="company_website" tabindex="-1" autocomplete="off" /></label>
+    </p>
+
+    <div class="subscribe__field">
+      <label class="visually-hidden" for="subscribe-email">Email address</label>
+      <input
+        class="subscribe__input"
+        id="subscribe-email"
+        type="email"
+        name="email"
+        required
+        autocomplete="email"
+        inputmode="email"
+        placeholder="you@company.com"
+        aria-describedby="subscribe-status"
+        data-subscribe-email
+      />
+    </div>
+
+    <button class="btn btn--primary subscribe__button" type="submit" data-subscribe-button>
+      <span data-subscribe-label>Subscribe</span>
+    </button>
+  </form>
+
+  {/* The form is replaced by this on success, and it carries the error and the
+      validation message otherwise. Polite, so it is read without cutting in. */}
+  <p class="subscribe__status" id="subscribe-status" role="status" aria-live="polite" data-subscribe-status></p>
+
+  <p class="subscribe__done" data-subscribe-done hidden>You&rsquo;re in. Look out for the next one.</p>
+</div>
+
+<script>
+  import '../scripts/subscribe';
+</script>
+
+<style>
+  .subscribe { display: grid; gap: var(--space-m); }
+  .subscribe__words { display: grid; gap: var(--space-2xs); }
+  .subscribe__line {
+    font-size: var(--text-lead);
+    font-weight: var(--weight-secondary);
+    max-width: 44ch;
+    opacity: 0.7;
+    text-wrap: pretty;
+  }
+
+  /* The field and the button on one line from 48em, stacked below it. */
+  .subscribe__form { display: grid; gap: var(--space-s); align-items: end; max-width: 34rem; }
+  @media (min-width: 48em) {
+    .subscribe__form { grid-template-columns: minmax(0, 1fr) auto; }
+  }
+
+  /* A rule under the words, not a box around them: the site's field, with
+     three of its four sides taken off. */
+  .subscribe__input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.6rem 0;
+    font: inherit;
+    font-size: 1rem;              /* ≥16px, or iOS zooms on focus */
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    border-bottom: var(--stroke) solid var(--line);
+    border-radius: 0;
+  }
+  .subscribe__input::placeholder { color: var(--ink); font-weight: var(--weight-secondary); opacity: 0.7; }
+  .subscribe__input:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
+  .subscribe__input[aria-invalid='true'] { border-bottom-width: var(--stroke-mark); }
+
+  .subscribe__button { justify-self: start; }
+  @media (max-width: 47.99em) { .subscribe__button { width: 100%; } }
+
+  /* In flight: plainly not available, and not pressable twice. */
+  .subscribe__button[disabled] { opacity: 0.55; cursor: default; }
+
+  .subscribe__status {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-secondary);
+    max-width: 52ch;
+    text-wrap: pretty;
+  }
+  .subscribe__status:empty { display: none; }
+
+  .subscribe__done {
+    font-size: var(--text-lead);
+    font-weight: var(--weight-secondary);
+    max-width: 44ch;
+  }
+  /* Only one of the two is ever present. */
+  .subscribe[data-state='done'] .subscribe__form,
+  .subscribe[data-state='done'] .subscribe__status { display: none; }
+</style>
