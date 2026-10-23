@@ -475,14 +475,19 @@ function enhance(form: HTMLFormElement) {
       body.append(key, typeof value === 'string' ? value : value.name);
     }
 
-    // The backup copy is sent alongside and never decides the outcome.
-    const backup = toNetlify('/', body).catch((reason) => {
-      console.error('[amavi] backup copy not sent to Netlify Forms', reason);
-    });
+    // With a Sheets endpoint, Netlify Forms gets a backup copy alongside that
+    // never decides the outcome. Without one, Netlify Forms is the only copy,
+    // as the README says, so its answer is the outcome. Until 23 October 2026
+    // a missing endpoint failed every application at the last step instead.
+    const backup = endpoint
+      ? toNetlify('/', body).catch((reason) => {
+          console.error('[amavi] backup copy not sent to Netlify Forms', reason);
+        })
+      : undefined;
 
     try {
-      if (!endpoint) throw new Error('PUBLIC_SHEETS_ENDPOINT is not set, so there is nowhere to send this.');
-      await toSheets(endpoint, body);
+      if (endpoint) await toSheets(endpoint, body);
+      else await toNetlify('/', body);
     } catch (reason) {
       console.error(`[amavi] creator application not sent. ${reasonFor(reason)}`, reason);
       if (failBox) {
@@ -500,7 +505,7 @@ function enhance(form: HTMLFormElement) {
       void backup;
     }
 
-    // Confirmed by the endpoint, and only then.
+    // Confirmed by whichever copy decides, and only then.
     setLabel('Sent');
     await new Promise((resolve) => window.setTimeout(resolve, 450));
     form.hidden = true;
