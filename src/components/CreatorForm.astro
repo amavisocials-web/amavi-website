@@ -29,7 +29,18 @@ const sheetsEndpoint = import.meta.env.PUBLIC_SHEETS_ENDPOINT?.trim() || undefin
 if (!sheetsEndpoint) {
   console.warn('[amavi] PUBLIC_SHEETS_ENDPOINT is not set, so creator applications go to Netlify Forms only. See README → "Creator applications → Google Sheets".');
 } else if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(sheetsEndpoint)) {
-  throw new Error(`PUBLIC_SHEETS_ENDPOINT should be the Apps Script web app URL, https://script.google.com/…/exec — got "${sheetsEndpoint}".`);
+  /* What is wrong with the value, without printing it. Netlify masks it in
+     the build log, so on 23 October 2026 the whole clue was 'got "****"'. */
+  const clues = [
+    `it is ${sheetsEndpoint.length} characters long`,
+    /^PUBLIC_SHEETS_ENDPOINT\s*=/.test(sheetsEndpoint) &&
+      'it starts with the variable name and "=": paste only what comes after the =',
+    /^["'‘“]|["'’”]$/.test(sheetsEndpoint) && 'it has quote marks around it',
+    /\s/.test(sheetsEndpoint) && 'it has a space or line break inside it',
+    !sheetsEndpoint.includes('script.google.com') && 'it does not contain script.google.com',
+    !/\/exec["'’”]?$/.test(sheetsEndpoint) && 'it does not end in /exec',
+  ].filter(Boolean);
+  throw new Error(`PUBLIC_SHEETS_ENDPOINT should be the Apps Script web app URL, https://script.google.com/…/exec, and the value set is not: ${clues.join('; ')}.`);
 }
 
 /* TODO(client): the tiers are still to be supplied. These are the live form's
