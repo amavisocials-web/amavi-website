@@ -111,7 +111,7 @@ const schema = {
   {/* TODO(client): the partner is unnamed, and the three figures are the
       client's own wording as supplied. Confirm whether the healthcare partner
       may be named, and whether the figures can be published as they stand. */}
-  <Feature labelledby="case-heading">
+  <Feature labelledby="case-heading" textOnlyOnPhone>
     <p class="eyebrow">Case study</p>
     <h2 id="case-heading" class="display display--lg">
       Building an always-on creator strategy for our healthcare partner
@@ -130,8 +130,11 @@ const schema = {
       growth</strong>, and has since launched <strong>100+ creator partnerships</strong> with{' '}
       <strong>25 active partnerships currently running and fully managed by AMAVI Socials</strong>.
     </p>
-    {/* AMAVI's own studio wall: see src/data/media.ts. */}
-    <Frame slot="media" media={MEDIA.home.caseStudy} ratio="2/3" sizes="(min-width: 48em) 22rem, 60vw" />
+    {/* AMAVI's own studio wall: see src/data/media.ts. Tablet and up only:
+        since 23 October 2026 a phone gets the words alone, and does not
+        download the photograph. */}
+    <Frame slot="media" media={MEDIA.home.caseStudy} ratio="2/3" sizes="(min-width: 48em) 22rem, 60vw"
+           skipWhen="(max-width: 47.99em)" />
   </Feature>
 
   {/* ================= How we work ================= */}

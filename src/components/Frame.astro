@@ -16,15 +16,32 @@ interface Props {
   ratio: string;
   /** For the browser's choice of file size; describe the rendered width. */
   sizes?: string;
+  /** A media query under which the photograph is never shown, because the
+      page hides it there with display: none. Where it matches, the browser is
+      handed a blank instead of the file. Lazy loading already leaves a hidden
+      image alone; this also covers JavaScript being off, when lazy loading
+      is switched off and every image loads at once. */
+  skipWhen?: string;
   class?: string;
 }
-const { media, ratio, sizes = '(min-width: 64em) 22rem, 60vw', class: className } = Astro.props;
+const { media, ratio, sizes = '(min-width: 64em) 22rem, 60vw', skipWhen, class: className } = Astro.props;
+
+/** A transparent 1x1 GIF, inline: choosing it costs no request. */
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 ---
 
 {media ? (
   <div class:list={['frame', className]} style={`aspect-ratio:${ratio}`}>
-    <Image src={media.image} alt={media.alt} widths={[360, 540, 720, 1000]} sizes={sizes}
-           loading="lazy" decoding="async" class="frame__img" />
+    {skipWhen ? (
+      <picture>
+        <source media={skipWhen} srcset={BLANK} />
+        <Image src={media.image} alt={media.alt} widths={[360, 540, 720, 1000]} sizes={sizes}
+               loading="lazy" decoding="async" class="frame__img" />
+      </picture>
+    ) : (
+      <Image src={media.image} alt={media.alt} widths={[360, 540, 720, 1000]} sizes={sizes}
+             loading="lazy" decoding="async" class="frame__img" />
+    )}
   </div>
 ) : (
   <Placeholder kind="image" ratio={ratio} class={className} />
@@ -37,4 +54,7 @@ const { media, ratio, sizes = '(min-width: 64em) 22rem, 60vw', class: className 
     border-radius: var(--radius-frame);
   }
   .frame__img { width: 100%; height: 100%; object-fit: cover; }
+  /* No box of its own, so the image sits in the frame exactly as it does
+     without one. */
+  .frame picture { display: contents; }
 </style>

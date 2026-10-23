@@ -11,12 +11,15 @@ interface Props {
   reverse?: boolean;
   /** A hairline and a section's space above: for anything but the first. */
   ruled?: boolean;
+  /** Below 48em the text alone, full width: the media is display: none there.
+      Give an image inside it the Frame's `skipWhen` too, so it is not fetched. */
+  textOnlyOnPhone?: boolean;
   labelledby?: string;
 }
-const { reverse = false, ruled = false, labelledby } = Astro.props;
+const { reverse = false, ruled = false, textOnlyOnPhone = false, labelledby } = Astro.props;
 ---
 
-<section class:list={['section', 'feature', { 'section--ruled': ruled, 'feature--reverse': reverse }]}
+<section class:list={['section', 'feature', { 'section--ruled': ruled, 'feature--reverse': reverse, 'feature--text-only': textOnlyOnPhone }]}
          aria-labelledby={labelledby}>
   <div class="container media-row feature__grid">
     <div class="feature__text"><slot /></div>
@@ -41,6 +44,21 @@ const { reverse = false, ruled = false, labelledby } = Astro.props;
     .feature--reverse .feature__media { order: -1; justify-self: start; }
     /* The reversed block closes on its proof line, low on the right. */
     .feature--reverse .feature__text { align-self: end; }
+  }
+
+  /* textOnlyOnPhone: the media only from 48em. display: none rather than
+     hidden or transparent, so below that it holds no space and a lazy image
+     inside it is never requested; the grid is left with one item, so no gap
+     stays where the media was. Hidden first and shown from 48em, not the
+     other way round: the build writes these queries in range syntax, which
+     iOS before 16.4 cannot read, and a browser that skips the query should
+     land on no media at all rather than on a box the Frame has blanked. */
+  .feature--text-only .feature__media { display: none; }
+  @media (min-width: 48em) {
+    .feature--text-only .feature__media { display: block; }
+  }
+  @media (max-width: 47.99em) {
+    .feature--text-only .feature__text { max-width: none; }
   }
 
   /* Body copy with its key phrases in bold. */
