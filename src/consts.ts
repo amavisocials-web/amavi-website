@@ -4,7 +4,19 @@
  */
 
 export const SITE_NAME = 'AMAVI Socials';
-export const SITE_URL = 'https://www.amavisocials.co';
+
+/**
+ * The live domain. Changed from amavisocials.**co** to .**com** on 23 October
+ * 2026: .com is the domain the client owns and Netlify serves, and .co was the
+ * old Vercel app. Everything absolute reads from here — canonical links, Open
+ * Graph, the RSS feed and the structured data — and `site` in astro.config.mjs
+ * has to match it, because that is what the sitemap is built from.
+ *
+ * Note the two further mentions of .co further down this file and in the
+ * README: those are deliberate. They record where the **old** form lived and
+ * should not be changed with this one.
+ */
+export const SITE_URL = 'https://www.amavisocials.com';
 
 /**
  * Positioning, used throughout the copy: AMAVI is a creator-led marketing and

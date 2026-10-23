@@ -1037,8 +1037,9 @@ URL — see "Creator applications → Google Sheets".
 
 ### Before launch
 
-The site is configured for `https://www.amavisocials.co`, so canonical URLs and
-the sitemap are right at launch. Review it on the Netlify subdomain first.
+The site is configured for `https://www.amavisocials.com`, so canonical URLs
+and the sitemap are right at launch. It was `.co` until 23 October 2026; the
+`.co` mentions below refer to the old Vercel app and are not the live domain. Review it on the Netlify subdomain first.
 
 1. **`public/robots.txt`** — currently `Disallow: /`. The production version is
    commented out directly beneath; swapping them is the launch step.

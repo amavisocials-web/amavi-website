@@ -1,0 +1,86 @@
+# Continuous integration: does this commit build?
+#
+# Runs on every push to any branch and on every pull request. It does exactly
+# what Netlify does on a deploy — `npm ci` then `npm run build` on Node 22 —
+# so a green tick here means a deploy will build too, and a red one means it
+# will not. **Nothing here deploys.**
+#
+# Publishing is Netlify's, by hand. Netlify builds every push from GitHub but
+# auto-publishing is off (Build & deploy → "Stop auto publishing"), so a build
+# only goes live when someone presses "Publish deploy" in the Netlify UI. That
+# is the one-click deploy, and it is why there is no deploy workflow here: a
+# GitHub Action publishing as well would be a second route to production that
+# has to be kept in step with this one, and it would cost the deploy previews
+# Netlify gives pull requests for free.
+#
+# What this adds on top of Netlify's own build is a status check on pull
+# requests before anything is merged, and `npm ci`, which fails if the lockfile
+# and package.json have drifted apart.
+#
+# Node 22 is pinned the same way in three places: .nvmrc, netlify.toml's
+# NODE_VERSION, and here. They have to agree or CI stops predicting Netlify.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# A second push to the same branch cancels the first: no point finishing a run
+# for a commit that has already been replaced.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # `npm ci` and not `npm install`: it installs exactly what
+      # package-lock.json says and fails outright if the lockfile and
+      # package.json have drifted apart, which is a class of broken deploy
+      # worth catching here rather than on Netlify.
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # A build can exit 0 and still have produced nothing useful. These are
+      # the pages that must exist for the site to be a site.
+      - name: Check the output
+        run: |
+          set -euo pipefail
+          for page in \
+            dist/index.html \
+            dist/about/index.html \
+            dist/contact/index.html \
+            dist/culture/index.html \
+            dist/become-a-creator/index.html \
+            dist/privacy/index.html \
+            dist/sitemap-index.xml \
+            dist/culture/rss.xml
+          do
+            test -s "$page" || { echo "::error::missing or empty: $page"; exit 1; }
+          done
+          echo "All expected pages present."
+
+      # Kept for 7 days so a failed deploy can be compared against what CI
+      # actually produced.
+      - name: Keep the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist
+          retention-days: 7

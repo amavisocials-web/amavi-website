@@ -1,14 +1,16 @@
-# ── PRE-LAUNCH ────────────────────────────────────────────────────────────
-# Active while the site is under review on the Netlify subdomain. Keeps the
-# preview out of search results so it never competes with the live domain.
-User-agent: *
-Disallow: /
-
 # ── PRODUCTION ────────────────────────────────────────────────────────────
-# LAUNCH STEP: delete the two lines above and uncomment the three below, at
-# the same time as the custom domain is connected. Nothing else changes.
+# Live from 23 October 2026, at the same time as the project was made public.
 #
-# User-agent: *
-# Allow: /
+# The pre-launch block (User-agent: * / Disallow: /) is in git if it is ever
+# needed again — restore it before putting the site back behind review.
 #
-# Sitemap: https://www.amavisocials.co/sitemap-index.xml
+# Note on the Netlify subdomain: until amavisocials.com resolves, this site is
+# also reachable at transcendent-pony-baa9ad.netlify.app and crawlable. Every
+# page canonicals to https://www.amavisocials.com/..., so a crawl of the
+# subdomain consolidates to the real address rather than competing with it,
+# and once the custom domain is set as primary Netlify redirects the subdomain
+# to it permanently.
+User-agent: *
+Allow: /
+
+Sitemap: https://www.amavisocials.com/sitemap-index.xml

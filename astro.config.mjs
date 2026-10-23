@@ -11,7 +11,7 @@ import { CREATOR_PATH, CONTACT_PATH } from './src/consts.ts';
 const REDIRECTED = ['/creators', '/services', '/journal'];
 
 export default defineConfig({
-  site: 'https://www.amavisocials.co',
+  site: 'https://www.amavisocials.com',
   output: 'static',
   integrations: [
     sitemap({
