@@ -1041,8 +1041,9 @@ The site is configured for `https://www.amavisocials.com`, so canonical URLs
 and the sitemap are right at launch. It was `.co` until 23 October 2026; the
 `.co` mentions below refer to the old Vercel app and are not the live domain. Review it on the Netlify subdomain first.
 
-1. **`public/robots.txt`** — currently `Disallow: /`. The production version is
-   commented out directly beneath; swapping them is the launch step.
+1. **`public/robots.txt`** — done on 23 October 2026: it allows crawling. The
+   pre-launch `Disallow: /` is in git history if the site ever goes back
+   behind review.
 2. **Export the old creator form's submissions.** The previous form (a Vercel
    app on `www.amavisocials.co`) saved applications through its own
    `/api/submit`. New ones arrive in the Google Sheet (and Netlify Forms).

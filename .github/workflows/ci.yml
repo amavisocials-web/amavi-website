@@ -5,13 +5,14 @@
 # so a green tick here means a deploy will build too, and a red one means it
 # will not. **Nothing here deploys.**
 #
-# Publishing is Netlify's, by hand. Netlify builds every push from GitHub but
-# auto-publishing is off (Build & deploy → "Stop auto publishing"), so a build
-# only goes live when someone presses "Publish deploy" in the Netlify UI. That
-# is the one-click deploy, and it is why there is no deploy workflow here: a
-# GitHub Action publishing as well would be a second route to production that
-# has to be kept in step with this one, and it would cost the deploy previews
-# Netlify gives pull requests for free.
+# Publishing is Netlify's. **Every push to main goes live on its own**, usually
+# within a minute: auto-publishing was left on when the site launched on
+# 23 October 2026. To publish by hand instead, turn it off under Deploys →
+# "Stop auto publishing"; builds then wait for "Publish deploy" in the Netlify
+# UI. Either way there is no deploy workflow here: a GitHub Action publishing
+# as well would be a second route to production that has to be kept in step
+# with this one, and it would cost the deploy previews Netlify gives pull
+# requests for free.
 #
 # What this adds on top of Netlify's own build is a status check on pull
 # requests before anything is merged, and `npm ci`, which fails if the lockfile

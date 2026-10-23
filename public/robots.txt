@@ -4,12 +4,10 @@
 # The pre-launch block (User-agent: * / Disallow: /) is in git if it is ever
 # needed again — restore it before putting the site back behind review.
 #
-# Note on the Netlify subdomain: until amavisocials.com resolves, this site is
-# also reachable at transcendent-pony-baa9ad.netlify.app and crawlable. Every
-# page canonicals to https://www.amavisocials.com/..., so a crawl of the
-# subdomain consolidates to the real address rather than competing with it,
-# and once the custom domain is set as primary Netlify redirects the subdomain
-# to it permanently.
+# Note on the Netlify subdomain: the site is also served, with a 200 and not a
+# redirect, at transcendent-pony-baa9ad.netlify.app, and is crawlable there.
+# Every page canonicals to https://www.amavisocials.com/..., so a crawl of the
+# subdomain consolidates to the real address rather than competing with it.
 User-agent: *
 Allow: /
 
