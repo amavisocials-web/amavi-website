@@ -1,5 +1,14 @@
 ---
 /**
+ * TODO(client): **this policy does not yet name the data controller.** GDPR
+ * requires the registered legal entity, its company registration number and
+ * its registered address, and none of the three has been supplied. Five
+ * bracketed notes used to render on the page itself; on 23 October 2026, once
+ * the site went live on amavisocials.com, they were turned into the comments
+ * below so visitors stopped reading them. **That hid them, it did not answer
+ * them** — the controller identity is still missing and the policy is still
+ * incomplete until it is filled in at the marked place below.
+ *
  * TODO(client): accurate to how the site now works — brands email, creators
  * apply through the form on /become-a-creator/, which saves each application
  * to a Google Sheet, with a backup copy in Netlify Forms.
@@ -41,10 +50,11 @@ const updated = 'September 2026';
           purposes of the General Data Protection Regulation (GDPR) we are the data
           controller for the information described below.
         </p>
-        <p class="policy__todo">
-          [TODO(client): insert the registered legal entity name, company registration
-          number and registered address. A published policy needs all three.]
-        </p>
+        {/*
+            TODO(client): insert the registered legal entity name, company
+            registration number and registered address. A published policy needs
+            all three.
+        */}
         <p>
           You can reach us about anything in this policy at{' '}
           <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
@@ -91,10 +101,10 @@ const updated = 'September 2026';
           we can come to you when something fits, potentially years after you sign up.
           You can ask us to delete your details at any time.
         </p>
-        <p class="policy__todo">
-          [TODO(client): if you want a fixed retention period instead, for example
-          reviewing creator records every 24 months, state it here.]
-        </p>
+        {/*
+            TODO(client): if you want a fixed retention period instead, for example
+            reviewing creator records every 24 months, state it here.
+        */}
 
         <h2>Who we share it with</h2>
         <ul>
@@ -113,32 +123,33 @@ const updated = 'September 2026';
             standard request logs, such as IP addresses, to serve pages.
           </li>
         </ul>
-        <p class="policy__todo">
-          [TODO(client): confirm the applications spreadsheet, and the mailbox the
-          notification emails go to, live in AMAVI’s Google Workspace account rather than
-          a personal Google account, and name any further tool applications are moved on
-          to, such as a database or CRM, here too.]
-        </p>
+        {/*
+            TODO(client): confirm the applications spreadsheet, and the mailbox the
+            notification emails go to, live in AMAVI’s Google Workspace account
+            rather than a personal Google account, and name any further tool
+            applications are moved on to, such as a database or CRM, here too.
+        */}
         <p>
           We do not sell personal data, and we do not share it with anyone else for their
           own marketing purposes.
         </p>
-        <p class="policy__todo">
-          [TODO(client): if an analytics tool, CRM or email platform is added, list it
-          here. If a tool transfers data outside the EEA, that transfer and its safeguard
-          must be named.]
-        </p>
+        {/*
+            TODO(client): if an analytics tool, CRM or email platform is added,
+            list it here. If a tool transfers data outside the EEA, that transfer
+            and its safeguard must be named.
+        */}
 
         <h2>Cookies</h2>
         <p>
           This site sets no cookies of its own and uses no advertising or tracking
           cookies. Because nothing non-essential is set, no cookie banner is shown.
         </p>
-        <p class="policy__todo">
-          [TODO(client): analytics has not been added yet. If GA4 is chosen it sets
-          cookies and a consent banner becomes legally required before it loads. A
-          cookieless tool such as Plausible would not change this section.]
-        </p>
+        {/*
+            TODO(client): analytics has not been added yet. If GA4 is chosen it
+            sets cookies and a consent banner becomes legally required before it
+            loads. A cookieless tool such as Plausible would not change this
+            section.
+        */}
 
         <h2>Your rights</h2>
         <p>Under GDPR you have the right to:</p>
@@ -160,13 +171,13 @@ const updated = 'September 2026';
           one month.
         </p>
 
-        <h2>Complaints</h2>
-        <p>
-          If you believe we have handled your data improperly, you can complain to the
-          Irish Data Protection Commission at{' '}
-          <a href="https://www.dataprotection.ie" target="_blank" rel="noopener noreferrer">dataprotection.ie</a>.
-          We would rather you came to us first so we can put it right.
-        </p>
+        {/* TODO(client): the Complaints section was removed on request on 23
+            October 2026. It named the Irish Data Protection Commission. GDPR
+            (Article 13(2)(d)) requires a privacy notice to tell people they
+            have the right to complain to a supervisory authority, so the policy
+            now lacks a required element. If the Irish DPC was simply the wrong
+            authority for the company, the fix is to name the right one, or say
+            "your local data protection authority", rather than leave it out. */}
 
         <h2>Changes to this policy</h2>
         <p>
@@ -233,11 +244,4 @@ const updated = 'September 2026';
 
   /* Visible on purpose: these are unresolved and must not ship unnoticed.
      A black outline and heavier type mark them, not a colour. */
-  .policy__todo {
-    margin-top: var(--space-s);
-    padding: var(--space-s) var(--space-m);
-    border: var(--stroke) solid var(--line);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-strong);
-  }
 </style>

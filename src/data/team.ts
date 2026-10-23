@@ -15,12 +15,17 @@ import veneraBulliqi from '../assets/team/venera-bulliqi.jpg';
  * Each portrait is cut to 4:3 from the supplied frame at 1400x1050, well
  * above the 560px the card asks for at its largest.
  *
- * The names were matched to the faces by the client on 23 October 2026. They
- * had first been guessed from the order the pictures arrived in, which put
- * Elda and Venera the wrong way round; the two files were swapped on disk
- * rather than crossing the imports, so each filename still names the person
- * in it. The alt text swapped with them, because it describes what each of
- * them is wearing.
+ * **Each person imports the file with their own name, and that file is their
+ * photograph.** Keep it that way: to move a picture to someone else, rename
+ * the file, do not cross the imports.
+ *
+ * This is written down because Elda and Venera were swapped twice on 23
+ * October 2026 — once by renaming the files and once by crossing the `photo:`
+ * references below — and the two swaps cancelled out, putting each of them
+ * back on the other's card. Checked against the pictures themselves:
+ * elda-ajvazi.jpg is the blonde portrait in a black blazer over a white top,
+ * venera-bulliqi.jpg is the portrait in a navy blazer with arms folded. The
+ * alt text describes what each is wearing, so it has to move with them.
  */
 export interface TeamMember {
   /** As it should read on the page. Set in capitals by the stylesheet. */
@@ -49,13 +54,13 @@ export const TEAM: TeamMember[] = [
   {
     name: 'Elda Ajvazi',
     role: 'Content Direction',
-    photo: veneraBulliqi,
-    alt: 'Elda Ajvazi in a dark blazer, in front of the studio blinds',
+    photo: eldaAjvazi,
+    alt: 'Elda Ajvazi in a black blazer over a white top, in front of the studio blinds',
   },
   {
     name: 'Venera Bulliqi',
     role: 'Office Coordinator',
-    photo: eldaAjvazi,
-    alt: 'Venera Bulliqi in a dark blazer, in front of the studio blinds',
+    photo: veneraBulliqi,
+    alt: 'Venera Bulliqi, arms folded in a navy blazer, in front of the studio blinds',
   },
 ];
