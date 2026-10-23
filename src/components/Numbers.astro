@@ -305,6 +305,13 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
   @media (min-width: 64em) {
     .collage {
       display: grid;
+      /* 16px between the columns, matching the 16px between tiles inside one,
+         so the grid reads evenly. It was lost when the mobile marquee replaced
+         the old scroll row below — the base `.collage` rule carried it, and
+         the two columns had been touching since. The columns are `1fr`, so
+         they give the gap up out of their own width and the collage stays
+         578px overall rather than growing. */
+      gap: var(--space-s);
       grid-auto-flow: row;
       /* Two columns at a tablet-and-a-half, three once the split has room for
          them. The third column's tiles are hidden rather than unbuilt, so the
