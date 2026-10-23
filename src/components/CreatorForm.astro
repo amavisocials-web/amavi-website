@@ -528,9 +528,16 @@ const total = STEPS.length;
     display: flex;
     align-items: flex-start;
     transition: transform 480ms var(--ease);
+    /* The track is as tall as the tallest step, and with overflow-y left
+       visible its empty lower part hangs over Back and Next. Being
+       transformed, it is drawn, and hit-tested, above the static nav, so on
+       a wide screen it took every click meant for Next: until 23 October 2026
+       Next did nothing on a laptop. Only the steps take the pointer now. (On
+       a phone the nav is sticky with a z-index, so it was always on top.) */
+    pointer-events: none;
   }
   [data-stepper='pending'] :global(.step),
-  [data-stepper='ready'] :global(.step) { flex: 0 0 100%; min-width: 0; }
+  [data-stepper='ready'] :global(.step) { flex: 0 0 100%; min-width: 0; pointer-events: auto; }
   /* Before the script has measured anything, only the first step has height. */
   [data-stepper='pending'] :global(.step + .step) { height: 0; visibility: hidden; }
   /* First layout and resize corrections happen without a slide. */
