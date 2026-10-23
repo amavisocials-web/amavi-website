@@ -31,9 +31,24 @@ interface Props {
    * it is shown.
    */
   loopFrom?: string;
+  /**
+   * Playback is decided elsewhere, not by src/scripts/loop-videos.ts. That
+   * script plays every visible video; a caller that needs to cap how many play
+   * at once (the collage's phone row plays two) sets this and takes over.
+   */
+  managed?: boolean;
+  /**
+   * The HTML autoplay attribute, beside muted and playsinline: the set a phone
+   * browser lets start without a tap. It cannot start a download on its own,
+   * because the sources are only attached by the manager, whose play() call
+   * is what actually starts the video.
+   */
+  autoplay?: boolean;
+  /** 'none' by default. 'metadata' only where the brief asks for it. */
+  preload?: 'none' | 'metadata';
   class?: string;
 }
-const { src, poster, ratio = '2/3', note, loopFrom, class: className } = Astro.props;
+const { src, poster, ratio = '2/3', note, loopFrom, managed = false, autoplay = false, preload = 'none', class: className } = Astro.props;
 const files = videoFiles(src, poster);
 if (!files.playable) {
   console.warn(`[LoopVideo] TODO(client): video needed — no ${src}.mp4 or ${src}.webm in public/; showing "Add video".`);
@@ -42,8 +57,12 @@ if (!files.playable) {
 
 {files.playable ? (
   <div class:list={['loop-video', className]} style={`aspect-ratio:${ratio}`}>
-    <video muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"
-           data-loop data-poster={files.poster} data-loop-from={loopFrom}>
+    {/* `muted` is in the markup and not only set from script: Safari will not
+        autoplay a video that was muted after the fact. */}
+    <video muted loop playsinline preload={preload} autoplay={autoplay || undefined}
+           disablepictureinpicture aria-hidden="true"
+           data-loop data-loop-managed={managed ? 'true' : undefined}
+           data-poster={files.poster} data-loop-from={loopFrom}>
       {files.webm && <source data-src={files.webm} type="video/webm" />}
       {files.mp4 && <source data-src={files.mp4} type="video/mp4" />}
     </video>

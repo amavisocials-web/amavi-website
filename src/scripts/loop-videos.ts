@@ -18,7 +18,9 @@
  */
 import { reduceMotion as still } from './lib/motion';
 
-const videos = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]')];
+/* Managed videos are driven by their own script — the collage's phone row,
+   which caps how many play at once — and this one must not also start them. */
+const videos = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]:not([data-loop-managed])')];
 const visible = new Set<HTMLVideoElement>();
 
 function attachPoster(video: HTMLVideoElement) {

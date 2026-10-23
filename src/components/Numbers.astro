@@ -105,8 +105,10 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
             <div class="collage-row__run" aria-hidden={copy > 0 ? 'true' : undefined}>
               {run.map((tile) => (
                 <div class="collage-row__tile">
+                  {/* Played by src/scripts/collage-marquee.ts, two at most. */}
                   <LoopVideo src={tile.src} poster={tile.poster} ratio="9/16"
-                             loopFrom="(min-width: 64em)" class="collage-row__media" />
+                             managed autoplay preload="metadata"
+                             class="collage-row__media" />
                 </div>
               ))}
             </div>
