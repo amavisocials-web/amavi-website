@@ -1,5 +1,6 @@
 /**
- * AMAVI Socials — creator applications → Google Sheet + email
+ * AMAVI Socials — creator applications → Google Sheet + email,
+ * brand enquiries → email
  * ===========================================================
  *
  * A Google Apps Script web app. The /become-a-creator form POSTs each
@@ -9,6 +10,11 @@
  *      then one column per field, in the fixed order in COLUMNS below);
  *   2. emails NOTIFY_EMAIL a readable copy of the application;
  *   3. replies {"success":true}, or {"success":false,"error":"…"}.
+ *
+ * The /contact form POSTs brand enquiries here too (form-name
+ * "brand-enquiry"), since 23 October 2026: those are emailed to NOTIFY_EMAIL
+ * and not written to the sheet. See enquiry_ below. This replaced Netlify's
+ * form notifications, which needed a paid Netlify plan.
  *
  * The row comes first and the email second, each in its own try/catch: a
  * bounced or rate-limited email can never cost you the row, and neither can
@@ -32,8 +38,11 @@
  *   and Netlify would need the new one.
  */
 
-/** Where the notification goes. */
+/** Where the notifications go, for applications and enquiries alike. */
 var NOTIFY_EMAIL = 'partnerships@amavisocials.com';
+
+/** The contact form's form-name (src/components/BrandEnquiry.astro). */
+var ENQUIRY_FORM = 'brand-enquiry';
 
 /**
  * The creators database: "AMAVI creator applications". The id is the long
@@ -147,6 +156,10 @@ function doPost(e) {
     // fill it. Answer as if it worked, and store nothing.
     if (first_(params.company_website)) return reply_({ success: true });
 
+    // A brand enquiry from /contact is emailed, not stored. Everything else
+    // is a creator application, as it always was.
+    if (first_(params['form-name']) === ENQUIRY_FORM) return enquiry_(params);
+
     // The form requires these; a request without them didn't come from it.
     if (!first_(params.name) || !first_(params.email) || first_(params.consent) !== 'yes') {
       return reply_({ success: false, error: 'Missing name, email or consent.' });
@@ -202,12 +215,69 @@ function testApplication() {
   console.log(reply.getContent());
 }
 
+/**
+ * The same dry run for a brand enquiry: choose testEnquiry and press Run. It
+ * sends one email to NOTIFY_EMAIL, as the contact form would, and writes
+ * nothing to the sheet.
+ */
+function testEnquiry() {
+  var reply = doPost({
+    parameters: {
+      'form-name': [ENQUIRY_FORM],
+      name: ['Test Enquirer'],
+      email: ['test@example.com'],
+      message: ['This is a test enquiry from the Apps Script editor. Ignore it.'],
+    },
+  });
+  console.log(reply.getContent());
+}
+
 /** Opening the URL in a browser: a quick check that the deployment is live. */
 function doGet() {
   return reply_({
     success: true,
-    message: 'AMAVI creator applications endpoint. Applications are POSTed here by the website form.',
+    message: 'AMAVI form endpoint. Creator applications and brand enquiries are POSTed here by the website.',
   });
+}
+
+/**
+ * A brand enquiry: one email to NOTIFY_EMAIL, with Reply-To set to the
+ * enquirer, so answering is just Reply. Nothing goes in the sheet; Netlify
+ * Forms keeps the copy.
+ *
+ * Unlike an application, where the row is what matters and the email is a
+ * courtesy, here the email IS the delivery. So it is not swallowed: if it
+ * fails, the reply says so and the contact form shows its error, which gives
+ * the enquirer an address to write to instead.
+ */
+function enquiry_(params) {
+  var name = first_(params.name);
+  var email = first_(params.email);
+  // Trimmed and capped, but not clean_()ed: that guards sheet cells against
+  // formulas, and would put a stray apostrophe in front of "- we sell…".
+  var message = first_(params.message).slice(0, MAX_LENGTH);
+  if (!name || !email || !message) {
+    return reply_({ success: false, error: 'Missing name, email or message.' });
+  }
+
+  var lines = [['Name', name], ['Email', email], ['Message', message]];
+  var options = {
+    to: NOTIFY_EMAIL,
+    subject: 'New brand enquiry — ' + name,
+    body: lines.map(function (line) { return line[0] + ': ' + line[1]; }).join('\n'),
+    htmlBody: '<div style="font:14px/1.5 Helvetica,Arial,sans-serif">' +
+      lines.map(function (line) {
+        return '<p style="margin:0 0 6px"><strong>' + escape_(line[0]) + ':</strong> ' +
+          escape_(line[1]).replace(/\r?\n/g, '<br>') + '</p>';
+      }).join('\n') +
+      '</div>',
+  };
+  // Only an address that looks like one: a malformed Reply-To would make
+  // MailApp refuse the whole email.
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) options.replyTo = email;
+
+  MailApp.sendEmail(options);
+  return reply_({ success: true });
 }
 
 /** One writer at a time, so two applications at once can't collide. */

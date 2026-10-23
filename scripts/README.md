@@ -1,8 +1,11 @@
-# Creator applications → Google Sheet + email
+# Creator applications → Google Sheet + email, brand enquiries → email
 
 `google-sheets-handler.gs` is a Google Apps Script web app. The
 **Become a Creator** form POSTs each application to it; it appends one row to
 your creators database and emails a copy to **partnerships@amavisocials.com**.
+Since 23 October 2026 the **contact form** POSTs each brand enquiry to it too;
+those are emailed to the same address and not written to the sheet (see
+"Brand enquiries" below).
 
 Nothing here is deployed by the site's build. It is a one-off setup in Google,
 about ten minutes, then a URL pasted into Netlify.
@@ -16,9 +19,22 @@ about ten minutes, then a URL pasted into Netlify.
    costs you the application.
 3. At the same time the form POSTs to **Netlify Forms**, which keeps a backup
    copy of every application (Site configuration → Forms → creator-application).
-4. The applicant sees "Application received" only once one of the two has
-   confirmed it. If both fail, they see an error, everything they typed stays
-   on screen, and they're given partnerships@amavisocials.com to send it to instead.
+4. The applicant sees "Application received" only once the script has
+   confirmed it (or, with no script URL set, Netlify Forms). Otherwise they see
+   an error, everything they typed stays on screen, and they're given
+   partnerships@amavisocials.com to send it to instead.
+
+## Brand enquiries
+
+The contact form sends each enquiry the same way: to this script, with a copy
+to Netlify Forms (Forms → brand-enquiry). The script emails it to
+partnerships@amavisocials.com as *New brand enquiry — <name>*, with Reply-To
+set to the enquirer, so answering is just Reply. Nothing goes in the sheet.
+
+Here the email is the delivery, so a failed email is not swallowed: the form
+shows its error and gives the enquirer an address to write to instead. The
+script does this, rather than Netlify's own form notifications, because those
+needed a paid Netlify plan.
 
 ## Setup
 
@@ -102,6 +118,7 @@ is missing, the build warns and applications go to Netlify Forms only.
 row and sends one email exactly as a real application would, so you can see
 the sheet and the notification working before the site is deployed. The
 execution log prints `{"success":true}`. Delete the test row afterwards.
+**testEnquiry** does the same for a brand enquiry: one email, no row.
 
 **Then end to end:**
 
@@ -167,7 +184,8 @@ form is a small change — ask, and they'll fill themselves.
   deployment"** — it mints a different URL, and Netlify and `.env` would both
   need updating. Keep this repo's copy of the file in step with whatever is
   deployed.
-- **Where the email goes:** `NOTIFY_EMAIL`, at the top of the script.
+- **Where the emails go:** `NOTIFY_EMAIL`, at the top of the script, for
+  applications and enquiries alike.
 - **Adding a form field:** add a line to `COLUMNS` with the field's `name`
   attribute, then deploy a new version.
 - **Your own columns** (status, fee agreed, notes) are safe to add anywhere:
@@ -180,6 +198,7 @@ form is a small change — ask, and they'll fill themselves.
 ## A second safety net
 
 Netlify can email you whenever a backup copy arrives, which covers the case
-where the Apps Script is down: **Site configuration → Forms → Form
+where the Apps Script is down, though on AMAVI's plan in October 2026 form
+notifications needed a paid upgrade: **Site configuration → Forms → Form
 notifications → Add notification → Email notification**, form
 `creator-application`, to partnerships@amavisocials.com.
