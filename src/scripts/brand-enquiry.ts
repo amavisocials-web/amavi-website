@@ -5,12 +5,19 @@
  * Four states, held on the wrapper as `data-state`: idle, sending, done,
  * error. The stylesheet reads it, so the states are not described twice.
  *
- * **Success is never assumed.** `done` is set in exactly one place, after a
- * response that `res.ok` is true for. A non-2xx status, a network failure and
- * a timeout all land in the same branch and bring the form back with every
- * field still filled in, because nothing is cleared until success.
+ * Sent the same way as a creator application (src/scripts/lib/send.ts): to
+ * the Apps Script, which emails it to partnerships@, with a copy to Netlify
+ * Forms. Until 23 October 2026 it went to Netlify Forms alone, whose email
+ * notifications need a paid plan, so nobody was told an enquiry had arrived.
+ *
+ * **Success is never assumed.** `done` is set in exactly one place, after the
+ * copy that decides has confirmed it: the script's {"success":true}, meaning
+ * the email went, or Netlify's 2xx when no script URL is set. A refusal, a
+ * non-2xx, a network failure and a timeout all land in the same branch and
+ * bring the form back with every field still filled in, because nothing is
+ * cleared until success.
  */
-const TIMEOUT_MS = 15000;
+import { deliver } from './lib/send';
 
 const root = document.querySelector<HTMLElement>('[data-enquiry]');
 const form = document.querySelector<HTMLFormElement>('[data-enquiry-form]');
@@ -62,36 +69,22 @@ if (root && form && button && label && status && done) {
     setState('sending');
 
     const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
-      /* To "/", not the page path: Netlify's form handling takes a POST to the
-         site root with the form-name in the body, and that is the documented
-         route for submitting by fetch. The form's own `action` still points at
-         /contact/ for the no-JavaScript fallback. */
-      const res = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
-        signal: controller.signal,
-      });
-
-      /* The only place `done` is set, and only for a response the browser
-         itself calls ok. A 404 from a form Netlify never registered, a 500,
-         anything else: all of it falls through to the catch below. */
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      /* The only place `done` is set. The form's own `action` still points at
+         /contact/ for the no-JavaScript fallback, which reaches Netlify Forms
+         but emails nobody. */
+      await deliver(body, form.dataset.sheetsEndpoint);
 
       setState('done');
       done.hidden = false;
       done.setAttribute('tabindex', '-1');
       done.focus();
-    } catch {
+    } catch (reason) {
       /* Fields are untouched, so the form returns exactly as it was left. */
+      console.error('[amavi] brand enquiry not sent.', reason);
       setState('error');
       status.innerHTML = ERROR;
-    } finally {
-      clearTimeout(timer);
     }
   });
 

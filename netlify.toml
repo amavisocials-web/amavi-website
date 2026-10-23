@@ -1,13 +1,14 @@
 # Netlify build configuration.
 #
-# Brands enquire through the form on /contact/. Creators apply at
-# /become-a-creator: each application goes to a Google Sheet through an Apps
-# Script web app, whose URL is the PUBLIC_SHEETS_ENDPOINT environment variable
-# (set it in the Netlify UI — see README), and Netlify Forms keeps a backup
-# copy of every one. Netlify only registers the forms (brand-enquiry,
-# creator-application, journal-subscribe) once form detection is enabled for
-# the project, under Forms in the Netlify UI, and the site has been deployed
-# again after that. Until then every submission to them is answered 404.
+# Both forms send to an Apps Script web app, whose URL is the
+# PUBLIC_SHEETS_ENDPOINT environment variable (set it in the Netlify UI — see
+# README): creator applications from /become-a-creator become a row in a
+# Google Sheet and an email, brand enquiries from /contact an email. Netlify
+# Forms keeps a copy of every one. Netlify only registers the forms
+# (brand-enquiry, creator-application, journal-subscribe) once form detection
+# is enabled for the project, under Forms in the Netlify UI, and the site has
+# been deployed again after that. Until then every submission to them is
+# answered 404.
 # The /creators and /services redirects are defined in astro.config.mjs, not
 # here, so each destination URL is only ever written down once.
 

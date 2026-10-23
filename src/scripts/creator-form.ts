@@ -29,10 +29,8 @@
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
-/** Long enough for a slow mobile connection; short enough not to hang. */
-const TIMEOUT_MS = 20_000;
-
 import { prefersReducedMotion as reducedMotion } from './lib/motion';
+import { deliver } from './lib/send';
 
 /* --- Field errors ------------------------------------------------------------ */
 
@@ -226,35 +224,7 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, t
 
 /* --- Sending ------------------------------------------------------------------ */
 
-async function post(url: string, body: URLSearchParams, confirm: (response: Response) => Promise<void>) {
-  const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), TIMEOUT_MS);
-  try {
-    // A form-encoded body is a CORS "simple request": no preflight, which an
-    // Apps Script web app could not answer.
-    const response = await fetch(url, { method: 'POST', body, signal: controller.signal });
-    await confirm(response);
-  } finally {
-    window.clearTimeout(timer);
-  }
-}
-
-const toSheets = (endpoint: string, body: URLSearchParams) =>
-  post(endpoint, body, async (response) => {
-    if (!response.ok) throw new Error(`Sheets responded ${response.status}`);
-    // {"success":true}. Deployments of the script from before the email
-    // notification replied {"result":"success"}, so both are accepted: an old
-    // deployment left in place keeps working until it is updated.
-    const reply = (await response.json()) as { success?: boolean; error?: string; result?: string; message?: string };
-    if (reply.success !== true && reply.result !== 'success') {
-      throw new Error(`Sheets refused: ${reply.error ?? reply.message ?? 'no reason given'}`);
-    }
-  });
-
-const toNetlify = (action: string, body: URLSearchParams) =>
-  post(action, body, async (response) => {
-    if (!response.ok) throw new Error(`Netlify responded ${response.status}`);
-  });
+// src/scripts/lib/send.ts, shared with the brand enquiry on /contact.
 
 /* --- The form ------------------------------------------------------------------ */
 
@@ -475,19 +445,8 @@ function enhance(form: HTMLFormElement) {
       body.append(key, typeof value === 'string' ? value : value.name);
     }
 
-    // With a Sheets endpoint, Netlify Forms gets a backup copy alongside that
-    // never decides the outcome. Without one, Netlify Forms is the only copy,
-    // as the README says, so its answer is the outcome. Until 23 October 2026
-    // a missing endpoint failed every application at the last step instead.
-    const backup = endpoint
-      ? toNetlify('/', body).catch((reason) => {
-          console.error('[amavi] backup copy not sent to Netlify Forms', reason);
-        })
-      : undefined;
-
     try {
-      if (endpoint) await toSheets(endpoint, body);
-      else await toNetlify('/', body);
+      await deliver(body, endpoint);
     } catch (reason) {
       console.error(`[amavi] creator application not sent. ${reasonFor(reason)}`, reason);
       if (failBox) {
@@ -501,8 +460,6 @@ function enhance(form: HTMLFormElement) {
       }
       if (back) back.disabled = false;
       return;
-    } finally {
-      void backup;
     }
 
     // Confirmed by whichever copy decides, and only then.

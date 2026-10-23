@@ -1,5 +1,6 @@
 ---
 import { CONTACT_EMAIL } from '../consts';
+import { SHEETS_ENDPOINT } from '../lib/sheets';
 
 /**
  * The brand enquiry form on /contact.
@@ -15,13 +16,16 @@ import { CONTACT_EMAIL } from '../consts';
  * with every field still filled in and the error line appears. Nothing
  * optimistic (src/scripts/brand-enquiry.ts).
  *
- * TODO(client): **no automatic reply goes to the enquirer.** Netlify notifies
- * AMAVI and that is all, so the two working days promised in the copy beside
- * this form are a person's job at the moment. An acknowledgement would hook in
- * at the success branch in src/scripts/brand-enquiry.ts, where `done` is set:
- * either a Netlify function posting to an email provider, or an autoresponder
- * configured on the form in the Netlify UI. It needs an account and a sending
- * domain, so it is not something this change could do.
+ * Each enquiry is emailed to partnerships@ by the same Apps Script that handles
+ * creator applications (scripts/google-sheets-handler.gs, URL in
+ * data-sheets-endpoint), with Reply-To set to the enquirer; Netlify Forms keeps
+ * a copy. Netlify's own form notifications need a paid plan.
+ *
+ * TODO(client): **no automatic reply goes to the enquirer.** AMAVI is
+ * emailed and that is all, so the two working days promised in the copy beside
+ * this form are a person's job at the moment. The cheapest place for an
+ * acknowledgement is now the script's enquiry_: a second MailApp.sendEmail to
+ * the enquirer, from AMAVI's own Google account. It needs wording from AMAVI.
  */
 const FORM_NAME = 'brand-enquiry';
 
@@ -39,6 +43,7 @@ const FIELDS = [
     action="/contact/"
     data-netlify="true"
     netlify-honeypot="company_website"
+    data-sheets-endpoint={SHEETS_ENDPOINT}
     data-enquiry-form
     novalidate
   >

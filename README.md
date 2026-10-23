@@ -511,7 +511,7 @@ Two settings worth knowing here:
 | Where | Setting | What it does |
 |---|---|---|
 | Netlify → Environment variables | `PUBLIC_SHEETS_ENDPOINT` | The Apps Script `/exec` URL. Missing, and applications go to Netlify Forms only |
-| `scripts/google-sheets-handler.gs` | `NOTIFY_EMAIL` | Where the notification email goes |
+| `scripts/google-sheets-handler.gs` | `NOTIFY_EMAIL` | Where creator applications and brand enquiries are emailed |
 
 The build checks the endpoint: if it isn't a `https://script.google.com/…/exec`
 URL, the deploy fails with a message saying so, and the previous deploy stays
