@@ -1,7 +1,7 @@
 /**
  * Every accordion on the site: the practice areas on the home page and
  * /services (src/components/ServiceList.astro), and the two routes on Get in
- * touch (src/components/ContactRoutes.astro). One list is one accordion, and
+ * touch. One list is one accordion, and
  * a page may carry several.
  *
  * The markup contract: [data-accordion] on the list, [data-accordion-item] on

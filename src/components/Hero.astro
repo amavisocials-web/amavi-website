@@ -318,6 +318,11 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     align-items: center;
     justify-content: center;
     gap: clamp(0.75rem, 0.4rem + 1.1vw, 1.5rem);
+    /* How far under the baseline the hover rule sits. 11px here measures as
+       9.4px of clear air under the letters at 1280 and 9.0px at 375: the
+       0.36em baseline estimate below runs about 1.6px shallow, and this takes
+       that up rather than pretending the estimate is exact. */
+    --way-underline-gap: 11px;
   }
   .hero__ways-rule {
     flex: none;
@@ -347,13 +352,20 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     transition: opacity var(--dur) var(--ease);
   }
 
-  /* The underline wipes in from the left rather than appearing whole. */
+  /* The underline wipes in from the left rather than appearing whole.
+     Positioned from the baseline, not from the bottom of the target. The word
+     is centred in a 44px box while the type itself runs from 15px to 22px
+     across the clamp, so a fixed offset off the bottom lands somewhere
+     different at every width — `bottom: 0.7em` put it within a pixel of the
+     baseline at 1280 and struck through the letters. `50% - 0.36em` is where
+     the baseline falls in a centred line, so taking the gap off that holds
+     the same clearance under the letters at every size. */
   .hero__way::after {
     content: '';
     position: absolute;
     left: 0.2em;
     right: 0.2em;
-    bottom: 0.7em;
+    bottom: calc(50% - 0.36em - var(--way-underline-gap));
     height: var(--stroke-mark, 2px);
     background: currentColor;
     transform: scaleX(0);

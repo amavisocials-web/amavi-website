@@ -11,6 +11,10 @@
  *   nothing plays. If the setting changes while the page is open, it follows.
  * - A video that isn't displayed (the hero's desktop cut on a phone, and the
  *   other way round) never intersects, so it never loads at all.
+ * - `data-loop-from` holds a media query a video waits for before it loads
+ *   anything but its poster, for a frame that is shown at every width but
+ *   should only play at some of them. It follows the query while the page is
+ *   open, so widening the window starts it.
  */
 import { reduceMotion as still } from './lib/motion';
 
@@ -21,8 +25,14 @@ function attachPoster(video: HTMLVideoElement) {
   if (video.dataset.poster && !video.getAttribute('poster')) video.poster = video.dataset.poster;
 }
 
+/** Whether this video's width gate, if it has one, is open. */
+function gateOpen(video: HTMLVideoElement) {
+  const query = video.dataset.loopFrom;
+  return !query || window.matchMedia(query).matches;
+}
+
 function attachSources(video: HTMLVideoElement) {
-  if (still.matches || video.dataset.sources === 'on') return;
+  if (still.matches || !gateOpen(video) || video.dataset.sources === 'on') return;
   video.dataset.sources = 'on';
   video.querySelectorAll<HTMLSourceElement>('source[data-src]').forEach((source) => {
     source.src = source.dataset.src!;
@@ -69,6 +79,18 @@ for (const video of videos) {
   video.dataset.observed = 'true';
   near.observe(video);
   onScreen.observe(video);
+}
+
+/* Crossing a gate's width. The `near` observer let go of these the first time
+   they came close, so without this nothing would ever attach them. */
+for (const query of new Set(videos.map((v) => v.dataset.loopFrom).filter(Boolean) as string[])) {
+  window.matchMedia(query).addEventListener('change', () => {
+    for (const video of videos) {
+      if (video.dataset.loopFrom !== query) continue;
+      if (video.getAttribute('poster')) attachSources(video);
+      sync(video);
+    }
+  });
 }
 
 still.addEventListener('change', () => {

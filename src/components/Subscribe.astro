@@ -2,8 +2,8 @@
 import { CONTACT_EMAIL } from '../consts';
 
 /**
- * The subscribe block: the publication's one ask, on the journal landing page
- * and at the foot of every post.
+ * The subscribe block: AMAVI Culture's one ask, at the foot of the /culture
+ * index, below the list of pieces.
  *
  * One component, two placements, so the copy and the behaviour exist once.
  *
@@ -19,6 +19,9 @@ import { CONTACT_EMAIL } from '../consts';
  * nothing above or below needs touching. The submissions collected until then
  * are exportable from the Netlify UI.
  */
+/* Not renamed with the section on 23 October 2026: this string is the key
+   Netlify files submissions under, and changing it would orphan every address
+   collected so far. */
 const FORM_NAME = 'journal-subscribe';
 
 /** The one place the destination is decided. Empty posts to Netlify Forms. */
@@ -33,8 +36,9 @@ const H = `h${level}` as 'h2' | 'h3';
 ---
 
 <div class="subscribe" data-subscribe data-state="idle" data-endpoint={ENDPOINT || undefined}>
+  <div class="subscribe__strip">
   <div class="subscribe__words">
-    <H class="display display--md subscribe__heading">Get it in your inbox</H>
+    <H class="subscribe__heading">Get it in your inbox</H>
     <p class="subscribe__line">
       One piece a week on creator marketing, culture and the work. No pitches.
     </p>
@@ -44,7 +48,7 @@ const H = `h${level}` as 'h2' | 'h3';
     class="subscribe__form"
     name={FORM_NAME}
     method="POST"
-    action="/journal/"
+    action="/culture/"
     data-netlify="true"
     netlify-honeypot="company_website"
     data-subscribe-form
@@ -74,6 +78,7 @@ const H = `h${level}` as 'h2' | 'h3';
       <span data-subscribe-label>Subscribe</span>
     </button>
   </form>
+  </div>
 
   {/* The form is replaced by this on success, and it carries the error and the
       validation message otherwise. Polite, so it is read without cutting in. */}
@@ -87,27 +92,63 @@ const H = `h${level}` as 'h2' | 'h3';
 </script>
 
 <style>
-  .subscribe { display: grid; gap: var(--space-m); }
-  .subscribe__words { display: grid; gap: var(--space-2xs); }
+  .subscribe { display: grid; gap: var(--space-s); }
+
+  /* A strip, not a second hero. Rewritten on 23 October 2026: the heading was
+     display--md, the same step as the page title, the block was centred while
+     everything above it is left-aligned, and it sat in a section's worth of
+     air. Now it is one row — words on the left, field and button on the
+     right, centred against each other — on the same left edge as the masthead
+     and the index. Nothing here is centred horizontally. */
+  .subscribe__strip { display: grid; gap: var(--space-m); }
+  @media (min-width: 64em) {
+    .subscribe__strip {
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: var(--space-2xl);
+      align-items: center;
+    }
+  }
+
+  .subscribe__words { display: grid; gap: var(--space-3xs, 0.25rem); }
+
+  /* Three steps off the old display--md, down to --text-xs, which is exactly
+     the site's small label (.eyebrow, .label). It has to sit clearly under the
+     article titles in the index above, and those are --display-sm, which
+     clamps to 13px on a phone: at --text-sm this heading matched them there
+     rather than sitting below them. 11px is under the 13px floor at every
+     width. */
+  .subscribe__heading {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  /* Capped so the break falls at the full stop after "the work." rather than
+     mid-sentence. */
   .subscribe__line {
-    font-size: var(--text-lead);
+    font-size: var(--text-base);
     font-weight: var(--weight-secondary);
-    max-width: 44ch;
+    line-height: 1.5;
+    max-width: 54ch;
     opacity: 0.7;
     text-wrap: pretty;
   }
 
-  /* The field and the button on one line from 48em, stacked below it. */
-  .subscribe__form { display: grid; gap: var(--space-s); align-items: end; max-width: 34rem; }
-  @media (min-width: 48em) {
-    .subscribe__form { grid-template-columns: minmax(0, 1fr) auto; }
+  /* The field and the button beside each other from 64em, stacked and full
+     width below it. */
+  .subscribe__form { display: grid; gap: var(--space-s); align-items: end; }
+  @media (min-width: 64em) {
+    .subscribe__form { grid-template-columns: 16rem auto; align-items: center; }
   }
 
   /* A rule under the words, not a box around them: the site's field, with
      three of its four sides taken off. */
   .subscribe__input {
     width: 100%;
-    min-height: 3rem;
+    min-height: 2.75rem;
     padding: 0.6rem 0;
     font: inherit;
     font-size: 1rem;              /* ≥16px, or iOS zooms on focus */
@@ -123,8 +164,10 @@ const H = `h${level}` as 'h2' | 'h3';
   .subscribe__input:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
   .subscribe__input[aria-invalid='true'] { border-bottom-width: var(--stroke-mark); }
 
-  .subscribe__button { justify-self: start; }
-  @media (max-width: 47.99em) { .subscribe__button { width: 100%; } }
+  /* Full width and a 44px target while it is stacked, which is every width
+     below 64em. */
+  .subscribe__button { justify-self: stretch; min-height: 2.75rem; }
+  @media (min-width: 64em) { .subscribe__button { justify-self: start; } }
 
   /* In flight: plainly not available, and not pressable twice. */
   .subscribe__button[disabled] { opacity: 0.55; cursor: default; }

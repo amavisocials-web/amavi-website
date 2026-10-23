@@ -1,6 +1,7 @@
 ---
 import LoopVideo from './LoopVideo.astro';
 import type { ContentTile } from '../data/tiles';
+import { CONTACT_EMAIL } from '../consts';
 
 /**
  * The figures, beside a collage of creator content.
@@ -10,45 +11,120 @@ import type { ContentTile } from '../data/tiles';
  * pictures on a phone.
  *
  * The collage is a slow vertical loop: the same idea as the band above the
- * footer, turned on its side. Two sub-columns, one climbing and one falling,
- * each holding its tiles twice and travelling exactly one set's height, so
- * the join can't be seen. Top and bottom are masked, so tiles arrive and
- * leave rather than being cut off. It stops while anyone hovers it or tabs
- * into it, runs slower on a tablet, and on a phone it doesn't run at all —
- * the tiles become one row that scrolls sideways. Under
- * prefers-reduced-motion nothing moves anywhere.
+ * footer, turned on its side. Two sub-columns from 64em, each holding its own
+ * run of tiles twice over and travelling exactly one run's height, so the join
+ * can't be seen. One falls while the other climbs, at its own speed, and each
+ * starts part-way up, so no two tiles share a baseline.
+ *
+ * **Two columns, by request on 23 October 2026**, back from the three that
+ * stood here for six days. Two makes each tile 281px at 1280 against the
+ * three-column 187px, so the speeds and the stagger were set again from the
+ * new set heights rather than carried over: the two columns are no longer the
+ * same height as each other, so equal durations would have run them at
+ * visibly different speeds. Four columns was asked for before that and
+ * measured at 132px, which was unreadable; the container caps at about 578px
+ * and does not widen past 1280.
+ *
+ * It stops while anyone hovers it or tabs into it.
+ *
+ * **Below 64em there are no columns at all.** The tiles become one row that
+ * is swiped: snapping, about 60% of the screen each so part of the next one
+ * always shows, scrolling inside its own box so the page never moves
+ * sideways, and showing stills alone — `loopFrom` keeps every video on its
+ * poster until 64em, so a phone decodes nothing. Under
+ * prefers-reduced-motion nothing moves anywhere and no video ever loads: the
+ * posters are all there is (src/scripts/loop-videos.ts).
  *
  * Everything in the text column comes from the page, through the default
  * slot: this file owns the split and the collage, not the words.
  */
 interface Props {
-  /** Four of them: two per sub-column. */
+  /** Every tile there is. The deal below spreads them across the columns. */
   tiles: ContentTile[];
   labelledby?: string;
 }
 const { tiles, labelledby } = Astro.props;
 
+/**
+ * Which tile goes where, by index into `tiles`.
+ *
+ * **Every clip appears exactly once.** There are five, so one column carries
+ * three and the other two — short of the five a column the brief asks for,
+ * and deliberately not padded out by dealing anything twice. Five more clips
+ * would fill both columns with nothing seen twice; see the TODO in
+ * src/data/tiles.ts.
+ *
+ * Written out rather than computed so the rule can be read off the page. The
+ * newest clips lead both columns, which puts new footage at the top.
+ */
+const DEAL = [
+  [0, 3, 2],
+  [1, 4],
+];
+
 /** Two ratios, so no two tiles in a column stand the same height. */
-const RATIOS = ['3/4', '9/16', '9/16', '3/4'];
-const shaped = tiles.slice(0, 4).map((tile, i) => ({ ...tile, ratio: RATIOS[i % RATIOS.length] }));
-const columns = [shaped.slice(0, 2), shaped.slice(2)];
+const RATIOS = ['3/4', '9/16', '9/16'];
+
+const columns = DEAL.map((column) =>
+  column.map((index, step) => ({
+    ...tiles[index % tiles.length],
+    ratio: RATIOS[step % RATIOS.length],
+  })),
+);
+
+/**
+ * The same clips as one flat run, for the marquee below 64em.
+ *
+ * The row is built separately rather than squeezed out of the columns above.
+ * Flattening them would have needed the sets reordered with `order` and two
+ * levels of `display: contents` to get the tiles into one flex line, and the
+ * duplicate run for the loop would have interleaved with the originals. Two
+ * purpose-built structures are plainer than one contorted into serving both.
+ *
+ * Neither costs the other anything: whichever is `display: none` at a given
+ * width never intersects, so its videos never load (src/scripts/loop-videos.ts).
+ */
+const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
 ---
 
 <section class="section numbers" aria-labelledby={labelledby}>
-  <div class="container numbers__grid">
+  <div class="container media-row numbers__grid">
     <div class="numbers__text">
       <slot />
     </div>
 
     {/* Decorative: the figures beside it are what the section says. */}
+
+    {/* Below 64em: one row drifting right to left, for ever. The clips are
+        laid out twice and the track travels exactly one run's width, so the
+        join cannot be seen. Everything that moves it is a transform. */}
+    <div class="collage-row" data-marquee>
+      <div class="collage-row__drag" data-marquee-drag>
+        <div class="collage-row__track" data-marquee-track>
+          {[0, 1].map((copy) => (
+            <div class="collage-row__run" aria-hidden={copy > 0 ? 'true' : undefined}>
+              {run.map((tile) => (
+                <div class="collage-row__tile">
+                  <LoopVideo src={tile.src} poster={tile.poster} ratio="9/16"
+                             loopFrom="(min-width: 64em)" class="collage-row__media" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
     <div class="collage">
       {columns.map((column, i) => (
-        <div class:list={['collage__column', i % 2 === 0 ? 'collage__column--up' : 'collage__column--down']}>
+        <div class:list={['collage__column', i % 2 === 0 ? 'collage__column--up' : 'collage__column--down']}
+             data-column={i + 1}>
           {[0, 1].map((copy) => (
             <div class="collage__set" aria-hidden={copy > 0 ? 'true' : undefined}>
               {column.map((tile) => (
                 <div class="collage__tile">
-                  <LoopVideo src={tile.src} poster={tile.poster} ratio={tile.ratio} class="collage__media" />
+                  <LoopVideo src={tile.src} poster={tile.poster} ratio={tile.ratio}
+                     loopFrom="(min-width: 64em)" class="collage__media" />
                 </div>
               ))}
             </div>
@@ -56,20 +132,61 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
         </div>
       ))}
     </div>
+
+    {/* Whose work this is. A note on the collage, not a credit on each tile:
+        the handles are not cleared yet (TODO in src/data/tiles.ts), and a
+        caption under every tile would fight the loop. */}
+    <p class="collage__note">
+      Content created by the creators we work with and shared with permission.
+      All rights remain with the original creators. To request removal, email{' '}
+      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+    </p>
   </div>
 </section>
 
-<style>
-  .numbers { --loop: 48s; overflow: clip; }
-  /* Slower on a tablet, where the collage sits under the text and is read
-     rather than glanced at. */
-  @media (min-width: 48em) and (max-width: 63.99em) { .numbers { --loop: 72s; } }
+<script>
+  import '../scripts/collage-marquee';
+</script>
 
-  .numbers__grid { display: grid; gap: var(--space-xl); }
+<style>
+  /* A speed per column, none of them a multiple of another, so the three
+     never fall into step: at 47, 59 and 67 seconds the pattern they make
+     together takes over an hour to come round. */
+  /* A duration each, set from that column's own height so the two travel at
+     about the same pixel speed: 1423px in 47s is 30.3px/s, 907px in 31s is
+     29.3px/s. Both are prime, so the pattern they make together comes round
+     once in 1457 seconds — twenty-four minutes — rather than settling into
+     step. Re-measure these if the deal or the ratios change. */
+  .numbers {
+    --loop-1: 47s;
+    --loop-2: 31s;
+    /* One value for the tiles and for the mask that clips them, so the two
+       cannot drift apart. */
+    --tile-radius: 1.5rem;
+    overflow: clip;
+  }
+  /* display, gap and the centring come from .media-row in global.css. Stacked,
+     the three items want less air between them than the shared --space-xl:
+     40px keeps the note attached to the collage it describes rather than
+     floating between the collage and the next section. */
+  .numbers__grid { row-gap: var(--space-l); }
+
   @media (min-width: 64em) {
-    .numbers__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-xl); row-gap: var(--space-2xl); align-items: center; }
-    /* Text first in the markup, collage first on the screen. */
-    .collage { order: -1; }
+    .numbers__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: var(--space-xl);
+      row-gap: 0;
+    }
+    /* Placed rather than ordered. The collage and the text share row 1, so it
+       is the **collage** that centres against the text and not a wrapper that
+       also contains the note: the note used to sit inside that wrapper, which
+       made the wrapper 646px against the text's 433px and left the collage
+       itself reading 51px high. The note now has a row of its own under the
+       collage, where it takes no part in the centring. Text is first in the
+       markup, so a phone reads the figures before the pictures. */
+    .collage { grid-column: 1; grid-row: 1; }
+    .numbers__text { grid-column: 2; grid-row: 1; }
+    .collage__note { grid-column: 1; grid-row: 2; margin-top: var(--space-l); }
   }
   @media (min-width: 80em) {
     .numbers__grid { grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); }
@@ -77,33 +194,123 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
 
   .numbers__text { display: grid; gap: var(--space-m); align-content: start; }
 
-  /* ---- The collage ------------------------------------------------------- */
-  /* A phone gets one row that scrolls, so four portrait tiles can't swallow
-     the screen — and nothing moves on its own. */
-  .collage {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(8rem, 44%);
-    gap: var(--space-s);
-    margin-inline: calc(var(--gutter) * -1);
-    padding: var(--space-2xs) var(--gutter);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
-    scrollbar-width: none;
+  /* The site's small print: the culture CTA's line sets the same three
+     values. 0.7 and not lower — 0.6 of #222021 misses AA at this size. */
+  /* Wide enough that it reads as a note and not a caption clamped to the
+     tiles, and far narrower than the --section-y below it, so it still
+     belongs to the collage rather than to whatever comes next. */
+  .collage__note {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-secondary);
+    line-height: 1.6;
+    max-width: 56ch;
+    opacity: 0.7;
+    text-wrap: pretty;
   }
-  .collage::-webkit-scrollbar { display: none; }
-  .collage__column,
-  .collage__set { display: contents; }
-  /* The second copy of each column exists only for the loop. */
-  .collage__set + .collage__set { display: none; }
-  .collage__tile { scroll-snap-align: start; border-radius: 1.25rem; overflow: hidden; }
-  .collage :global(.collage__media) { width: 100%; max-width: 100%; border-radius: inherit; }
+  .collage__note a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: var(--stroke);
+  }
+  .collage__note a:hover { color: var(--accent); }
 
-  @media (min-width: 48em) {
+  /* ---- The collage: a marquee below 64em --------------------------------- */
+  /* One row drifting right to left, for ever. The clips are laid out twice and
+     the track travels exactly one run's width, so the two meet without a seam.
+
+     `overflow: hidden` and not a scroll container: the drift is a transform,
+     and a transform animating inside a scrollport changes the scrollable area
+     as it goes, which makes the scrollbar and the scroll range twitch. Hidden
+     also means this can never put a sideways scroll on the page. Swiping is
+     handled instead by src/scripts/collage-marquee.ts, which is also what
+     pauses it on touch and off screen.
+
+     The negative margin reaches the edges of the screen; `--space-s` of
+     padding keeps the first tile off the edge. */
+  .collage-row {
+    overflow: hidden;
+    margin-inline: calc(var(--gutter) * -1);
+    padding-block: var(--space-2xs);
+    /* The row absorbs the drag, so the browser must not also treat it as a
+       page gesture or a back swipe. */
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  @media (min-width: 64em) {
+    .collage-row { display: none; }
+  }
+
+  /* Two elements, because one cannot carry both the animated transform and the
+     drag offset the script sets. */
+  .collage-row__drag { will-change: transform; }
+
+  /* **No padding on the track.** It is what -50% is measured against, so any
+     padding here makes half of it wider than one run and the loop jumps by
+     exactly that much — 16px, when this carried `padding-inline: var(--space-s)`.
+     A leading inset means nothing on a row that is always mid-drift anyway; it
+     is added back under reduced motion below, where the row stands still and
+     the first tile would otherwise sit against the edge of the screen. */
+  .collage-row__track {
+    display: flex;
+    width: max-content;
+    /* Slow: this is ambience, not a carousel. 52s for a full cycle. */
+    animation: collage-drift 52s linear infinite;
+  }
+  .collage-row__run { display: flex; gap: var(--space-s); padding-right: var(--space-s); }
+
+  /* 58% of the screen, so part of the next tile always shows — capped so it is
+     not three vast tiles on a tablet. */
+  .collage-row__tile {
+    flex: none;
+    width: min(58vw, 15rem);
+    border-radius: var(--tile-radius);
+    overflow: hidden;
+  }
+  .collage-row :global(.collage-row__media) {
+    width: 100%;
+    max-width: 100%;
+    border-radius: inherit;
+    /* Capped, so the pictures never tower over the figures above them. */
+    max-height: 60vh;
+  }
+
+  /* Exactly one run. The track is two, so half of it is one. */
+  @keyframes collage-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+
+  /* Nothing moves. The row becomes an ordinary scroll container instead, so it
+     is still a row the reader can swipe through by hand. */
+  @media (prefers-reduced-motion: reduce) {
+    .collage-row {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      touch-action: auto;
+    }
+    .collage-row::-webkit-scrollbar { display: none; }
+    .collage-row__track { animation: none; padding-inline: var(--space-s); }
+    /* One run is enough when it is not looping, and the duplicate is the
+       aria-hidden one. */
+    .collage-row__run + .collage-row__run { display: none; }
+  }
+
+  /* ---- The collage: scrolling columns from 64em -------------------------- */
+  /* Hidden below 64em, where the marquee above is what runs. Nothing in here
+     intersects at those widths, so none of its videos load. */
+  .collage { display: none; }
+
+  @media (min-width: 64em) {
     .collage {
+      display: grid;
       grid-auto-flow: row;
+      /* Two columns at a tablet-and-a-half, three once the split has room for
+         them. The third column's tiles are hidden rather than unbuilt, so the
+         deal does not change with the breakpoint. */
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      scroll-snap-type: none;
       height: clamp(24rem, 46vw, 34rem);
       margin-inline: 0;
       padding: 0;
@@ -113,7 +320,23 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
       overflow: hidden;
     }
 
-    .collage__column { display: flex; flex-direction: column; }
+    /* The mask the tiles pass through. Each column carries it, not the
+       wrapper: a radius on the wrapper would curve only the four outer
+       corners of the pair and leave the two inner column ends cut square,
+       which reads as lopsided. Per column, both ends of both columns curve,
+       and because the mask takes the same radius as the tiles, a tile sitting
+       flush at either end has its own corners land exactly on the mask's.
+       `isolation` is a WebKit guard: a rounded overflow clip has historically
+       been ignored around a transformed child, and these columns are animated
+       with transform. */
+    .collage__column {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: var(--tile-radius);
+      isolation: isolate;
+    }
+
     .collage__set {
       display: flex;
       flex-direction: column;
@@ -121,10 +344,17 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
       /* Each set carries its own trailing gap, so one set is exactly one step
          of the loop and the two copies meet without a seam. */
       padding-bottom: var(--space-s);
-      animation: tiles-up var(--loop) linear infinite;
+      animation: tiles-up var(--loop-1) linear infinite;
     }
     .collage__set + .collage__set { display: flex; }
     .collage__column--down .collage__set { animation-name: tiles-down; }
+    .collage__column[data-column='2'] .collage__set { animation-duration: var(--loop-2); }
+
+    /* Started part-way through, so the columns are offset from each other and
+       no two tiles sit on the same baseline. A negative delay starts a loop
+       already in progress rather than waiting. */
+    .collage__column[data-column='2'] .collage__set { animation-delay: calc(var(--loop-2) * -0.41); }
+
     .collage__tile { flex: none; }
   }
 
@@ -144,7 +374,7 @@ const columns = [shaped.slice(0, 2), shaped.slice(2)];
     .collage__set { animation: none; }
     .collage__set + .collage__set { display: none; }
   }
-  @media (prefers-reduced-motion: reduce) and (min-width: 48em) {
+  @media (prefers-reduced-motion: reduce) and (min-width: 64em) {
     .collage { height: auto; }
   }
 </style>

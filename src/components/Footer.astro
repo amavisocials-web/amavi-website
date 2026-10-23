@@ -18,7 +18,7 @@ const pages = [
   { label: 'Home', href: '/' },
   // Services, temporarily off the site (5 October 2026): see src/pages/_services.astro.
   { label: 'About', href: '/about/' },
-  { label: 'Journal', href: '/journal/' },
+  { label: 'AMAVI Culture', href: '/culture/' },
   { label: 'Creator Network', href: CREATOR_PATH },
   { label: 'Contact', href: CONTACT_PATH },
 ];
@@ -114,7 +114,9 @@ const pages = [
   .footer-col li { font-size: var(--text-sm); overflow-wrap: break-word; }
   /* The addresses set a step down, so the longest of them holds one line
      in its column at every width. */
-  .footer-col a[href^='mailto:'] { font-size: var(--text-xs); }
+  /* With the other footer links, not a step under them: --text-xs stays
+     with the labels and headings. */
+  .footer-col a[href^='mailto:'] { font-size: var(--text-sm); }
 
   /* Who the address under it is for. Set like the column headings above,
      a shade quieter, so the two pairs read as pairs rather than four

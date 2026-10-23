@@ -10,14 +10,16 @@ import myirelandbox from '../assets/logos/myirelandbox.png';
 import pearlsCollective from '../assets/logos/pearls-collective.png';
 import theHumbleFishmonger from '../assets/logos/the-humble-fishmonger.png';
 
-// TODO(client): Beyond BMI is not cleared for publication (brief §9), so it is
-// listed below with `cleared: false` and its file stays in
-// ../assets/logos/pending/, deliberately NOT imported: Astro copies every
-// imported image into the public build, rendered or not, so importing it here
-// would put an uncleared client's logo on the live server. Once sign-off
-// lands, move the file up a folder, uncomment this import, point `logo` at it
-// and set `cleared: true`.
-// import beyondBmi from '../assets/logos/beyond-bmi.png';
+// Beyond BMI was held back until 17 October 2026, when the client asked for it
+// in the row and supplied its address. The supplied artwork is a white mark on
+// a solid blue square; the copy in this folder was already black on
+// transparent, and was cut to the roundel and the "Beyondbmi" wordmark, with
+// the "Begin with Biology" strapline left off because at the row's height it
+// would be about two pixels tall. That matches ADHD Now, the other roundel
+// with its name under it. The uncut lockup, strapline and all, is still at
+// ../assets/logos/pending/beyond-bmi.png and is not imported, so it ships
+// nowhere: it is there in case the full lockup is ever wanted.
+import beyondBmi from '../assets/logos/beyond-bmi.png';
 
 /**
  * The clients, in the order the logo rows show them.
@@ -72,27 +74,33 @@ export interface Client {
  * knocked-out lettering closes up. The Humble Fishmonger is fine stipple and
  * small caps, so it sits above its computed 1.21 for the same reason.
  *
+ * Beyond BMI is a solid disc with its name under it, square at 588x589, so
+ * equal-area sizing gives it a factor of 1.00 and it would stand taller than
+ * every wordmark in the row. Its 0.95 brings it level: a filled circle reads
+ * heavier than a line of type at the same height, which is the same reason
+ * ADHD Now sits at 0.96.
+ *
  * A client without a logo file has its name set in type; there `scale`
  * multiplies the type size instead, set so each name's measured ink lands in
  * the range of the logos around it — a long name smaller, a short one larger.
+ * Every client now has both a file and an address, so that branch and the
+ * unlinked one in LogoWall.astro are kept for the next client rather than for
+ * a current one.
  *
  * Re-measure if a logo file changes: all of them are solid black on
  * transparent (npm run logos:mono), so ink is simply total alpha.
  */
 export const CLIENTS: Client[] = [
-  { name: 'Fettle',                logo: fettle,              url: 'https://fettle.ie',              cleared: true, scale: 1.06 },
-  { name: 'AutismCare',            logo: autismcare,          url: 'https://autismcare.ie',          cleared: true, scale: 0.93 },
-  { name: 'ADHD Now',              logo: adhdNow,             url: 'https://adhdnow.ie',             cleared: true, scale: 0.96 },
-  { name: 'Le Olive',              logo: leOlive,             url: 'https://le-olive.com',           cleared: true, scale: 1.08 },
-  { name: 'MyIrelandBox',          logo: myirelandbox,        url: 'https://www.myirelandbox.com',   cleared: true, scale: 1.08 },
-  { name: 'Cleaning Doctor',       logo: cleaningDoctor,      url: 'https://cleaningdoctor.net',     cleared: true, scale: 1.19 },
-  { name: 'The Humble Fishmonger', logo: theHumbleFishmonger, url: '',                               cleared: true, scale: 1.4 },
-  { name: 'Line 98',               logo: line98,              url: '',                               cleared: true, scale: 1.15 },
-  { name: 'Pearls Collective',     logo: pearlsCollective,    url: '',                               cleared: true, scale: 1.11 },
-
-  // TODO(client): the two empty urls above, and sign-off below — see the note
-  // on the imports. The Humble Fishmonger has no website.
-  { name: 'Beyond BMI',            logo: undefined,           url: 'https://beyondbmi.ie',           cleared: false },
+  { name: 'Fettle',                logo: fettle,              url: 'https://fettle.ie',                                      cleared: true, scale: 1.06 },
+  { name: 'AutismCare',            logo: autismcare,          url: 'https://autismcare.ie',                                  cleared: true, scale: 0.93 },
+  { name: 'ADHD Now',              logo: adhdNow,             url: 'https://adhdnow.ie',                                     cleared: true, scale: 0.96 },
+  { name: 'Le Olive',              logo: leOlive,             url: 'https://le-olive.com',                                   cleared: true, scale: 1.08 },
+  { name: 'MyIrelandBox',          logo: myirelandbox,        url: 'https://www.myirelandbox.com',                           cleared: true, scale: 1.08 },
+  { name: 'Cleaning Doctor',       logo: cleaningDoctor,      url: 'https://cleaningdoctor.net',                             cleared: true, scale: 1.19 },
+  { name: 'Beyond BMI',            logo: beyondBmi,           url: 'https://beyondbmi.ie',                                   cleared: true, scale: 0.95 },
+  { name: 'The Humble Fishmonger', logo: theHumbleFishmonger, url: 'https://www.thehumblefishmonger.com/',                  cleared: true, scale: 1.4 },
+  { name: 'Line 98',               logo: line98,              url: 'https://www.instagram.com/lineninetyeight/',             cleared: true, scale: 1.15 },
+  { name: 'Pearls Collective',     logo: pearlsCollective,    url: 'https://www.instagram.com/pearlscollective/',            cleared: true, scale: 1.11 },
 ];
 
 /**

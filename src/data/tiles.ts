@@ -1,8 +1,25 @@
 /**
  * Creator content from AMAVI's own campaigns, self-hosted in
- * public/media/tiles/. Tiles 1–4 drift beside the figures on the home page
- * (src/components/Numbers.astro), in this order. Tile 5 isn't on the site:
- * its burned-in captions read badly as a silent background loop.
+ * public/media/tiles/. Every tile here drifts beside the figures on the home
+ * page (src/components/Numbers.astro), which deals out the order.
+ *
+ * Changed on 17 October 2026: the two that led the collage, tiles 1 and 3,
+ * were replaced by new footage and their files deleted. Tiles 6, 7 and 8 are
+ * the new clips, and tile 5 came back in.
+ *
+ * Changed on 23 October 2026: tile 4, the Pearls Collective jewellery clip,
+ * was taken out and its files deleted. It was asked for twice over, once as
+ * the jewellery content and once as the creator with long brown hair in the
+ * black strapless top — she is the one modelling the necklace, and the frame
+ * carries the Pearls Collective watermark, so the two were one clip. **Five
+ * are left.**
+ *
+ * TODO(client): **the collage wants five more clips.** Two columns of five is
+ * ten slots against these five, so the collage runs three tiles in one column
+ * and two in the other, each clip appearing exactly once — no repeats, but
+ * short of the five-a-column the brief asks for. Five more would fill both
+ * columns with nothing seen twice. Portrait 9:16, please: tile 7 arrived
+ * landscape and had to be cropped to a third of its frame.
  *
  * Each tile keeps the link to its original Instagram post, for a row that
  * linked them; that row came off on 30 September 2026 and is in git if it is
@@ -15,9 +32,8 @@
  * - With neither file, the tile is an empty frame at the same 9:16, and the
  *   build logs which one is missing.
  *
- * The videos are the first 12 seconds of each post (tile 4 is whole): silent
- * H.264 at 540×960 (tile 1 at 360×640, all its source had), each under 2MB,
- * with the first frame as the poster. See README → Visual content to make
+ * The videos are the first 12 seconds of each post: silent H.264 at 540×960,
+ * each under 2MB, with the first frame as the poster. See README → Visual content to make
  * more.
  *
  * TODO(client): creator handle and consent, for every tile. `credit` stays
@@ -40,11 +56,25 @@ export interface ContentTile {
 
 export const TILES: ContentTile[] = [
   {
-    src: '/media/tiles/tile-1',
-    poster: '/media/tiles/tile-1.jpg',
-    href: 'https://www.instagram.com/p/DVyh_TzjFtj/',
+    src: '/media/tiles/tile-6',
+    poster: '/media/tiles/tile-6.jpg',
+    href: 'https://www.instagram.com/p/DbJTBDFq21K/',
     credit: '',
-    alt: 'A creator in a pageant sash talks to camera outdoors',
+    alt: 'A creator talks to camera in a car about being called thick for having ADHD',
+  },
+  {
+    src: '/media/tiles/tile-7',
+    poster: '/media/tiles/tile-7.jpg',
+    href: 'https://www.instagram.com/p/DeMpxYwisJA/',
+    credit: '',
+    alt: 'A laptop on a table showing a grid of campaign photographs',
+  },
+  {
+    src: '/media/tiles/tile-8',
+    poster: '/media/tiles/tile-8.jpg',
+    href: 'https://www.instagram.com/p/DejsiKOtqb7/',
+    credit: '',
+    alt: 'A magazine open on a portrait of Audrey Hepburn',
   },
   {
     src: '/media/tiles/tile-2',
@@ -52,20 +82,6 @@ export const TILES: ContentTile[] = [
     href: 'https://www.instagram.com/p/DbGxroTo6C0/',
     credit: '',
     alt: 'A creator chats with a brand founder on a bench by the sea in Dingle',
-  },
-  {
-    src: '/media/tiles/tile-3',
-    poster: '/media/tiles/tile-3.jpg',
-    href: 'https://www.instagram.com/reel/DcjliuSOy5p/',
-    credit: '',
-    alt: 'Back to school, but make it cool: a creator models outfits in a doorway',
-  },
-  {
-    src: '/media/tiles/tile-4',
-    poster: '/media/tiles/tile-4.jpg',
-    href: 'https://www.instagram.com/reel/DaZ3JjetuND/',
-    credit: '',
-    alt: 'A creator models a crystal necklace, earrings and bracelet',
   },
   {
     src: '/media/tiles/tile-5',

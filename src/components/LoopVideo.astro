@@ -23,9 +23,17 @@ interface Props {
   ratio?: string;
   /** Shown in the placeholder when the video is missing. */
   note?: string;
+  /**
+   * A media query the video waits for before it loads anything but its
+   * poster, e.g. '(min-width: 64em)'. For a frame that is on the page at
+   * every width but should only play at some of them — the collage's swipe
+   * row on a phone shows stills alone. Without it, the video plays wherever
+   * it is shown.
+   */
+  loopFrom?: string;
   class?: string;
 }
-const { src, poster, ratio = '2/3', note, class: className } = Astro.props;
+const { src, poster, ratio = '2/3', note, loopFrom, class: className } = Astro.props;
 const files = videoFiles(src, poster);
 if (!files.playable) {
   console.warn(`[LoopVideo] TODO(client): video needed — no ${src}.mp4 or ${src}.webm in public/; showing "Add video".`);
@@ -35,7 +43,7 @@ if (!files.playable) {
 {files.playable ? (
   <div class:list={['loop-video', className]} style={`aspect-ratio:${ratio}`}>
     <video muted loop playsinline preload="none" disablepictureinpicture aria-hidden="true"
-           data-loop data-poster={files.poster}>
+           data-loop data-poster={files.poster} data-loop-from={loopFrom}>
       {files.webm && <source data-src={files.webm} type="video/webm" />}
       {files.mp4 && <source data-src={files.mp4} type="video/mp4" />}
     </video>

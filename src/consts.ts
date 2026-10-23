@@ -144,7 +144,7 @@ export interface NavLink {
 /** "Get in Touch" is rendered separately, as the header's one button. */
 export const NAV_LINKS: NavLink[] = [
   { label: 'About', href: '/about/' },
-  { label: 'Journal', href: '/journal/' },
+  { label: 'AMAVI Culture', href: '/culture/' },
   // Services, temporarily off the site (5 October 2026): see src/pages/_services.astro.
   { label: 'Become a Creator', href: CREATOR_PATH },
 ];

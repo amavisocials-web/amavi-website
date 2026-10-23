@@ -1,0 +1,132 @@
+---
+import Base from '../../layouts/Base.astro';
+import CultureRow from '../../components/CultureRow.astro';
+import Subscribe from '../../components/Subscribe.astro';
+import { publishedPosts } from '../../lib/culture';
+import { SITE_NAME } from '../../consts';
+
+/**
+ * AMAVI Culture, at /culture. Was /journal until 23 October 2026; the old
+ * address redirects (astro.config.mjs).
+ *
+ * The order is the point: masthead, then what there is to read, then the ask.
+ * The subscribe block used to sit above the list and now sits below it, so
+ * nobody is asked for an email before they have seen a headline.
+ *
+ * **Twelve at a time.** Every post is rendered, the first twelve are shown and
+ * "Load more" reveals the next twelve. Done this way rather than with paged
+ * routes because it adds no URLs to maintain and no second place for the
+ * sitemap and the feed to disagree with: there is one page, and it holds
+ * everything. With no script the button is absent and the whole list shows,
+ * which is the right failure.
+ */
+const posts = await publishedPosts();
+const PER_PAGE = 12;
+---
+
+<Base
+  title="AMAVI Culture"
+  description="Notes on marketing, culture and the work. Published weekly."
+>
+  <Fragment slot="head">
+    <link rel="alternate" type="application/rss+xml" title="AMAVI Culture" href="/culture/rss.xml" />
+  </Fragment>
+
+  {/* ---- Masthead: a header, not a hero ---- */}
+  <section class="section culture-head">
+    <div class="container">
+      <p class="eyebrow">{SITE_NAME}</p>
+      <h1 class="display display--lg culture-head__title">AMAVI Culture</h1>
+      <p class="culture-head__line">
+        Notes on marketing, culture and the work. Published weekly.
+      </p>
+    </div>
+  </section>
+
+  {/* ---- The index ---- */}
+  <div class="container">
+    {posts.length > 0 ? (
+      <>
+        <ul class="culture-list" role="list" data-culture-list data-per-page={PER_PAGE}>
+          {posts.map((post, i) => (
+            <li class="culture-list__item" hidden={i >= PER_PAGE || undefined}>
+              <CultureRow post={post} level={2} />
+            </li>
+          ))}
+        </ul>
+
+        {posts.length > PER_PAGE && (
+          <p class="culture-more">
+            <button class="btn btn--ghost" type="button" data-culture-more>Load more</button>
+          </p>
+        )}
+      </>
+    ) : (
+      <p class="culture-empty">
+        The first piece is on its way. <a href="/culture/rss.xml">Subscribe to the feed</a> to catch it.
+      </p>
+    )}
+  </div>
+
+  {/* ---- The ask, after the reading ---- */}
+  {/* --tight rather than --section, which is about half the room: the strip
+      belongs under the list, not in a space of its own. The hairline comes
+      from --ruled and is already --divider-line, the same as the rules
+      between the rows above it. */}
+  <section class="section--tight section--ruled">
+    <div class="container">
+      <Subscribe level={2} />
+    </div>
+  </section>
+</Base>
+
+<script>
+  /* Reveals the next page of rows and takes itself away at the end. The rows
+     are already in the document, so this only flips `hidden`. */
+  const list = document.querySelector<HTMLElement>('[data-culture-list]');
+  const more = document.querySelector<HTMLButtonElement>('[data-culture-more]');
+
+  if (list && more) {
+    const step = Number(list.dataset.perPage) || 12;
+    more.addEventListener('click', () => {
+      const hidden = [...list.querySelectorAll<HTMLElement>('.culture-list__item[hidden]')];
+      hidden.slice(0, step).forEach((item) => item.removeAttribute('hidden'));
+      if (hidden.length <= step) more.remove();
+      /* Where the reading continues, for anyone on a keyboard. */
+      hidden[0]?.querySelector<HTMLAnchorElement>('a')?.focus();
+    });
+  }
+</script>
+
+<style>
+  /* Compact. It names the publication and gets out of the way: the old page
+     put a section's worth of air between the standing line and the first
+     headline. */
+  .culture-head { padding-block: clamp(3rem, 1.6rem + 5.5vw, 6rem) var(--space-l); }
+  /* --space-2xs here put 8px under the eyebrow, same as the team head. */
+  .culture-head__title { margin-top: var(--eyebrow-gap); }
+  .culture-head__line {
+    margin-top: var(--space-xs);
+    font-size: var(--text-lead);
+    font-weight: var(--weight-secondary);
+    max-width: 44ch;
+    opacity: 0.7;
+    text-wrap: pretty;
+  }
+
+  /* The rule between rows is the only furniture: no cards, no fills. */
+  .culture-list { list-style: none; }
+  .culture-list__item { border-top: var(--stroke) solid var(--divider-line); }
+  .culture-list__item:last-child { border-bottom: var(--stroke) solid var(--divider-line); }
+
+  .culture-more { margin-top: var(--space-l); }
+
+  .culture-empty {
+    padding-block: var(--space-2xl);
+    font-size: var(--text-lead);
+    font-weight: var(--weight-secondary);
+    max-width: 44ch;
+  }
+  .culture-empty a { color: var(--accent); text-decoration: underline; }
+
+</style>

@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 
-export type Post = CollectionEntry<'journal'>;
+export type Post = CollectionEntry<'culture'>;
 
 /**
  * Every published post, newest first.
@@ -11,7 +11,7 @@ export type Post = CollectionEntry<'journal'>;
  * read from here.
  */
 export async function publishedPosts(): Promise<Post[]> {
-  const posts = await getCollection('journal', ({ data }) => !data.draft);
+  const posts = await getCollection('culture', ({ data }) => !data.draft);
   return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
@@ -36,4 +36,4 @@ export function isoDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-export const journalPath = (slug: string) => `/journal/${slug}/`;
+export const culturePath = (slug: string) => `/culture/${slug}/`;

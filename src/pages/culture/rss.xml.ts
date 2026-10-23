@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
-import { publishedPosts, journalPath } from '../../lib/journal';
+import { publishedPosts, culturePath } from '../../lib/culture';
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from '../../consts';
 
 /**
- * The journal's feed, at /journal/rss.xml.
+ * The AMAVI Culture feed, at /culture/rss.xml.
  *
  * Written by hand rather than through a dependency: the feed is a handful of
  * fields, and the only thing that has to be right is the escaping, which is
@@ -22,11 +22,11 @@ const escape = (value: string) =>
 
 export const GET: APIRoute = async () => {
   const posts = await publishedPosts();
-  const self = new URL('/journal/rss.xml', SITE_URL).href;
+  const self = new URL('/culture/rss.xml', SITE_URL).href;
 
   const items = posts
     .map((post) => {
-      const link = new URL(journalPath(post.id), SITE_URL).href;
+      const link = new URL(culturePath(post.id), SITE_URL).href;
       return [
         '    <item>',
         `      <title>${escape(post.data.title)}</title>`,
@@ -43,8 +43,8 @@ export const GET: APIRoute = async () => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>${escape(`${SITE_NAME} Journal`)}</title>
-    <link>${escape(new URL('/journal/', SITE_URL).href)}</link>
+    <title>${escape(`${SITE_NAME} | AMAVI Culture`)}</title>
+    <link>${escape(new URL('/culture/', SITE_URL).href)}</link>
     <atom:link href="${escape(self)}" rel="self" type="application/rss+xml" />
     <description>${escape(SITE_DESCRIPTION)}</description>
     <language>en-ie</language>

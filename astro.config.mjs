@@ -8,7 +8,7 @@ import { CREATOR_PATH, CONTACT_PATH } from './src/consts.ts';
 // subdomain until DNS access is granted — never hardcode that subdomain in
 // links; all internal links are relative.
 /** The paths above, for the sitemap filter: a redirect is not a page. */
-const REDIRECTED = ['/creators', '/services'];
+const REDIRECTED = ['/creators', '/services', '/journal'];
 
 export default defineConfig({
   site: 'https://www.amavisocials.co',
@@ -28,5 +28,10 @@ export default defineConfig({
   redirects: {
     '/creators': CREATOR_PATH,
     '/services': CONTACT_PATH,
+    /* The journal became AMAVI Culture on 23 October 2026. Anything already
+       linking to the old address still lands. Post URLs are not redirected
+       one by one: only the one piece existed, and it is in the sitemap at its
+       new address. */
+    '/journal': '/culture/',
   },
 });

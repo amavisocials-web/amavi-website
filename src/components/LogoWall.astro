@@ -117,13 +117,17 @@ const COPIES = 3;
 
 <style>
   .logo-wall {
-    /* Sized so no client mark stands taller or wider than the AMAVI wordmark
-       in the header — measured against the tallest (The Humble Fishmonger)
-       and the widest (AutismCare). `--logo-boost` scales a whole row from
-       there; the default row is 1. */
+    /* The row's display height, raised 20% on 17 October 2026: every stop of
+       the clamp and the width cap multiplied by 1.2. It no longer holds the
+       marks under the header wordmark, which is what the old numbers were set
+       against; the row is meant to carry now.
+
+       `--logo-boost` scales a whole row from here; the default row is 1. Each
+       mark's own optical factor is in src/data/clients.ts, and a change here
+       does not disturb them: they are multipliers of this. */
     --logo-boost: 1;
-    --logo-base: calc(clamp(1.9rem, 1.45rem + 1.2vw, 2.55rem) * var(--logo-boost));
-    --logo-cap: calc(4.75rem * var(--logo-boost));
+    --logo-base: calc(clamp(2.28rem, 1.74rem + 1.44vw, 3.06rem) * var(--logo-boost));
+    --logo-cap: calc(5.7rem * var(--logo-boost));
     --logo-gap: clamp(2.5rem, 5vw, 4.5rem);
     text-align: center;
   }
@@ -227,6 +231,11 @@ const COPIES = 3;
     .logo-wall__link { transition: none; }
   }
 
+  /* No height step-down on smaller screens. It was tried and taken out: the
+     space between marks is a fixed flex gap, and the marquee scrolls rather
+     than fitting, so a taller mark never closes the gap on its neighbour. The
+     narrowest measured gap is 40px at 375, the same as at 768. Only the gap
+     itself tightens, which is what the clamp above already does. */
   @media (max-width: 47.99em) {
     .logo-wall { --logo-gap: var(--space-l); }
     .logo-wall__list--static { gap: var(--space-m) var(--space-l); }

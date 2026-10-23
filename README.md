@@ -228,14 +228,21 @@ only colour values anywhere in the codebase:
 |---|---|---|
 | `--bg` | `#F2F0EF` | Every background, bar the dark surfaces. A warm off-white, not paper white. No tinted, grey or alternating sections |
 | `--ink` | `#222021` | All text and every heading. A near-black with a trace of warmth, so the type sits on the ground rather than cutting into it. **Rules are `--line`, which is still pure black** |
-| `--line` | `#000000` | Every rule, divider, border, field outline and table line |
+| `--line` | `var(--ink)` | Every rule, divider, border, field outline and table line. It follows the ink: a rule is drawn in the same near-black as the type, not in a colour of its own. It keeps its own name because what it is for is different |
 | `--accent` | `#341BCA` | Accents and highlights: the logo, links, button fills and outlines, hover and pressed states, focus rings, accordion and step numbers, the drawn circle, the reading-progress line. One token: the blue reads both as text on white and under white as a fill, at 9.74:1 either way |
 | `--surface-dark` | `#000000` | The footer, and the flat overlay under text on video |
 | `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on black and on video |
-| `--divider-line` | `rgb(0 0 0 / 0.06)`, and `rgb(255 255 255 / 0.10)` under `.surface-dark` | The few lines left between sections |
+| `--divider-line` | 6% of `--ink`, and `rgb(255 255 255 / 0.10)` under `.surface-dark` | The few lines left between sections, and between journal rows |
 | `--tint` | `rgb(0 0 0 / 0.04)` | A row under the pointer, where a fill of the accent would read as a block of colour rather than a state |
 
-**The exceptions to white** are the footer (full bleed, edge to edge), the
+**Ink and surfaces are two different things.** `--ink` (and `--line` with it)
+is the near-black the type and the rules are drawn in; `--surface-dark` is the
+pure black the footer, the dark bands and the video overlays are made of, and
+`--on-dark` is the white that sits on them. Changing one never moves the
+other: the ink went from `#000000` to `#222021` on 16 October 2026 and the dark
+surfaces did not change at all.
+
+**The exceptions to the light ground** are the footer (full bleed, edge to edge), the
 "Our philosophy" band on /about — white over a photograph under a black
 shade at 0.72, where white holds 9.2:1 on the lightest pixel in the picture —
 and text set over video, which sits on a flat black overlay (the hero and the
@@ -518,42 +525,53 @@ value.
 Logos live in `src/assets/logos/` and are declared once in **`src/logos.ts`**.
 
 ```ts
-{ name: 'Client Name', src: clientLogo, cleared: true, scale: 1.0 }
+{ name: 'Client Name', logo: clientLogo, url: 'https://client.ie', cleared: true, scale: 1.0 }
 ```
 
-- **Clearance.** Only clients already public on the related agency site may
-  appear (brief §9). The one still held back, Beyond BMI, has its file in
-  `src/assets/logos/pending/`, deliberately **not imported**: Astro copies
-  every imported image into the public build whether or not a page shows it.
-  Once sign-off lands, move the file up a folder and uncomment its two lines
-  in `src/logos.ts`.
-- **No logo file yet?** Leave out `src` and the partner's name is set in type
-  in its place, at the same optical weight. Every cleared partner has a file
-  now; when a new one arrives, import it and add `src`.
+- **Clearance.** Only clients cleared for publication appear. `cleared: false`
+  hides a client from every row but does **not** keep its file off the server:
+  Astro copies every imported image into the build whether or not a page shows
+  it, so a client awaiting sign-off keeps its file in
+  `src/assets/logos/pending/` with its import commented out. Beyond BMI was the
+  one held back; it was cleared on 17 October 2026 and its file moved up a
+  folder. **All ten clients are now cleared and linked**, so the `cleared`
+  flag and the two fallbacks below are kept for the next client rather than for
+  a current one.
+- **`url`** turns a mark into a link, opening in a new tab, labelled
+  "<Client>, opens in a new tab", with `rel="noopener noreferrer"`. An empty
+  string renders a plain image with no cursor and no hover.
+- **No logo file yet?** Leave out `logo` and the client's name is set in type
+  in its place, at the same optical weight.
 - **`scale`** evens out optical weight: a solid black disc and a thin ring
   cover the same area but not the same amount of ink. The comment above the
   manifest explains how the current values were set.
 - **Size.** `--logo-base` in `LogoWall.astro` sets the height and `--logo-cap`
-  the widest any mark may run. Both are set so no client logo is taller or
-  wider than the AMAVI wordmark in the header (79×55 at every width): today
-  the tallest renders 46px and the widest 76px.
+  the widest any mark may run. Both were raised **20% on 17 October 2026**, so
+  the row no longer sits under the header wordmark the old numbers were set
+  against. The base resolves to 46px at 1280, 43 at 1024, 39 at 768 and 36 at
+  375, and the cap to 91px. Five of the ten marks are bound by the cap rather
+  than the height, which is why the cap had to move with it.
 
-**Two sets.** The home page runs the logos **solid black on transparent**
-(`src/assets/logos/`); /services runs the **full-colour originals**
-(`src/assets/logos/colour/`), each on a white chip with the same padding and
-radius, which is what lets a set supplied on white, cream and navy sit
-together in one row. `<LogoWall colour />` picks the colour file, falls back
-to the black one where there is no colour version, and takes its optical
-nudge from `colourScale` rather than `scale`: a mark that is a filled block in
-colour carries far more ink than its black cut-out.
+  **There is no height step-down on small screens.** One was written and taken
+  out: the space between marks is a fixed flex gap and the marquee scrolls
+  rather than fitting, so a taller mark never closes the gap on its neighbour.
+  The narrowest gap measured is 40px, the same at 320, 375 and 768.
 
-The colour set was reassembled on 30 September 2026, after the mono
-conversion had overwritten the originals in place: six came back out of git
-(`a7c66c1`, and `f4bf291` for The Humble Fishmonger), Le Olive and Pearls Co.
-from the supplied files, each trimmed to its own artwork. **Line 98 has no
-colour original anywhere** — it was cut from a square social image before the
-conversion — so the colour row shows its black wordmark until the file is
-supplied.
+**One set, black.** Every row runs the logos **solid black on transparent**
+(`src/assets/logos/`). A full-colour row was tried on /services on 30
+September 2026 and taken off again on 1 October: each mark needed its own
+white chip to sit beside the rest, and the chips read as a table of cards
+rather than a row of marks. The recovered colour originals stay in
+`src/assets/logos/colour/`, **unimported**, in case that changes; nothing
+references them, so Astro does not ship them. Line 98 has no colour original
+anywhere.
+
+Beyond BMI was supplied as a white mark on a solid blue square. The copy in
+this folder was already black on transparent, and was cut to the roundel and
+the "Beyondbmi" wordmark: the "Begin with Biology" strapline was left off
+because at the row's height it would stand about two pixels tall. That matches
+ADHD Now, the other roundel carrying its own name, and the two sit level at
+0.95 and 0.96.
 
 The black set was converted in place by:
 
@@ -654,11 +672,30 @@ contents with nothing in the gap. That was taken out on 5 October 2026.
 - **The figures** (`Numbers.astro`). A split: a collage of creator work on one
   side, the figures on the other, each written as a sentence with its number
   leading the line and a rule between. The collage is a slow vertical loop, in
-  CSS alone: two sub-columns, one climbing and one falling, each holding its
-  tiles twice and travelling exactly one set's height, so the join can't be
-  seen. Top and bottom are masked. It pauses on hover and on focus, runs
-  slower at 48em, and on a phone doesn't run at all — the tiles become a row
-  that scrolls sideways. Under `prefers-reduced-motion` nothing moves.
+  CSS alone: **two sub-columns from 48em and three from 80em**, alternately
+  climbing and falling, each holding its five tiles twice and travelling
+  exactly one set's height, so the join can't be seen (measured at 0px on
+  every column). Each runs at its own speed — 47s, 59s, 67s, no one a multiple
+  of another — and starts part-way through, so no two tiles share a baseline.
+  Top and bottom are a hard edge, not a fade. It pauses on hover and on focus.
+  Under `prefers-reduced-motion` nothing moves.
+
+  **Below 64em there are no columns at all** — the tiles are one row that is
+  swiped: snapping, 60% of the screen each (capped at 17rem) so part of the
+  next always shows, 16px between them and 16px before the first and after
+  the last. It scrolls inside its own box and the section is `overflow: clip`,
+  so the page never scrolls sideways at any width — measured at 0 from 320px
+  up. Every video stays on its poster until 64em (`loopFrom`, below), so a
+  phone decodes nothing. The columns were tried from 48em and a tablet got two
+  342px towers under the figures; they start at 64em now, the same width the
+  text and the collage go side by side at.
+
+  **Why three columns and not four.** The split caps the collage at 578px at
+  1280 and it does not widen past that — 572px at 1440 — so four across leaves
+  each tile 132px, at which the faces are slivers and burned-in captions are
+  mush. Three gives 187px. For the same reason the third column waits for
+  80em: at 64em the collage is 438px, and three across that is 141px, so
+  64em–80em stays on two columns at 211–241px.
 - **The services** (`ServiceList.astro`). The same numbered accordion the
   services page uses, 01 to 06 with a hairline between the rows, opening on
   each service's paragraph alone. See "The areas are an accordion" below. It
@@ -852,9 +889,23 @@ flagged in `src/data/media.ts`, to be replaced first.
   not to a number. `scripts/encode-video.swift` does the cutting; see "Making
   the video files". Remove a cut and that orientation shows the "Add video"
   frame, with black text.
-- **Stat tiles** — tiles 1–4 of `src/data/tiles.ts` (`public/media/tiles/`),
-  creator videos from AMAVI's campaigns, behind the four figures. Tile 5 isn't
-  used: its burned-in captions read badly as a silent loop.
+- **Stat tiles** — all six tiles of `src/data/tiles.ts`
+  (`public/media/tiles/`), creator videos from AMAVI's campaigns, beside the
+  figures. **The collage wants more footage:** three columns of five is
+  fifteen slots for six clips, so each appears two or three times. Nothing
+  repeats inside a column or sits beside itself across columns, but a careful
+  viewer will see repeats — nine more clips would fill it cleanly. Portrait
+  9:16, please. Tiles 1 and 3 were replaced on 17 October 2026 and deleted;
+  tile 5 came back in at the same time, burned-in captions and all, because
+  there was no longer enough footage to leave it out.
+- **The case study image** (home, 2:3) — `src/assets/media/home-case-study.jpg`,
+  the studio wall with the printed sign and a laptop of content. Supplied 17
+  October 2026 and **shipped already cropped to 2:3**, so the frame crops
+  nothing and the picture is the same at every width; the photograph was 3:4
+  and the 133px came off the right, which was blazer and hair, because a
+  centre crop clipped the A from the AutismCare sheet. The full-height
+  original is not in the repo. It replaced `home-creators.jpg`, the earlier
+  and smaller board shot, which was deleted.
 - **Feature videos** (home, 2:3) — "Creators are one part of the equation"
   plays a photo shoot (`16521739…mp4`); "How we work" a content studio
   (`15636407…mp4`, first 12 seconds). In `public/media/features/`.
@@ -890,11 +941,16 @@ cut; `--fade 30` makes the loop seamless). The tile files were made with:
 | `hero-portrait.mp4` | the same | `--size 1080x1920 --crop 400,0,1215,2160 --bitrate 1500000 --fade 24` |
 | `features/creators.mp4` | `16521739_1440_2560_60fps.mp4` | `--size 720x1080 --crop 0,200,1440,2160 --bitrate 1500000 --fade 45` |
 | `features/studio.mp4` | `15636407_1080_1920_30fps.mp4` | `--size 720x1080 --crop 0,150,1080,1620 --bitrate 1200000 --max 12 --fade 30` |
-| `tiles/tile-1.mp4` | `Video-20656.mp4` | `--size 360x640 --bitrate 700000 --max 12` |
 | `tiles/tile-2.mp4` | `Video-43037.mp4` | `--size 540x960 --bitrate 1100000 --max 12` |
-| `tiles/tile-3.mp4` | `Video-15280.mp4` | `--size 540x960 --bitrate 1100000 --max 12` |
-| `tiles/tile-4.mp4` | `Video-76499.mp4` | `--size 540x960 --bitrate 1200000` |
 | `tiles/tile-5.mp4` | `Video-81412.mp4` | `--size 540x960 --bitrate 1000000 --max 12` |
+| `tiles/tile-6.mp4` | `igexport-DbJTBDFq21K.mp4` | `--size 540x960 --bitrate 1250000 --max 12 --fade 20` |
+| `tiles/tile-7.mp4` | `igexport-DeMpxYwisJA.mp4` | `--size 540x960 --crop 435,0,405,720 --bitrate 1250000 --max 12 --fade 20` |
+| `tiles/tile-8.mp4` | `igexport-DejsiKOtqb7.mp4` | `--size 540x960 --bitrate 1250000 --max 12 --fade 20` |
+
+Tile 7's source arrived landscape (1276×720), so `--crop` takes a 405px-wide
+slice from the middle — a third of its frame. Portrait sources need no crop.
+The three tile posters from 17 October 2026 are quality 72, not 75, to hold
+them under the others' weight.
 
 ```bash
 swift scripts/encode-video.swift Video-43037.mp4 public/media/tiles/tile-2.mp4 tile-2.png --size 540x960 --bitrate 1100000 --max 12

@@ -1,52 +1,137 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import ContactRoutes from '../components/ContactRoutes.astro';
-import { RESPONSE_TIME } from '../consts';
+import BrandEnquiry from '../components/BrandEnquiry.astro';
+import contactPhoto from '../assets/media/contact.jpg';
 
 /**
- * Get in touch: the heading and one line of instruction on the left, the two
- * routes on the right.
+ * Get in touch: a picture filling one half of the page, the enquiry form on
+ * the other.
  *
- * The addresses are not repeated here. They were, as a labelled list under the
- * heading, until 6 October 2026: they say the same thing as the two routes
- * beside them and as the footer's contact column on every page, and three
- * copies of the same two mailto links is two too many. Each route carries the
- * one way in that belongs to it.
+ * **For brands only, from 23 October 2026.** The two expanding rows, Brand?
+ * and Creator?, came off with the rebuild. Creators are not stranded: the
+ * hero's "Creators" link, the main menu and the footer all still reach
+ * /become-a-creator, which is where the creator form has always lived. The
+ * rows and their component are in git if they are ever wanted back.
  *
- * Nothing here sets a viewport height. The body is a column the height of the
- * screen at least, with main taking the slack (src/styles/global.css), so the
- * footer is at the bottom of a short page and after the content on a long one.
+ * **The picture is full bleed, so this page does not use `.container`.** The
+ * row is the width of the screen and the right column carries the gutter and
+ * the vertical room itself, which is the only way the picture can run to the
+ * edge of the screen and to the top and bottom of the section with no margin,
+ * no radius and no gap against the form. Everything else on the site sits
+ * inside the container; this is the exception, and that is why the padding is
+ * written out here rather than inherited.
+ *
+ * The photograph was supplied on 23 October 2026. Swapping it is swapping the
+ * import above; the frame crops to the column either way.
  */
 ---
 
 <Base
   title="Get in Touch"
-  description="Brands: email AMAVI Socials to start a campaign with the right creators, communities and partners. Creators: apply to join the AMAVI creator network."
+  description="Tell AMAVI Socials what you sell and who you want in front of it. We reply to every brand enquiry within two working days."
 >
-  <section class="section contact">
-    <div class="container contact__grid">
-      <div class="contact__intro">
-        <h1 class="contact__title">Get in touch</h1>
-        <p class="contact__lead">{RESPONSE_TIME} Select an option to get started.</p>
+  <section class="contact">
+    <div class="contact__grid">
+      <div class="contact__media">
+        <Image
+          class="contact__photo"
+          src={contactPhoto}
+          alt="A silver multi-strand bracelet resting on an open magazine spread, over a black and white fashion photograph"
+          widths={[640, 900, 1200]}
+          sizes="(min-width: 64em) 50vw, 100vw"
+          loading="eager"
+          decoding="async"
+        />
       </div>
 
-      <div class="contact__routes">
-        <ContactRoutes />
+      <div class="contact__panel">
+        <h1 class="contact__title">Get in touch</h1>
+        <p class="contact__lead">
+          Tell us what you sell and who you want in front of it. We reply to every
+          enquiry within two working days.
+        </p>
+        <BrandEnquiry />
       </div>
     </div>
   </section>
 </Base>
 
 <style>
-  .contact__grid { display: grid; gap: var(--space-xl); align-items: start; }
+  /* Stacked below 64em, picture first; two halves above it with no gap at all
+     between them, so the two meet on one line down the middle. */
+  .contact__grid { display: grid; }
   @media (min-width: 64em) {
-    .contact__grid {
-      grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
-      column-gap: var(--space-xl);
-    }
+    .contact__grid { grid-template-columns: 1fr 1fr; gap: 0; align-items: stretch; }
   }
 
-  .contact__intro { display: grid; gap: var(--space-s); align-content: start; }
+  /* The picture fills its half: no margin, no radius, and flush to the top and
+     bottom of the row, however tall the form beside it runs. */
+  .contact__media { position: relative; min-height: 14rem; }
+  /* The picture dissolves into the page rather than meeting the form at a
+     line: opaque at the edge of the window, transparent at the edge nearest
+     the fields, over the near 12% of its width. It was 29%, which washed
+     out most of the photograph; this leaves it solid and softens only the join. The mask is on the picture
+     alone — the form is a sibling, so nothing of it is ever touched. */
+  .contact__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+      /* Seven stops rather than two: a straight two-stop ramp bands visibly
+         across a band this wide, and these approximate an ease-out so the
+         steps between levels stay under what the eye picks up. */
+    --fade: linear-gradient(
+      to left,
+      transparent 0%,
+      rgb(0 0 0 / 0.08) 2%,
+      rgb(0 0 0 / 0.3) 4.5%,
+      rgb(0 0 0 / 0.6) 7%,
+      rgb(0 0 0 / 0.85) 9.5%,
+      #000 12%
+    );
+    -webkit-mask-image: var(--fade);
+    mask-image: var(--fade);
+  }
+
+  /* Stacked, it sits above the form, so it fades downward into it. */
+  @media (max-width: 63.99em) {
+    .contact__photo {
+      --fade: linear-gradient(
+        to top,
+        transparent 0%,
+        rgb(0 0 0 / 0.08) 2%,
+        rgb(0 0 0 / 0.3) 4.5%,
+        rgb(0 0 0 / 0.6) 7%,
+        rgb(0 0 0 / 0.85) 9.5%,
+        #000 12%
+      );
+    }
+  }
+  /* Stacked, it is a band rather than a column. */
+  @media (max-width: 63.99em) {
+    .contact__media { height: 280px; }
+  }
+  @media (max-width: 47.99em) {
+    .contact__media { height: 220px; }
+  }
+
+  /* The column carries the gutter and the vertical room, because the row
+     itself has none. */
+  .contact__panel {
+    display: grid;
+    gap: var(--space-s);
+    align-content: center;
+    padding: var(--section-y) var(--gutter);
+    max-width: 38rem;
+  }
+  @media (min-width: 64em) {
+    /* Held off the centre line by a full gutter, so the words do not sit
+       against the picture. */
+    .contact__panel { padding-inline: clamp(var(--gutter), 4vw, 4.5rem); }
+  }
 
   /* A page title, not a display line: between the section-head and page-title
      steps, which lands at about 34px on a desktop. */
@@ -60,5 +145,13 @@ import { RESPONSE_TIME } from '../consts';
     text-transform: uppercase;
   }
 
-  .contact__lead { font-size: var(--text-lead); font-weight: var(--weight-secondary); max-width: 34ch; text-wrap: pretty; }
+  .contact__lead {
+    font-size: var(--text-lead);
+    font-weight: var(--weight-secondary);
+    line-height: 1.55;
+    max-width: 44ch;
+    opacity: 0.7;
+    text-wrap: pretty;
+    margin-bottom: var(--space-s);
+  }
 </style>

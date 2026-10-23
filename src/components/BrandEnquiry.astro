@@ -1,0 +1,185 @@
+---
+import { CONTACT_EMAIL } from '../consts';
+
+/**
+ * The brand enquiry form on /contact.
+ *
+ * A real form first. The markup posts to Netlify Forms on its own — name,
+ * method, action and the hidden form-name input are what Netlify's build-time
+ * detection looks for — so with no JavaScript it still submits and the
+ * enquiry is still captured. The script then takes it over to submit in
+ * place, which is the only reason the four states exist.
+ *
+ * **Success is only ever shown on an actual success.** The script treats a
+ * non-2xx response, a network error and a timeout alike: the form comes back
+ * with every field still filled in and the error line appears. Nothing
+ * optimistic (src/scripts/brand-enquiry.ts).
+ *
+ * TODO(client): **no automatic reply goes to the enquirer.** Netlify notifies
+ * AMAVI and that is all, so the two working days promised in the copy beside
+ * this form are a person's job at the moment. An acknowledgement would hook in
+ * at the success branch in src/scripts/brand-enquiry.ts, where `done` is set:
+ * either a Netlify function posting to an email provider, or an autoresponder
+ * configured on the form in the Netlify UI. It needs an account and a sending
+ * domain, so it is not something this change could do.
+ */
+const FORM_NAME = 'brand-enquiry';
+
+const FIELDS = [
+  { name: 'name', label: 'Name', type: 'text', placeholder: 'Your name', autocomplete: 'name' },
+  { name: 'email', label: 'Email', type: 'email', placeholder: 'you@company.com', autocomplete: 'email' },
+] as const;
+---
+
+<div class="enquiry" data-enquiry data-state="idle">
+  <form
+    class="enquiry__form"
+    name={FORM_NAME}
+    method="POST"
+    action="/contact/"
+    data-netlify="true"
+    netlify-honeypot="company_website"
+    data-enquiry-form
+    novalidate
+  >
+    <input type="hidden" name="form-name" value={FORM_NAME} />
+    <p class="honeypot" aria-hidden="true">
+      <label>Leave this empty <input name="company_website" tabindex="-1" autocomplete="off" /></label>
+    </p>
+
+    {FIELDS.map((field) => (
+      <div class="field">
+        <label class="field__label" for={`enquiry-${field.name}`}>{field.label}</label>
+        <input
+          class="field__input"
+          id={`enquiry-${field.name}`}
+          name={field.name}
+          type={field.type}
+          placeholder={field.placeholder}
+          autocomplete={field.autocomplete}
+          required
+        />
+      </div>
+    ))}
+
+    <div class="field">
+      <label class="field__label" for="enquiry-message">How can we help</label>
+      <textarea
+        class="field__input field__input--area"
+        id="enquiry-message"
+        name="message"
+        rows="4"
+        placeholder="I want to start influencer marketing for my brand"
+        required
+      ></textarea>
+    </div>
+
+    <button class="btn btn--primary enquiry__button" type="submit" data-enquiry-button>
+      <span data-enquiry-label>Get started</span>
+    </button>
+  </form>
+
+  {/* The error and any validation message. Polite, so it is read without
+      cutting across whatever the person is doing. */}
+  <p class="enquiry__status" role="status" aria-live="polite" data-enquiry-status></p>
+
+  {/* Replaces the form, and only ever after a real success. */}
+  <div class="enquiry__done" data-enquiry-done hidden>
+    <p class="enquiry__done-title">Thanks, we have got it.</p>
+    <p class="enquiry__done-line">We will come back to you within two working days.</p>
+  </div>
+
+  <div class="enquiry__direct">
+    <p class="enquiry__direct-label">Email us</p>
+    <p><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+    {/* TODO(client): phone number, if one should be listed. */}
+  </div>
+</div>
+
+<script>
+  import '../scripts/brand-enquiry';
+</script>
+
+<style>
+  .enquiry { display: grid; gap: var(--space-m); }
+  .enquiry__form { display: grid; gap: var(--space-m); }
+
+  .field { display: grid; gap: var(--space-3xs, 0.25rem); }
+
+  /* The site's label: small capitals, letter-spaced, above the field. */
+  .field__label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+  }
+
+  /* A rule under the words, not a box around them: the site's field, with
+     three of its four sides taken off. Matches Subscribe.astro. */
+  .field__input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.6rem 0;
+    font: inherit;
+    font-size: 1rem;              /* ≥16px, or iOS zooms on focus */
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    border-bottom: var(--stroke) solid var(--line);
+    border-radius: 0;
+  }
+  .field__input::placeholder { color: var(--ink); font-weight: var(--weight-secondary); opacity: 0.7; }
+  .field__input:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
+  .field__input[aria-invalid='true'] { border-bottom-width: var(--stroke-mark); }
+
+  .field__input--area { min-height: 7rem; resize: vertical; }
+
+  /* Full width of the column, accent fill, white text. */
+  .enquiry__button { width: 100%; justify-content: center; }
+  .enquiry__button[disabled] { opacity: 0.55; cursor: default; }
+
+  .enquiry__status {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-secondary);
+    line-height: 1.5;
+    max-width: 52ch;
+    text-wrap: pretty;
+  }
+  .enquiry__status:empty { display: none; }
+  .enquiry__status a { color: var(--accent); text-decoration: underline; }
+
+  /* `:not([hidden])`, so the author `display` cannot override the attribute.
+     This rendered the confirmation on page load before 23 October 2026: it
+     said `display: grid` outright, which beats the UA `display: none` that
+     `hidden` relies on. There is a site-wide [hidden] guard in global.css as
+     well; this keeps the component correct on its own. */
+  .enquiry__done:not([hidden]) { display: grid; gap: var(--space-2xs); }
+  .enquiry__done-title { font-size: var(--text-lead); font-weight: var(--weight-strong); }
+  .enquiry__done-line { font-size: var(--text-lead); font-weight: var(--weight-secondary); opacity: 0.7; }
+
+  /* Only one of the two is ever present. */
+  .enquiry[data-state='done'] .enquiry__form,
+  .enquiry[data-state='done'] .enquiry__status { display: none; }
+
+  /* A labelled block, not a sentence: the site's small capitals over the
+     address. */
+  .enquiry__direct { display: grid; gap: var(--space-3xs, 0.25rem); }
+  .enquiry__direct-label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+  }
+  /* 0.7 and not lower: 0.6 of #222021 misses AA at this size. */
+  .enquiry__direct a {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-secondary);
+    color: var(--ink);
+    opacity: 0.7;
+    text-decoration: underline;
+    text-decoration-thickness: var(--stroke);
+  }
+  .enquiry__direct a:hover { color: var(--accent); opacity: 1; }
+</style>

@@ -5,6 +5,8 @@ import Base from '../layouts/Base.astro';
 import Lines from '../components/Lines.astro';
 import Connect from '../components/Connect.astro';
 import { MEDIA } from '../data/media';
+import aboutHero from '../assets/media/about-hero.jpg';
+import { TEAM } from '../data/team';
 
 /**
  * About: who AMAVI is and how it thinks — a point of view more than an
@@ -42,26 +44,65 @@ const approach = [
   description="AMAVI is a creator-led marketing and partnerships agency. We start with the objective, then find the creators, communities and partnerships that reach the audience."
 >
   {/* ================= Intro ================= */}
-  <section class="section about">
-    <div class="container about__intro">
-      <h1 class="eyebrow">About AMAVI</h1>
-      <div class="about__lead">
-        <p class="lead">
-          We are a <strong>creator-led marketing and partnerships agency</strong> for ambitious
-          brands across Europe. In a world overwhelmed by noise, reach is easy to buy.
-          Relevance isn’t.
-        </p>
-        <p class="lead">
-          We focus on what actually moves the needle: authentic human connection, trusted voices
-          and measurable commercial results.
-        </p>
-      </div>
-    </div>
+  <section class="about">
+    <div class="container about__hero">
+      {/* The picture, behind. First in the markup so the statement paints over
+          it without a z-index race; the layering is set in the stylesheet.
 
+          TODO(client): a different photograph may be wanted here. Swapping it
+          is swapping the import above. Whatever lands, re-measure the left
+          edge: #222021 over this one runs from 1.87:1 on its darkest grain to
+          15.53:1 on the highlight, and the mask below is what keeps the words
+          on it readable. */}
+      <div class="about__hero-media" aria-hidden="true">
+        <Image class="about__hero-img" src={aboutHero}
+               alt="" widths={[600, 900, 1200]} sizes="(min-width: 64em) 50vw, 100vw"
+               loading="eager" decoding="async" />
+      </div>
+
+      <div class="about__hero-words">
+        <h1 class="eyebrow">About AMAVI</h1>
+        <div class="about__lead">
+          <p class="lead">
+            We are a <strong>creator-led marketing and partnerships agency</strong> for ambitious
+            brands across Europe. In a world overwhelmed by noise, reach is easy to buy.
+            Relevance isn’t.
+          </p>
+          <p class="lead">
+            We focus on what actually moves the needle: authentic human connection, trusted voices
+            and measurable commercial results.
+          </p>
+        </div>
+      </div>
+
+      {/* In the hero grid, not a section under it: the picture spans both rows
+          so the whole thing reads as one tall band. */}
+      <nav class="jumps" aria-label="On this page">
+        <p class="jumps__label">Explore</p>
+        <ul class="jumps__list" role="list">
+          {[
+            { label: 'Our approach', href: '#approach' },
+            { label: 'The team', href: '#team' },
+            { label: 'Our philosophy', href: '#philosophy' },
+            { label: 'Get in touch', href: '#connect' },
+          ].map((jump) => (
+            <li>
+              <a class="jump" href={jump.href}>
+                <span class="jump__label">{jump.label}</span>
+                <svg class="jump__arrow" viewBox="0 0 12 12" aria-hidden="true" focusable="false">
+                  <path d="M2 10L10 2M10 2H4M10 2v6" fill="none" stroke="currentColor"
+                        stroke-width="1.5" vector-effect="non-scaling-stroke" />
+                </svg>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
   </section>
 
   {/* ================= Our approach ================= */}
-  <section class="section section--ruled" aria-labelledby="approach-heading">
+  <section id="approach" class="section section--ruled" aria-labelledby="approach-heading">
     <div class="container split">
       <div class="split__head">
         <p class="eyebrow">Our approach</p>
@@ -78,8 +119,38 @@ const approach = [
     </div>
   </section>
 
+  {/* ================= Meet the team ================= */}
+  <section id="team" class="section section--ruled" aria-labelledby="team-heading">
+    <div class="container">
+      <div class="team__head">
+        <p class="eyebrow">Meet the team</p>
+        <h2 id="team-heading" class="display display--md">The people behind the work.</h2>
+      </div>
+
+      <ul class="team" role="list">
+        {TEAM.map((person) => (
+          <li class="team__card">
+            {person.photo ? (
+              <Image class="team__photo" src={person.photo} alt={person.alt ?? ''}
+                     widths={[280, 420, 560]} sizes="(min-width: 64em) 22vw, 44vw"
+                     loading="lazy" decoding="async" />
+            ) : (
+              /* Unreachable while all four portraits are supplied. Kept as the
+                 fallback for a fifth person added before their photograph:
+                 a flat block at the card's own ratio, so the row keeps its
+                 shape and the picture only has to drop in. */
+              <div class="team__photo team__photo--empty" aria-hidden="true"></div>
+            )}
+            <h3 class="team__name">{person.name}</h3>
+            <p class="team__role">{person.role}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
   {/* ================= Our philosophy: over the photograph ================= */}
-  <section class="section why-amavi surface-dark" aria-labelledby="why-heading">
+  <section id="philosophy" class="section why-amavi surface-dark" aria-labelledby="why-heading">
     {/* Decoration: what it says is said by the copy over it. */}
     <div class="band-media" aria-hidden="true">
       <Image src={MEDIA.philosophy.image} alt="" widths={[768, 1100, 1376]}
@@ -110,7 +181,263 @@ const approach = [
 
 <style>
   /* ---------- Intro: space does the work ---------- */
-  .about { padding-block: clamp(4rem, 2rem + 8vw, 9rem) var(--section-y); }
+  /* ---- The hero: a statement over a picture ------------------------------ */
+  /* clip, not hidden: the picture runs past the container on the right, and
+     100vw counts the scrollbar on some browsers. clip creates no scrollport
+     at all, so a stray pixel cannot become a sideways scroll. */
+  .about {
+    /* Held in a variable because the picture's negative top margin has to be
+       exactly this plus the header, to reach the top of the window. */
+    --about-pad-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    padding-block: var(--about-pad-top) var(--section-y);
+    /* x only. overflow-y stays visible, which is what lets the picture run up
+       behind the header. */
+    overflow-x: clip;
+  }
+
+  /* Both layers in one grid cell, so they overlap without absolute
+     positioning: the picture takes the right half and the words run 60px into
+     it. The words are second in the markup and carry the z-index, so the
+     statement always paints over the photograph. */
+  .about__hero { display: grid; }
+  .about__hero-media { position: relative; }
+  .about__hero-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Very small, per the brief: a hard edge, not a card. */
+    border-radius: 2px;
+  }
+  .about__hero-words { position: relative; z-index: 1; }
+
+  /* Body copy, as it was before the display treatment of 23 October 2026:
+     the statement is back to being two paragraphs at reading size. Capped near
+     52 characters so the lines break comfortably rather than running the full
+     width of the column. */
+  /* The eyebrow was sitting straight on the first line: `.about__hero-words`
+     is a plain block, so nothing separated the two. */
+  .about__hero-words { display: grid; gap: var(--eyebrow-gap); justify-items: start; }
+  .about__hero-words .about__lead { display: grid; gap: var(--space-m); justify-items: start; max-width: none; }
+  /* Three classes deep on purpose: `.about__lead .lead { max-width: none }`
+     further down the file matches at the same specificity and would win on
+     source order, leaving the copy running the whole 700px column. */
+  .about__hero-words .about__lead .lead { max-width: 52ch; }
+
+  /* Stacked up to 64em: words, then the picture beneath them, full width and
+     no overlap at all. */
+  /* Stacked up to 64em: words, then the jump links, then the picture. */
+  @media (max-width: 63.99em) {
+    .about__hero { gap: var(--space-l); }
+    .about__hero-words { order: 1; }
+    .jumps { order: 2; }
+    /* Edge to edge on both sides once it is under the words: the container has
+       it inset by a gutter, and this takes that back. */
+    .about__hero-media {
+      order: 3;
+      height: clamp(14rem, 50vw, 22rem);
+      width: 100vw;
+      margin-inline: calc(50% - 50vw);
+    }
+  }
+
+  @media (min-width: 64em) {
+    /* The picture: starts at the middle and runs to the edge of the window.
+       The width carries the extra and the negative margin puts it all on the
+       right, so the **left edge does not move** — a plain negative margin on a
+       right-aligned item would have slid the whole box over and taken the
+       overlap with it. `100%` here is the grid area, which is the container's
+       content box, so (100vw - 100%) / 2 is exactly the distance from that
+       box to the edge of the window: it holds at every width rather than at
+       one breakpoint. */
+    /* Two rows: the words, then the jump links, with the picture beside both.
+       The gap between the two is half what it was, so the copy and the links
+       read as one group in the column rather than two blocks. */
+    /* **The picture is positioned, not placed in the grid.** As a grid item
+       spanning both rows its own height sized those rows, which prised the
+       copy and the jump links 250px apart and made its height impossible to
+       set — it just took the file's natural height at that width, 972px. Out
+       of flow, the left column sizes to its own content and the band's height
+       is a number this file decides.
+
+       The hero reserves that height with min-height, so the picture still
+       takes up room and cannot lap over the section beneath it. */
+    .about__hero {
+      position: relative;
+      grid-template-columns: minmax(0, 1fr);
+      /* Room above EXPLORE, so it sits well clear of the copy rather than
+         tucked under it. 32px first, then doubled. */
+      row-gap: var(--space-xl);
+      /* No min-height and no height on the picture. It is stretched between
+         `top` and `bottom` below, so the band follows the column it sits
+         beside: it finishes a fixed distance under the last jump link at
+         every width instead of taking a share of the viewport. At 64vw it
+         stood 819px against a 428px column and ran 299px past the links.
+
+         Centred rather than `start`: the column is the hero's full height, so
+         this changes nothing today, but it is what should happen to any slack
+         if something here is ever given a height. The group reads centred
+         against the picture because the picture overhangs it by the same
+         amount top and bottom — see `top` and `bottom` below. */
+      align-items: center;
+      align-content: center;
+    }
+    .about__hero-words { max-width: 50%; }
+    .jumps { max-width: 13rem; }
+
+    /* The picture spans both rows, runs up behind the header to the top of the
+       window and finishes below the last jump link — one band, not two
+       stacked sections.
+
+       8% wider toward the words than the half it used to take. The width
+       carries the bleed and the negative right margin puts it all on the
+       right, so the left edge is the only thing that moved.
+
+       **`100%` here is the column, not the container.** It was the whole
+       content box while both layers shared one grid cell; splitting the grid
+       into two columns halved it, and the old `(100vw - 100%) / 2` then
+       doubled the bleed and threw the picture 279px off the side of the
+       window. Measured from the column instead: `50vw - 100%` is the distance
+       from this column's right edge to the edge of the window, and 16% of the
+       column is the 8% of the container the picture gains on the left. */
+    .about__hero-media {
+      position: absolute;
+      /* `100%` is the hero again, which is the container's content box, so
+         (100vw - 100%) / 2 is the distance out to the edge of the window. */
+      right: calc((100vw - 100%) / -2);
+      width: calc(58% + (100vw - 100%) / 2);
+      /* The same overhang below as above, which is what puts equal air above
+         the eyebrow and below the last jump link. It was --space-xl, 64px
+         against the 40px above, so the group sat high in the band however the
+         column was aligned. The top is fixed by the header, so the bottom is
+         the one that had to move. */
+      bottom: calc(var(--about-pad-top) * -1);
+      /* Up past this section's own padding only, so the top edge sits flush
+         against the bottom of the header. It used to take the header height
+         off as well and run up behind the nav; nothing is behind the header
+         now. */
+      top: calc(var(--about-pad-top) * -1);
+      aspect-ratio: auto;
+    }
+    .about__hero-img { height: 100%; object-fit: cover; }
+
+    /* Capped against the viewport rather than in characters alone, so the copy
+       stops short of the picture's left edge at every width now that the edge
+       has moved 8% in. 52ch still wins on a narrow desktop. */
+    .about__hero-words .about__lead .lead { max-width: min(52ch, 34vw); }
+    /* The copy and the links sit above the picture, which is behind them. */
+    .about__hero-words,
+    .jumps { position: relative; z-index: 1; }
+  }
+
+  /* The picture dissolves into the page instead of stopping at a line:
+     transparent at the edge nearest the headline, fully opaque at the edge of
+     the window, over the near 29% of its width.
+
+     **This replaced the scrim** that used to sit here. #222021 over this
+     photograph runs from 1.87:1 on its darkest grain to 15.53:1 on the
+     highlight, so the overlapping words needed help; a light wash over the
+     left edge gave them about 5.9:1. The mask does the same job better — at
+     60px in, where the statement overlaps, it is only about 15% opaque, so
+     what sits behind the words is mostly page colour and the contrast is
+     around 11:1. A scrim on top of a masked image would also have shown as a
+     pale band over the part that is now transparent. */
+  .about__hero-img {
+      /* Seven stops rather than two: a straight two-stop ramp bands visibly
+         across a band this wide, and these approximate an ease-out so the
+         steps between levels stay under what the eye picks up. */
+    --fade: linear-gradient(
+      to right,
+      transparent 0%,
+      rgb(0 0 0 / 0.05) 6%,
+      rgb(0 0 0 / 0.2) 11%,
+      rgb(0 0 0 / 0.45) 16%,
+      rgb(0 0 0 / 0.7) 21%,
+      rgb(0 0 0 / 0.9) 25%,
+      #000 29%
+    );
+    -webkit-mask-image: var(--fade);
+    mask-image: var(--fade);
+  }
+
+  /* Stacked, it sits under the headline, so it fades upward into it. */
+  @media (max-width: 63.99em) {
+    .about__hero-img {
+      --fade: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgb(0 0 0 / 0.05) 5%,
+        rgb(0 0 0 / 0.2) 9%,
+        rgb(0 0 0 / 0.45) 13%,
+        rgb(0 0 0 / 0.7) 17%,
+        rgb(0 0 0 / 0.9) 21%,
+        #000 25%
+      );
+    }
+  }
+
+  /* ---- Below the hero ---------------------------------------------------- */
+  /* Aligned to the left edge of the statement: same container, so the same
+     gutter. */
+  /* The jump links are all that sits here now: the copy moved up into the
+     hero on 23 October 2026. Still the narrow left column it was in, on the
+     same left edge as the eyebrow above it. */
+  /* The jump links sit in the hero grid now, so there is no wrapper left. */
+
+  /* ---- The jump links ---------------------------------------------------- */
+  /* Held off full black, so the label recedes behind the links it names —
+     they are the same size now, and this is what separates them. 0.7 and not
+     lower: 0.6 of #222021 misses AA at this size. */
+  .jumps__label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: var(--space-2xs);
+  }
+  .jumps__list { list-style: none; }
+
+  /* A row with a rule under it and the arrow at the far right. 44px minimum,
+     which is the tap target on a phone and comfortable everywhere else. */
+  .jump {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    min-height: 2.75rem;
+    padding-block: var(--space-2xs);
+    border-bottom: var(--stroke) solid var(--divider-line);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* Down a step from --text-sm. */
+  .jump__label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    transition: color 200ms var(--ease-out, ease-out);
+  }
+  .jump__arrow {
+    flex: none;
+    width: 0.6rem;
+    height: 0.6rem;
+    transition: transform 200ms var(--ease-out, ease-out);
+  }
+  .jump:hover .jump__label,
+  .jump:focus-visible .jump__label { color: var(--accent); }
+  .jump:hover .jump__arrow,
+  .jump:focus-visible .jump__arrow { transform: translate(2px, -2px); color: var(--accent); }
+  .jump:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jump__label,
+    .jump__arrow { transition: none; }
+    .jump:hover .jump__arrow,
+    .jump:focus-visible .jump__arrow { transform: none; }
+  }
+
   .about__intro { display: grid; justify-items: center; text-align: center; gap: var(--space-m); }
   /* Its own measure rather than the narrow container's and the shared .lead's
      48ch: the lines run to about 75 characters, a paragraph to read rather
@@ -154,7 +481,9 @@ const approach = [
   @media (min-width: 64em) {
     .split { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: var(--space-xl); row-gap: var(--space-2xl); align-items: start; }
   }
-  .split__head { display: grid; gap: var(--space-m); align-content: start; }
+  /* Only the eyebrow and its heading live here, so the gap is the eyebrow gap
+     — 24px at desktop as before, but 16px on a phone like the others. */
+  .split__head { display: grid; gap: var(--eyebrow-gap); align-content: start; }
   .split__body {
     display: grid;
     gap: var(--space-s);
@@ -166,6 +495,72 @@ const approach = [
   .split__body strong { font-weight: 700; }
 
   /* ---------- Approach: a list held apart by space, not by rules ---------- */
+  /* ---- Meet the team ----------------------------------------------------- */
+  /* --space-2xs here put 8px under the eyebrow, which read as one block. */
+  .team__head { display: grid; gap: var(--eyebrow-gap); margin-bottom: var(--space-xl); }
+
+  /* Two across on a phone rather than a stack four deep, four across once the
+     page is wide enough. Every card is its own grid item, so a role that runs
+     to two lines grows that card downwards and leaves the rest where they
+     are — the pictures stay level because they all share one ratio. */
+  .team {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Three rows per band of cards, for the subgrid below to line up on. */
+    grid-auto-rows: auto auto auto;
+    gap: var(--space-l) var(--space-m);
+    align-items: start;
+  }
+  @media (min-width: 64em) {
+    .team { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-m); }
+  }
+
+  /* Subgrid, so the picture, the name and the role each sit on a row shared
+     by every card in that row of the grid. Without it a name that wraps —
+     VENERA BULLIQI does at 375 — drops its own role 15px below the one
+     beside it. A role wrapping was always safe; a name wrapping was not. */
+  .team__card {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 3;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+
+  /* The picture and the empty block are the same box, so nothing shifts when
+     a photograph lands. */
+  .team__photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 1rem;
+  }
+  /* A flat tint off the ink, so it sits on the page rather than on top of it.
+     No outline and no label: it is a gap, not a control. */
+  .team__photo--empty { background: color-mix(in srgb, var(--ink) 9%, var(--bg)); }
+
+  .team__name {
+    font-family: var(--font-display);
+    font-stretch: var(--display-stretch);
+    font-size: var(--display-sm);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  /* 0.7 and not lower: 0.6 of #222021 misses AA at this size. */
+  .team__role {
+    font-size: var(--text-base);
+    font-weight: var(--weight-secondary);
+    line-height: 1.45;
+    opacity: 0.7;
+    text-wrap: pretty;
+  }
+
   .approach { list-style: none; display: grid; gap: var(--space-l); }
   .approach__item { display: grid; gap: var(--space-3xs); }
   @media (min-width: 64em) { .approach { gap: var(--space-xl); } }

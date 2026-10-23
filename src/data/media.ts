@@ -1,7 +1,7 @@
 import type { ImageMetadata } from 'astro';
 
 import servicesInvoice from '../assets/media/services-invoice.jpg';
-import homeCreators from '../assets/media/home-creators.jpg';
+import homeCaseStudy from '../assets/media/home-case-study.jpg';
 import areaCreatorCommunity from '../assets/media/area-creator-community.jpg';
 import areaCreatorUgc from '../assets/media/area-creator-ugc.jpg';
 // Affiliate Marketing came off the service list on 5 October 2026. The file
@@ -51,14 +51,22 @@ export interface VideoSlot {
 export const MEDIA = {
   home: {
     /**
-     * "Creators are one part of the equation." 2:3. AMAVI's own: campaign work
-     * for Le Olive and ADHD Now on the board (supplied 29 September 2026,
-     * cropped past the Instagram overlay it came with). It replaced the
-     * creators loop, which is still in public/media/features/ if wanted back.
+     * The case study. 2:3. AMAVI's own: the studio wall, with the printed
+     * sign and a laptop of content on the trolley (supplied 17 October 2026),
+     * replacing the earlier wide board shot.
+     *
+     * **Already cropped to 2:3**, so the frame crops nothing and the picture
+     * is the same at every width. The photograph is 3:4; the 133px came off
+     * the right, which was blazer and hair, because a centre crop clipped the
+     * A from the AutismCare sheet on the left. The full-height original is
+     * not in the repo — ask the client for it before re-cropping.
+     *
+     * Named `caseStudy`, not `creators`: the section it feeds has been the
+     * case study since 7 October 2026.
      */
-    creators: {
-      image: homeCreators,
-      alt: 'Someone looking at a board of AMAVI campaign work for Le Olive and ADHD Now',
+    caseStudy: {
+      image: homeCaseStudy,
+      alt: 'Someone in a black blazer at a wall of printed AMAVI campaign work, holding a sheet reading “This is your sign. Get professional marketing help.”, with a laptop of content on a trolley beside them',
     } as ImageSlot,
     /** "How we work." 2:3. From 15636407, first 12 seconds. */
     howWeWork: { src: '/media/features/studio' } as VideoSlot,

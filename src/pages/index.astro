@@ -90,7 +90,7 @@ const schema = {
   </section>
 
   {/* ================= Results: the figures beside the work ================= */}
-  <Numbers tiles={TILES.slice(0, 4)} labelledby="stats-heading">
+  <Numbers tiles={TILES} labelledby="stats-heading">
     <h2 id="stats-heading" class="display display--md">The numbers behind the work</h2>
 
     <dl class="figures">
@@ -130,8 +130,8 @@ const schema = {
       growth</strong>, and has since launched <strong>100+ creator partnerships</strong> with{' '}
       <strong>25 active partnerships currently running and fully managed by AMAVI Socials</strong>.
     </p>
-    {/* AMAVI's own campaign board: see src/data/media.ts. */}
-    <Frame slot="media" media={MEDIA.home.creators} ratio="2/3" sizes="(min-width: 48em) 22rem, 60vw" />
+    {/* AMAVI's own studio wall: see src/data/media.ts. */}
+    <Frame slot="media" media={MEDIA.home.caseStudy} ratio="2/3" sizes="(min-width: 48em) 22rem, 60vw" />
   </Feature>
 
   {/* ================= How we work ================= */}

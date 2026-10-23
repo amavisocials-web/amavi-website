@@ -18,21 +18,21 @@ const { reverse = false, ruled = false, labelledby } = Astro.props;
 
 <section class:list={['section', 'feature', { 'section--ruled': ruled, 'feature--reverse': reverse }]}
          aria-labelledby={labelledby}>
-  <div class="container feature__grid">
+  <div class="container media-row feature__grid">
     <div class="feature__text"><slot /></div>
     <div class="feature__media"><slot name="media" /></div>
   </div>
 </section>
 
 <style>
-  .feature__grid { display: grid; gap: var(--space-xl); }
+  /* display, gap and the centring come from .media-row in global.css. */
   .feature__text { display: grid; gap: var(--space-m); align-content: start; max-width: 38rem; }
   .feature__media { width: min(100%, 16rem); }
 
   @media (min-width: 48em) {
     .feature__grid {
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      align-items: start;
+
       column-gap: var(--space-xl);
       row-gap: var(--space-2xl);
     }
