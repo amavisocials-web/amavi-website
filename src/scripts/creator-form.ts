@@ -160,7 +160,7 @@ function validate(scope: HTMLElement): HTMLElement[] {
   // Rates: asked for only once the answer is Paid or Both, which is also the
   // only time they're on screen.
   const rateGroup = scope.querySelector<HTMLElement>('[data-rate-group]');
-  const ratesShown = rateGroup && !rateGroup.closest('[data-rates]')?.hidden;
+  const ratesShown = rateGroup && !rateGroup.closest<HTMLElement>('[data-rates]')?.hidden;
   if (rateGroup && ratesShown) {
     clearError(rateGroup);
     const rates = [...rateGroup.querySelectorAll<HTMLInputElement>('[data-rate]')];
@@ -476,7 +476,7 @@ function enhance(form: HTMLFormElement) {
     }
 
     // The backup copy is sent alongside and never decides the outcome.
-    const backup = toNetlify(form.getAttribute('action') || '/', body).catch((reason) => {
+    const backup = toNetlify('/', body).catch((reason) => {
       console.error('[amavi] backup copy not sent to Netlify Forms', reason);
     });
 

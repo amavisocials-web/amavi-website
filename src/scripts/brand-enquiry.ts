@@ -66,7 +66,11 @@ if (root && form && button && label && status && done) {
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
-      const res = await fetch(form.getAttribute('action') || '/contact/', {
+      /* To "/", not the page path: Netlify's form handling takes a POST to the
+         site root with the form-name in the body, and that is the documented
+         route for submitting by fetch. The form's own `action` still points at
+         /contact/ for the no-JavaScript fallback. */
+      const res = await fetch('/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: body.toString(),

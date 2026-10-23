@@ -72,8 +72,9 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-subscribe]')) {
 
     const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
     // Where it goes: the component's own ENDPOINT if one has been set, and
-    // the form's action — Netlify Forms — until then.
-    const url = root.dataset.endpoint || form.getAttribute('action') || '/';
+    // Netlify Forms until then, which by fetch means the site root, not the
+    // page's action.
+    const url = root.dataset.endpoint || '/';
 
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), TIMEOUT);
