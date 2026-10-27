@@ -5,8 +5,9 @@
  * exactly one run's width. This file only decides when it runs, and lets the
  * row be dragged.
  *
- * - **Touch pauses it.** Pointer down pauses the animation and starts a drag;
- *   pointer up resumes. The animation keeps its own progress across a pause,
+ * - **Touch pauses it.** Pointer down pauses the animation; once it has moved
+ *   a few pixels it is a drag, and pointer up resumes. A press that never
+ *   moved is a tap, which opens the tile's Instagram post. The animation keeps its own progress across a pause,
  *   so it picks up where it was rather than snapping back, and the drag the
  *   person made stays as an offset on a wrapper above it. Two elements,
  *   because one cannot carry an animated transform and a script-set one.
@@ -20,6 +21,9 @@
  */
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+/** How far a press may move, in CSS pixels, and still count as a tap. */
+const TAP_SLOP = 8;
+
 for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   const drag = row.querySelector<HTMLElement>('[data-marquee-drag]');
   const track = row.querySelector<HTMLElement>('[data-marquee-track]');
@@ -27,13 +31,17 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   if (!drag || !track || !firstRun) continue;
 
   let onScreen = false;
-  let dragging = false;
+  let pressed = false; // a pointer is down on the row
+  let dragging = false; // ...and has moved far enough to be a swipe
+  let swiped = false; // the last press was a swipe, so its click opens nothing
+  let downX = 0;
   let startX = 0;
   let offset = 0;
 
-  /** Paused unless it is on screen and nobody has hold of it. */
+  /** Paused unless it is on screen, nobody has hold of it and no tile has focus. */
   const sync = () => {
-    track.style.animationPlayState = onScreen && !dragging ? 'running' : 'paused';
+    const held = pressed || row.matches(':focus-within');
+    track.style.animationPlayState = onScreen && !held ? 'running' : 'paused';
   };
 
   new IntersectionObserver(
@@ -44,20 +52,17 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
     { threshold: 0 },
   ).observe(row);
 
+  /* A press is a tap until it moves TAP_SLOP pixels: only then does it become
+     a drag and take pointer capture. Capturing at once would route the
+     release to the row, and a tap would never reach the tile's link. */
   row.addEventListener(
     'pointerdown',
     (event) => {
       if (still.matches) return;
-      dragging = true;
-      startX = event.clientX;
-      /* Capture keeps the drag alive if the finger leaves the row. It throws
-         on a pointer the browser no longer considers active, which must not
-         take the drag down with it. */
-      try {
-        row.setPointerCapture(event.pointerId);
-      } catch {
-        /* Carry on uncaptured. */
-      }
+      pressed = true;
+      dragging = false;
+      swiped = false;
+      downX = startX = event.clientX;
       sync();
     },
     { passive: true },
@@ -66,7 +71,19 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   row.addEventListener(
     'pointermove',
     (event) => {
-      if (!dragging) return;
+      if (!pressed) return;
+      if (!dragging) {
+        if (Math.abs(event.clientX - downX) < TAP_SLOP) return;
+        dragging = swiped = true;
+        /* Capture keeps the drag alive if the finger leaves the row. It throws
+           on a pointer the browser no longer considers active, which must not
+           take the drag down with it. */
+        try {
+          row.setPointerCapture(event.pointerId);
+        } catch {
+          /* Carry on uncaptured. */
+        }
+      }
       const width = firstRun.getBoundingClientRect().width;
       /* Wrapped to one run, so repeated swipes cannot walk the row away. */
       offset = width ? (((offset + event.clientX - startX) % width) + width) % width - width : 0;
@@ -77,8 +94,8 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   );
 
   const release = (event: PointerEvent) => {
-    if (!dragging) return;
-    dragging = false;
+    if (!pressed) return;
+    pressed = dragging = false;
     try {
       if (row.hasPointerCapture(event.pointerId)) row.releasePointerCapture(event.pointerId);
     } catch {
@@ -89,10 +106,27 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   row.addEventListener('pointerup', release, { passive: true });
   row.addEventListener('pointercancel', release, { passive: true });
 
+  /* A swipe that ends over a tile must not open its post. Caught on the way
+     down, before the link sees it. */
+  row.addEventListener(
+    'click',
+    (event) => {
+      if (!swiped) return;
+      swiped = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    { capture: true },
+  );
+
+  /* A tile with keyboard focus holds the row still, as the columns do. */
+  row.addEventListener('focusin', sync);
+  row.addEventListener('focusout', () => requestAnimationFrame(sync));
+
   /* Following the setting while the page is open, rather than only at load. */
   still.addEventListener('change', () => {
     if (still.matches) {
-      dragging = false;
+      pressed = dragging = swiped = false;
       drag.style.transform = '';
       offset = 0;
     }
@@ -100,6 +134,48 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   });
 
   sync();
+}
+
+/* --- Keyboard focus on a tile ---------------------------------------------
+ *
+ * The tiles are links (27 October 2026). With keyboard focus on one, CSS parks
+ * the loop at its start (Numbers.astro); this then brings the tile into view
+ * inside its clipped column or row, and puts the scroll back when focus
+ * leaves. Without it, a tab could land on a tile outside the window.
+ */
+/** A focused tile, inside its clipped frame and on the page clear of the
+    sticky header. Two steps rather than scrollIntoView, which knows nothing
+    of the header and would tuck the top of the tile, ring and all, under it. */
+const reveal = (tile: HTMLElement, frame: HTMLElement) => {
+  const t = tile.getBoundingClientRect();
+  const f = frame.getBoundingClientRect();
+  if (t.top < f.top) frame.scrollTop -= f.top - t.top;
+  else if (t.bottom > f.bottom) frame.scrollTop += t.bottom - f.bottom;
+  if (t.left < f.left) frame.scrollLeft -= f.left - t.left;
+  else if (t.right > f.right) frame.scrollLeft += t.right - f.right;
+
+  const gap = 16;
+  const top = (document.querySelector('.site-header')?.getBoundingClientRect().bottom ?? 0) + gap;
+  const r = tile.getBoundingClientRect();
+  const by = r.top < top ? r.top - top : r.bottom > innerHeight - gap ? r.bottom - (innerHeight - gap) : 0;
+  if (by) window.scrollTo(0, window.scrollY + by);
+};
+
+for (const frame of document.querySelectorAll<HTMLElement>('.collage__column, [data-marquee]')) {
+  frame.addEventListener('focusin', (event) => {
+    const tile = event.target as HTMLElement;
+    if (!tile.matches('a:focus-visible')) return;
+    // After the style change that parks the loop has laid out, and only if
+    // focus has not already moved on: a late reveal would undo the reset below.
+    requestAnimationFrame(() => {
+      if (document.activeElement === tile) reveal(tile, frame);
+    });
+  });
+  frame.addEventListener('focusout', (event) => {
+    if (frame.contains(event.relatedTarget as Node | null)) return;
+    frame.scrollTop = 0;
+    frame.scrollLeft = 0;
+  });
 }
 
 /* --- Playback on a phone: two at a time, the two nearest the centre --------

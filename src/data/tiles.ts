@@ -21,9 +21,8 @@
  * columns with nothing seen twice. Portrait 9:16, please: tile 7 arrived
  * landscape and had to be cropped to a third of its frame.
  *
- * Each tile keeps the link to its original Instagram post, for a row that
- * linked them; that row came off on 30 September 2026 and is in git if it is
- * wanted back.
+ * Each tile links to its original Instagram post (`href`), opening in a new
+ * tab, since 27 October 2026. A tile without one renders unlinked.
  *
  * - `src` is the video's base path, with no extension: the tile plays
  *   `<src>.webm` and `<src>.mp4`, whichever exist, and preloads neither.
@@ -46,8 +45,8 @@ export interface ContentTile {
   src: string;
   /** The still: the video's first frame, or the image itself for a photo post. */
   poster: string;
-  /** The original Instagram post. */
-  href: string;
+  /** The original Instagram post. Optional: without one the tile is not a link. */
+  href?: string;
   /** The creator's handle, e.g. '@handle', shown under the tile. Empty until cleared. */
   credit: string;
   /** What the post shows. Leads the link's accessible name. */
@@ -58,7 +57,7 @@ export const TILES: ContentTile[] = [
   {
     src: '/media/tiles/tile-6',
     poster: '/media/tiles/tile-6.jpg',
-    href: 'https://www.instagram.com/p/DbJTBDFq21K/',
+    href: 'https://www.instagram.com/reel/DbJTBDFq21K/',
     credit: '',
     alt: 'A creator talks to camera in a car about being called thick for having ADHD',
   },
@@ -86,7 +85,7 @@ export const TILES: ContentTile[] = [
   {
     src: '/media/tiles/tile-5',
     poster: '/media/tiles/tile-5.jpg',
-    href: 'https://www.instagram.com/p/DdE56TYOjHF/',
+    href: 'https://www.instagram.com/reel/DdPIN9tOP-8/',
     credit: '',
     alt: 'A man tells his story in a podcast-style interview',
   },

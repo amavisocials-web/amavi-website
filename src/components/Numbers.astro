@@ -85,6 +85,24 @@ const columns = DEAL.map((column) =>
  * width never intersects, so its videos never load (src/scripts/loop-videos.ts).
  */
 const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
+
+/**
+ * A tile's link, if it has a post: a new tab, named for what the post shows.
+ * The copies made for the loop are already aria-hidden; their links also leave
+ * the tab order, so each post is reached once from the keyboard. Not
+ * draggable, or a mouse drag along the row would pick the link up instead.
+ */
+const linkTo = (tile: ContentTile, copy: number) =>
+  tile.href
+    ? {
+        href: tile.href,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        draggable: 'false',
+        'aria-label': `View this post on Instagram: ${tile.alt} (opens in a new tab)`,
+        ...(copy > 0 ? { tabindex: '-1' } : {}),
+      }
+    : {};
 ---
 
 <section class="section numbers" aria-labelledby={labelledby}>
@@ -103,14 +121,17 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
         <div class="collage-row__track" data-marquee-track>
           {[0, 1].map((copy) => (
             <div class="collage-row__run" aria-hidden={copy > 0 ? 'true' : undefined}>
-              {run.map((tile) => (
-                <div class="collage-row__tile">
-                  {/* Played by src/scripts/collage-marquee.ts, two at most. */}
-                  <LoopVideo src={tile.src} poster={tile.poster} ratio="9/16"
-                             managed autoplay preload="metadata"
-                             class="collage-row__media" />
-                </div>
-              ))}
+              {run.map((tile) => {
+                const Tile = tile.href ? 'a' : 'div';
+                return (
+                  <Tile class="collage-row__tile" {...linkTo(tile, copy)}>
+                    {/* Played by src/scripts/collage-marquee.ts, two at most. */}
+                    <LoopVideo src={tile.src} poster={tile.poster} ratio="9/16"
+                               managed autoplay preload="metadata"
+                               class="collage-row__media" />
+                  </Tile>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -123,13 +144,16 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
              data-column={i + 1}>
           {[0, 1].map((copy) => (
             <div class="collage__set" aria-hidden={copy > 0 ? 'true' : undefined}>
-              {column.map((tile) => (
-                <div class="collage__tile">
-                  <LoopVideo src={tile.src} poster={tile.poster} ratio={tile.ratio}
-                     autoplay preload="metadata"
-                     loopFrom="(min-width: 64em)" class="collage__media" />
-                </div>
-              ))}
+              {column.map((tile) => {
+                const Tile = tile.href ? 'a' : 'div';
+                return (
+                  <Tile class="collage__tile" {...linkTo(tile, copy)}>
+                    <LoopVideo src={tile.src} poster={tile.poster} ratio={tile.ratio}
+                       autoplay preload="metadata"
+                       loopFrom="(min-width: 64em)" class="collage__media" />
+                  </Tile>
+                );
+              })}
             </div>
           ))}
         </div>
@@ -382,6 +406,53 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
 
   .collage:hover .collage__set,
   .collage:focus-within .collage__set { animation-play-state: paused; }
+
+  /* --- Tiles that link to their post ---------------------------------------
+     The anchor is the tile itself, inside the moving set, so the link travels
+     with it. The ring is drawn inside the tile: the row and the columns clip
+     at their edges and would cut one drawn outside. White within the accent,
+     so it reads on light frames and dark ones. */
+  a.collage-row__tile,
+  a.collage__tile {
+    display: block;
+    position: relative;
+    border-radius: var(--tile-radius);
+    color: inherit;
+    cursor: pointer;
+    -webkit-user-drag: none;
+    transition: opacity 200ms ease-out;
+  }
+  @media (hover: hover) {
+    a.collage-row__tile:hover,
+    a.collage__tile:hover { opacity: 0.85; }
+  }
+  a.collage-row__tile:focus-visible,
+  a.collage__tile:focus-visible {
+    outline: var(--stroke-mark) solid var(--accent);
+    outline-offset: calc(var(--stroke-mark) * -1);
+  }
+  a.collage-row__tile:focus-visible::after,
+  a.collage__tile:focus-visible::after {
+    content: '';
+    position: absolute;
+    inset: var(--stroke-mark);
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 2px var(--on-dark);
+    pointer-events: none;
+  }
+  /* The dimming still marks a link, but without the fade. */
+  @media (prefers-reduced-motion: reduce) {
+    a.collage-row__tile,
+    a.collage__tile { transition: none; }
+  }
+
+  /* Keyboard focus on a tile parks the loop at its start, so the layout and
+     what is on screen agree again and the script can scroll the focused tile
+     into view (src/scripts/collage-marquee.ts). Paused mid-loop instead, a
+     tile can be focused while sitting outside its column's window. Keyboard
+     only: a mouse click leaves the loop where it is. */
+  .collage:has(a:focus-visible) .collage__set,
+  .collage-row:has(a:focus-visible) .collage-row__track { animation: none; }
 
   /* Nothing moves: one copy of each column, standing still. */
   @media (prefers-reduced-motion: reduce) {
