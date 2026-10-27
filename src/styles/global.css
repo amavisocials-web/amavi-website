@@ -78,12 +78,19 @@
   /* The wordmark only — see src/components/Logo.astro. */
   --font-wordmark: 'Poppins', 'Montserrat Variable', Helvetica, Arial, sans-serif;
 
-  /* The scale steps by 1.125. Every size here is two steps below where the
-     type started, at the client's direction; buttons and form controls keep
-     their own sizes and are set where they are defined. */
-  --display-xl: clamp(1.5625rem, 0.875rem + 2.85vw, 3.1875rem);  /* home hero; headroom for the wider real face */
-  --display-lg: clamp(1.5rem, 0.9rem + 2.29vw, 2.75rem);         /* page titles */
-  --display-md: clamp(1.0625rem, 0.75rem + 1.34vw, 1.75rem);     /* section heads */
+  /* The scale steps by 1.125; buttons and form controls keep their own sizes
+     and are set where they are defined.
+
+     Every large heading is one size, --display, since 27 October 2026: the
+     size the services accordion already gave an open panel's title ("LIVE
+     EXPERIENCES"), which the client chose as the reference. It was
+     --display-md; the page titles and section heads above it came down to
+     it (44px and 46px at 1280, now 28px). The -xl, -lg and -md names stay,
+     all resolving to it, so nothing that uses them had to change. */
+  --display: clamp(1.0625rem, 0.75rem + 1.34vw, 1.75rem);
+  --display-xl: var(--display);  /* home hero */
+  --display-lg: var(--display);  /* page titles */
+  --display-md: var(--display);  /* section heads */
   --display-sm: clamp(0.8125rem, 0.7rem + 0.47vw, 1.0625rem);    /* small heads */
 
   /* 11px is the floor: two steps below the old 12px would not be readable.
