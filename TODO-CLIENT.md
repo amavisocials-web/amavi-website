@@ -21,11 +21,11 @@ These are the ones that are a problem the moment the site is live.
 
 | # | File | Waiting on |
 |---|---|---|
-| 1 | `src/pages/privacy.astro:45` | **Registered legal entity name, company registration number and registered address.** A published privacy policy needs all three. Currently a bracketed placeholder that renders on the page. |
-| 2 | `src/pages/privacy.astro:117` | Confirm the applications spreadsheet and the notification mailbox live in AMAVI's **Google Workspace**, not a personal Google account. Name any CRM or database applications later move to. |
-| 3 | `src/pages/privacy.astro:127` | If an analytics tool, CRM or email platform is added, it must be listed. Any transfer outside the EEA must be named with its safeguard. |
-| 4 | `src/pages/privacy.astro:95` | Optional: a fixed retention period, e.g. reviewing creator records every 24 months. |
-| 5 | `src/pages/privacy.astro:138` | Analytics not added yet. **GA4 sets cookies and would legally require a consent banner before it loads.** Plausible is cookieless and would not. |
+| 1 | `src/pages/_privacy.astro:66` | **Registered legal entity name, company registration number and registered address.** A published privacy policy needs all three. The page is **off the site since 27 October 2026** until these arrive; see the README. |
+| 2 | `src/pages/_privacy.astro:139` | Confirm the applications spreadsheet and the notification mailbox live in AMAVI's **Google Workspace**, not a personal Google account. Name any CRM or database applications later move to. |
+| 3 | `src/pages/_privacy.astro:149` | If an analytics tool, CRM or email platform is added, it must be listed. Any transfer outside the EEA must be named with its safeguard. |
+| 4 | `src/pages/_privacy.astro:117` | Optional: a fixed retention period, e.g. reviewing creator records every 24 months. |
+| 5 | `src/pages/_privacy.astro:160` | Analytics not added yet. **GA4 sets cookies and would legally require a consent banner before it loads.** Plausible is cookieless and would not. |
 | 6 | `src/layouts/Base.astro:55` | Which analytics: GA4 or Plausible. See above — the choice changes whether a consent banner is required. |
 | 7 | `src/pages/index.astro:33` | **"100+ partnerships delivered" is ahead of the brief**, which has 61 all-time. "1,000+" sits under its 1,100 creators sourced, so that one holds. Confirm the current counts before publishing either. |
 | 8 | `src/pages/index.astro:111` | The case study's **healthcare partner is unnamed** and its three figures are the client's own wording. Confirm the partner may be named and the figures may be published as they stand. |

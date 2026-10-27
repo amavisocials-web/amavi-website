@@ -102,10 +102,10 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 | `/journal/[slug]` | One post. Built from a markdown file; see Journal below |
 | `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Two columns: the heading and one line of instruction on the left; Brand? and Creator?, opening in place onto a card each, on the right |
-| `/privacy` | Privacy policy |
+| `/privacy` | Privacy policy. **Temporarily off the site**, see below |
 
-`/creators` redirects to `/become-a-creator`. **`/services` is temporarily off
-the site** — see below.
+`/creators` redirects to `/become-a-creator`. **`/services` and `/privacy` are
+temporarily off the site** — see below.
 
 ### Services, temporarily off the site
 
@@ -138,6 +138,29 @@ and put these back:**
 Each is marked with a comment naming this file. The accordion on the home page
 reads the same `src/data/services.ts`, so the service copy stays live and in one
 place while the page is down.
+
+### Privacy policy, temporarily off the site
+
+Taken down on 27 October 2026, at AMAVI's request, without deleting the text.
+`src/pages/privacy.astro` was renamed **`src/pages/_privacy.astro`**, so
+`/privacy/` does not build, is not in the sitemap, and returns the site's 404
+page. Unlike `/services` it is **not** redirected: nothing else on the site
+stands in for a privacy notice.
+
+**Worth knowing while it is down:** the creator form, the contact form and the
+newsletter sign-up all still collect personal data, and GDPR (Article 13)
+expects people to be told how it is used at the point they hand it over. The
+consent box on the creator form linked here for exactly that.
+
+Two links were taken out with it. **To restore the page, rename the file back
+and put these back:**
+
+| Where | What |
+|---|---|
+| `src/components/Footer.astro`, `.footer-base` | `<p class="meta"><a href="/privacy/">Privacy Policy</a></p>`, after the copyright line |
+| `src/components/CreatorForm.astro`, the consent text | `See our <a href="/privacy/">Privacy Policy</a>.` at the end |
+
+Each is marked with a comment naming this section.
 
 Two things to check when it comes back: the "Services invoice" photograph at the
 top of the page still lists the old five services, including Affiliate
@@ -1051,7 +1074,8 @@ and the sitemap are right at launch. It was `.co` until 23 October 2026; the
 3. **Deploy the Google Sheets script and set `PUBLIC_SHEETS_ENDPOINT`** — see
    "Creator applications → Google Sheets".
 4. **Fill in the privacy policy blanks** — registered entity name, company
-   number and address. They render visibly on `/privacy`.
+   number and address, marked in `src/pages/_privacy.astro`. The page is off
+   the site until then: see "Privacy policy, temporarily off the site".
 5. **Connect the custom domain and HTTPS.**
 
 ### Open questions for the client
