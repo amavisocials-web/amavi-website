@@ -208,6 +208,10 @@ const COPIES = 3;
     gap: var(--logo-gap);
     padding-right: var(--logo-gap);
     animation: marquee var(--marquee-duration) linear infinite;
+    /* Its own GPU layer in every browser. Not translate3d in the keyframes:
+       the minifier rewrites that as the shorter translate(), so it never
+       reaches the browser. */
+    will-change: transform;
   }
   @keyframes marquee {
     to { transform: translateX(-100%); }

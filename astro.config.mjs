@@ -21,6 +21,15 @@ export default defineConfig({
   ],
   build: { inlineStylesheets: 'auto' },
 
+  // The browsers the CSS is written down for. Left to the default, the minifier
+  // assumes only the newest ones: it dropped -webkit-backdrop-filter, so the
+  // frosted header was lost in Safari before 18, and it rewrote every media
+  // query in range syntax (width >= 48em), which Safari before 16.4 ignores.
+  // Naming Safari and iOS 15 keeps the prefixes and the min-width form.
+  vite: {
+    build: { cssTarget: ['safari15', 'ios15', 'chrome100', 'edge100', 'firefox100'] },
+  },
+
   // Addresses that no longer have a page of their own. /creators was the
   // creator page's earlier one; /services is off the site for now
   // (src/pages/_services.astro), and anyone arriving on an old link or an old

@@ -126,6 +126,7 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
               {column.map((tile) => (
                 <div class="collage__tile">
                   <LoopVideo src={tile.src} poster={tile.poster} ratio={tile.ratio}
+                     autoplay preload="metadata"
                      loopFrom="(min-width: 64em)" class="collage__media" />
                 </div>
               ))}
@@ -258,6 +259,9 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
     width: max-content;
     /* Slow: this is ambience, not a carousel. 52s for a full cycle. */
     animation: collage-drift 52s linear infinite;
+    /* Its own GPU layer in every browser, Safari included. Not translate3d
+       in the keyframes: the minifier rewrites that as translate(). */
+    will-change: transform;
   }
   .collage-row__run { display: flex; gap: var(--space-s); padding-right: var(--space-s); }
 
@@ -354,6 +358,7 @@ const run = DEAL.flat().map((index) => tiles[index % tiles.length]);
          of the loop and the two copies meet without a seam. */
       padding-bottom: var(--space-s);
       animation: tiles-up var(--loop-1) linear infinite;
+      will-change: transform; /* as the phone row's track, above */
     }
     .collage__set + .collage__set { display: flex; }
     .collage__column--down .collage__set { animation-name: tiles-down; }

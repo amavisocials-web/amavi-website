@@ -63,8 +63,10 @@ if (!files.playable) {
            disablepictureinpicture aria-hidden="true"
            data-loop data-loop-managed={managed ? 'true' : undefined}
            data-poster={files.poster} data-loop-from={loopFrom}>
-      {files.webm && <source data-src={files.webm} type="video/webm" />}
+      {/* MP4 (H.264) first: every browser plays it. WebM, if one is ever
+          added, only after it, as an optimisation. */}
       {files.mp4 && <source data-src={files.mp4} type="video/mp4" />}
+      {files.webm && <source data-src={files.webm} type="video/webm" />}
     </video>
   </div>
 ) : (

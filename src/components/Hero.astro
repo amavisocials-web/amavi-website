@@ -86,18 +86,23 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
     {/* Silent, captionless footage: decoration, hidden from assistive tech. */}
     {(desktop.playable || mobile.playable) && (
       <div class="hero__media" aria-hidden="true">
+        {/* muted, playsinline, autoplay, loop and preload are all in the markup,
+            where Safari reads them. None of them can start a download on its
+            own: the sources are only attached by loop-videos.ts as the hero
+            comes into view, and never under reduced motion. MP4 (H.264) first,
+            which every browser plays; WebM, if one is ever added, after it. */}
         {desktop.playable && (
-          <video class="hero__video hero__video--desktop" muted loop playsinline preload="none"
+          <video class="hero__video hero__video--desktop" muted loop playsinline autoplay preload="metadata"
                  disablepictureinpicture data-loop data-poster={desktop.poster}>
-            {desktop.webm && <source data-src={desktop.webm} type="video/webm" />}
             {desktop.mp4 && <source data-src={desktop.mp4} type="video/mp4" />}
+            {desktop.webm && <source data-src={desktop.webm} type="video/webm" />}
           </video>
         )}
         {mobile.playable && (
-          <video class="hero__video hero__video--mobile" muted loop playsinline preload="none"
+          <video class="hero__video hero__video--mobile" muted loop playsinline autoplay preload="metadata"
                  disablepictureinpicture data-loop data-poster={mobile.poster}>
-            {mobile.webm && <source data-src={mobile.webm} type="video/webm" />}
             {mobile.mp4 && <source data-src={mobile.mp4} type="video/mp4" />}
+            {mobile.webm && <source data-src={mobile.webm} type="video/webm" />}
           </video>
         )}
         <div class="hero__overlay"></div>

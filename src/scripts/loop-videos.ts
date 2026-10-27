@@ -44,8 +44,12 @@ function attachSources(video: HTMLVideoElement) {
 
 function sync(video: HTMLVideoElement) {
   if (visible.has(video) && !still.matches && video.dataset.sources === 'on') {
+    // Refused (Low Power Mode, a strict setting): the poster stays up.
     video.play().catch(() => {});
-  } else if (!video.paused) {
+  } else {
+    /* Even when already paused: a video carrying the autoplay attribute
+       whose sources were just attached would otherwise start by itself as
+       soon as it could, on screen or not. pause() also cancels that. */
     video.pause();
   }
 }
