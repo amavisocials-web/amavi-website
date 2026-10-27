@@ -11,6 +11,13 @@ import { SHEETS_ENDPOINT } from '../lib/sheets';
  * enquiry is still captured. The script then takes it over to submit in
  * place, which is the only reason the four states exist.
  *
+ * Two steps since 27 October 2026, in place: who you are (name, company,
+ * email), then the brief (what you need, budget, timing, and the brand). Both
+ * are in the markup as one form, so a single submission at the end carries
+ * every field, and without JavaScript the two simply show one after the
+ * other. An inline script hides step 2 before first paint; if the step script
+ * never arrives, its timer shows the long form again.
+ *
  * **Success is only ever shown on an actual success.** The script treats a
  * non-2xx response, a network error and a timeout alike: the form comes back
  * with every field still filled in and the error line appears. Nothing
@@ -29,10 +36,25 @@ import { SHEETS_ENDPOINT } from '../lib/sheets';
  */
 const FORM_NAME = 'brand-enquiry';
 
+/** Step 1. `error` is the message under a field left empty. */
 const FIELDS = [
-  { name: 'name', label: 'Name', type: 'text', placeholder: 'Your name', autocomplete: 'name' },
-  { name: 'email', label: 'Email', type: 'email', placeholder: 'you@company.com', autocomplete: 'email' },
+  { name: 'name', label: 'Name', type: 'text', placeholder: 'Your name', autocomplete: 'name', error: 'Please add your name.' },
+  { name: 'company', label: 'Company', type: 'text', placeholder: 'Your company', autocomplete: 'organization', error: 'Please add your company.' },
+  { name: 'email', label: 'Email', type: 'email', placeholder: 'you@company.com', autocomplete: 'email', error: 'Please add your email address.' },
 ] as const;
+
+/** Step 2: what the brief is. Only the brand description is required. */
+const NEEDS = [
+  'Creator campaigns',
+  'Always-on creator programme',
+  'UGC content',
+  'Founder and personal brand',
+  'Live experiences',
+  'Organic social content',
+  'Not sure yet',
+];
+const BUDGETS = ['Under 5k', '5k to 15k', '15k to 50k', '50k+', 'Not decided yet'];
+const STARTS = ['As soon as possible', 'Within a month', 'Within three months', 'Just exploring'];
 ---
 
 <div class="enquiry" data-enquiry data-state="idle">
@@ -47,41 +69,112 @@ const FIELDS = [
     data-enquiry-form
     novalidate
   >
+    {/* Steps before first paint: step 2 hidden until the script takes over.
+        If it never does, the long form comes back after four seconds. */}
+    <script is:inline>
+      (function (form) {
+        form.dataset.steps = 'pending';
+        setTimeout(function () { if (form.dataset.steps === 'pending') delete form.dataset.steps; }, 4000);
+      })(document.currentScript.parentElement);
+    </script>
     <input type="hidden" name="form-name" value={FORM_NAME} />
     <p class="honeypot" aria-hidden="true">
       <label>Leave this empty <input name="company_website" tabindex="-1" autocomplete="off" /></label>
     </p>
 
-    {FIELDS.map((field) => (
-      <div class="field">
-        <label class="field__label" for={`enquiry-${field.name}`}>{field.label}</label>
-        <input
-          class="field__input"
-          id={`enquiry-${field.name}`}
-          name={field.name}
-          type={field.type}
-          placeholder={field.placeholder}
-          autocomplete={field.autocomplete}
-          required
-        />
-      </div>
-    ))}
-
-    <div class="field">
-      <label class="field__label" for="enquiry-message">How can we help</label>
-      <textarea
-        class="field__input field__input--area"
-        id="enquiry-message"
-        name="message"
-        rows="4"
-        placeholder="I want to start influencer marketing for my brand"
-        required
-      ></textarea>
+    {/* Visual only: each step's legend says "Step n of 2" to screen readers. */}
+    <div class="enquiry__progress" aria-hidden="true">
+      <p class="enquiry__count" data-enquiry-count>Step 1 of 2</p>
+      <ol class="enquiry__segments" role="list">
+        <li class="enquiry__segment is-on" data-enquiry-segment></li>
+        <li class="enquiry__segment" data-enquiry-segment></li>
+      </ol>
     </div>
 
-    <button class="btn btn--primary enquiry__button" type="submit" data-enquiry-button>
-      <span data-enquiry-label>Get started</span>
-    </button>
+    <fieldset class="enquiry__step" data-enquiry-step="1">
+      <legend class="visually-hidden">Step 1 of 2: about you</legend>
+      {FIELDS.map((field) => (
+        <div class="field">
+          <label class="field__label" for={`enquiry-${field.name}`}>{field.label}</label>
+          <input
+            class="field__input"
+            id={`enquiry-${field.name}`}
+            name={field.name}
+            type={field.type}
+            placeholder={field.placeholder}
+            autocomplete={field.autocomplete}
+            required
+            aria-describedby={`enquiry-${field.name}-error`}
+            data-error={field.error}
+          />
+          <p class="field__error" id={`enquiry-${field.name}-error`} aria-live="polite"></p>
+        </div>
+      ))}
+    </fieldset>
+
+    <fieldset class="enquiry__step" data-enquiry-step="2">
+      <legend class="visually-hidden">Step 2 of 2: about the brief</legend>
+
+      <div class="field" role="group" aria-labelledby="enquiry-needs-label">
+        <span class="field__label" id="enquiry-needs-label">
+          What do you need help with <span class="field__optional">(choose any)</span>
+        </span>
+        <div class="chips">
+          {NEEDS.map((need) => (
+            <label class="chip">
+              <input type="checkbox" name="needs[]" value={need} />
+              <span class="chip__label">{need}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div class="field" role="radiogroup" aria-labelledby="enquiry-budget-label">
+        <span class="field__label" id="enquiry-budget-label">What is the budget</span>
+        <div class="chips">
+          {BUDGETS.map((budget) => (
+            <label class="chip">
+              <input type="radio" name="budget" value={budget} />
+              <span class="chip__label">{budget}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div class="field" role="radiogroup" aria-labelledby="enquiry-start-label">
+        <span class="field__label" id="enquiry-start-label">When do you want to start</span>
+        <div class="chips">
+          {STARTS.map((start) => (
+            <label class="chip">
+              <input type="radio" name="start" value={start} />
+              <span class="chip__label">{start}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="enquiry-brand">Tell us about the brand</label>
+        <textarea
+          class="field__input field__input--area"
+          id="enquiry-brand"
+          name="brand"
+          rows="4"
+          placeholder="What you sell, who you are trying to reach, and what you have tried so far."
+          required
+          aria-describedby="enquiry-brand-error"
+          data-error="Please tell us about the brand."
+        ></textarea>
+        <p class="field__error" id="enquiry-brand-error" aria-live="polite"></p>
+      </div>
+    </fieldset>
+
+    <div class="enquiry__actions">
+      <button class="enquiry__back" type="button" data-enquiry-back hidden>Back</button>
+      <button class="btn btn--primary enquiry__button" type="submit" data-enquiry-button>
+        <span data-enquiry-label>Get started</span>
+      </button>
+    </div>
   </form>
 
   {/* The error and any validation message. Polite, so it is read without
@@ -140,6 +233,55 @@ const FIELDS = [
   .field__input[aria-invalid='true'] { border-bottom-width: var(--stroke-mark); }
 
   .field__input--area { min-height: 7rem; resize: vertical; }
+
+  /* --- Two steps ------------------------------------------------------------
+     `data-steps` is set by the inline script before first paint ("pending")
+     and by the step script once it runs ("ready"); `data-current` says which
+     step is showing. Without either, both steps show as one long form. */
+  .enquiry__step { display: grid; gap: var(--space-m); min-width: 0; margin: 0; padding: 0; border: 0; }
+  .enquiry__form[data-steps='pending'] [data-enquiry-step='2'],
+  .enquiry__form[data-steps='ready'][data-current='1'] [data-enquiry-step='2'],
+  .enquiry__form[data-steps='ready'][data-current='2'] [data-enquiry-step='1'] { display: none; }
+
+  /* Step 1 of 2, and two segments filled in the accent up to this step, as
+     on the creator application. Only while it is in steps. */
+  .enquiry__progress { display: grid; gap: var(--space-xs); }
+  .enquiry__form:not([data-steps]) .enquiry__progress { display: none; }
+  .enquiry__count {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+  }
+  .enquiry__segments { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem; margin: 0; padding: 0; }
+  .enquiry__segment {
+    height: 0.4rem;
+    border: var(--stroke) solid var(--line);
+    transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .enquiry__segment.is-on { background: var(--accent); border-color: var(--accent); }
+
+  /* Back is a link in look, a button in kind: it changes the step, it does
+     not go anywhere. Beside the main button on step 2. */
+  .enquiry__actions { display: flex; align-items: center; gap: var(--space-m); }
+  .enquiry__back {
+    flex: none;
+    padding: 0.5rem 0;
+    font: inherit;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-strong);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    border-bottom: var(--stroke) solid currentColor;
+    cursor: pointer;
+  }
+  .enquiry__back:hover { color: var(--accent); }
+  .enquiry__back:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
+  .enquiry__back[hidden] { display: none; }
+  .enquiry__actions .enquiry__button { flex: 1 1 auto; }
 
   /* Full width of the column, accent fill, white text. */
   .enquiry__button { width: 100%; justify-content: center; }

@@ -18,7 +18,14 @@ import { NAV_LINKS, CONTACT_PATH, CREATOR_PATH, BRAND_ENQUIRY_MAILTO, CONTACT_EM
  */
 const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 const isCurrent = (href: string) => path === href;
-const links = [{ label: 'Home', href: '/' }, ...NAV_LINKS, { label: 'Get in Touch', href: CONTACT_PATH }];
+/* The open menu's order: Get in Touch above Become a Creator since
+   27 October 2026. NAV_LINKS keeps its own order, which the 404 page reads. */
+const links = [
+  { label: 'Home', href: '/' },
+  ...NAV_LINKS.filter((link) => link.href !== CREATOR_PATH),
+  { label: 'Get in Touch', href: CONTACT_PATH },
+  ...NAV_LINKS.filter((link) => link.href === CREATOR_PATH),
+];
 ---
 
 <header class="site-header" data-header>

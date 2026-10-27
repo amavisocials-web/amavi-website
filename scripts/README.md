@@ -31,6 +31,13 @@ to Netlify Forms (Forms → brand-enquiry). The script emails it to
 partnerships@amavisocials.com as *New brand enquiry — <name>*, with Reply-To
 set to the enquirer, so answering is just Reply. Nothing goes in the sheet.
 
+Since 27 October 2026 the form has two steps (name, company, email; then what
+they need, budget, when, and the brand). The script prints a name, an email
+and a message, so the page writes the company and every step 2 answer into
+`message` before sending; the email shows them as lines under *Message*, and
+no change to the deployed script was needed. Netlify Forms stores each answer
+as its own field.
+
 Here the email is the delivery, so a failed email is not swallowed: the form
 shows its error and gives the enquirer an address to write to instead. The
 script does this, rather than Netlify's own form notifications, because those
