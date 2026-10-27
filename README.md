@@ -98,13 +98,13 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 |---|---|
 | `/` | Full-screen video hero ("Content that connects"), copy centred, with "Brands \| Creators" under the headline and the two buttons under that; the "Trusted by" logo marquee; what AMAVI is, in three paragraphs; the three figures beside a drifting collage of creator work; the case study; the six services, as an accordion |
 | `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting and optimisation), the philosophy over a photograph in black, and the closing invitation |
-| `/journal` | Notes on the work: every published post as a row, newest first |
-| `/journal/[slug]` | One post. Built from a markdown file; see Journal below |
+| `/culture` | AMAVI Culture: every published piece as a row, newest first, each opening on Substack in a new tab. No article pages; see AMAVI Culture below |
 | `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Two columns: the heading and one line of instruction on the left; Brand? and Creator?, opening in place onto a card each, on the right |
 | `/privacy` | Privacy policy. **Temporarily off the site**, see below |
 
-`/creators` redirects to `/become-a-creator`. **`/services` and `/privacy` are
+`/creators` redirects to `/become-a-creator` and `/journal` to `/culture`.
+**`/services` and `/privacy` are
 temporarily off the site** — see below.
 
 ### Services, temporarily off the site
@@ -173,9 +173,10 @@ page renders, so they ship on every build while it is off.
 src/
   consts.ts              Site-wide constants: email, nav, socials, positioning,
                          tagline, region label, hero video path
-  content.config.ts      The journal collection and its schema
-  content/journal/       One markdown file per post, plus its own README
-  lib/journal.ts         The published list, the ordering and the date formats
+  content.config.ts      The AMAVI Culture collection and its schema
+  content/culture/       One markdown file per post, frontmatter only, its
+                         thumbnail, and its own README
+  lib/culture.ts         The published list, the ordering and the date formats
   data/clients.ts        Client manifest: logo, site, clearance, optical sizing
   data/services.ts       The six practice areas, read by both accordions; the
                          sectors and results (kept, not rendered)
@@ -191,8 +192,7 @@ src/
                          invitation), Footer, Hero, Feature, Numbers,
                          ServiceList (the practice areas, on both pages),
                          ContactRoutes (the two questions on Get in touch),
-                         JournalRow (one post as a row, on the listing and
-                         under a post),
+                         CultureRow (one post as a row on /culture),
                          LoopVideo, Placeholder, ProofLink, LogoWall,
                          the creator form, Logo, Lines, Frame, Fonts.
                          ServicesSlider and ContactPaths are kept but unused:
@@ -204,8 +204,6 @@ src/
   scripts/service-accordions.ts  Every practice-area accordion, opening in place
   scripts/services-slider.ts  Unused, with its component
   scripts/country-combobox.ts  The country field, as a combobox you type into
-  scripts/journal-preview.ts  The cover that follows the cursor on /journal
-  scripts/reading-progress.ts The line along the header on a post page
   scripts/creator-form.ts  The application's steps, validation and submission
   pages/                 One file per route. A leading underscore takes a file
                          out of routing: _services.astro is off the site
@@ -252,10 +250,10 @@ only colour values anywhere in the codebase:
 | `--bg` | `#F2F0EF` | Every background, bar the dark surfaces. A warm off-white, not paper white. No tinted, grey or alternating sections |
 | `--ink` | `#222021` | All text and every heading. A near-black with a trace of warmth, so the type sits on the ground rather than cutting into it. **Rules are `--line`, which is still pure black** |
 | `--line` | `var(--ink)` | Every rule, divider, border, field outline and table line. It follows the ink: a rule is drawn in the same near-black as the type, not in a colour of its own. It keeps its own name because what it is for is different |
-| `--accent` | `#341BCA` | Accents and highlights: the logo, links, button fills and outlines, hover and pressed states, focus rings, accordion and step numbers, the drawn circle, the reading-progress line. One token: the blue reads both as text on white and under white as a fill, at 9.74:1 either way |
+| `--accent` | `#341BCA` | Accents and highlights: the logo, links, button fills and outlines, hover and pressed states, focus rings, accordion and step numbers, the drawn circle. One token: the blue reads both as text on white and under white as a fill, at 9.74:1 either way |
 | `--surface-dark` | `#000000` | The footer, and the flat overlay under text on video |
 | `--on-dark` | `#FFFFFF` | Text, links, outlines and focus rings on black and on video |
-| `--divider-line` | 6% of `--ink`, and `rgb(255 255 255 / 0.10)` under `.surface-dark` | The few lines left between sections, and between journal rows |
+| `--divider-line` | 6% of `--ink`, and `rgb(255 255 255 / 0.10)` under `.surface-dark` | The few lines left between sections, and between Culture rows |
 | `--tint` | `rgb(0 0 0 / 0.04)` | A row under the pointer, where a fill of the accent would read as a block of colour rather than a state |
 
 **Ink and surfaces are two different things.** `--ink` (and `--line` with it)
@@ -990,57 +988,50 @@ node -e "require('sharp')('tile-2.png').jpeg({ quality: 75, mozjpeg: true }).toF
 
 ---
 
-## Journal
+## AMAVI Culture
+
+**An index of pieces that are read on Substack.** `/culture/` lists them; the
+site has no article pages of its own. Until 28 October 2026 each post had a
+preview page that faded into a "Read on Substack" button; that page, its
+preview copy, the fade, the button and the share and reading-progress scripts
+built for it were removed, and the old post addresses now return the 404 page.
+(The section was `/journal` until 23 October 2026; `/journal` redirects.)
 
 **Adding a post is adding a file.** One markdown file in
-`src/content/journal/` becomes a row on `/journal`, a page of its own, an item
-in the feed and an entry in the sitemap. No route is registered by hand and no
-code changes. The instructions for whoever writes the next one are in
-`src/content/journal/README.md`, written for someone who does not read code.
+`src/content/culture/`, frontmatter only, becomes a row on `/culture/` and an
+item in the feed. No route is registered by hand and no code changes. The
+instructions for whoever writes the next one are in
+`src/content/culture/README.md`, written for someone who does not read code.
 
-- **The collection** is `src/content.config.ts`: title, excerpt and date are
-  required; reading time, tags, a cover, a Substack URL and `draft` are not.
-  `README.md` is excluded from the glob, so the instructions are not a post.
-- **One list, four readers.** `publishedPosts()` in `src/lib/journal.ts` drops
-  drafts and sorts by date, newest first, and the listing, each post page, the
-  "next" rows and the feed all read from it. A draft therefore has no row, no
-  page, no feed item and no sitemap entry — verified by building with one.
-- **The row** (`JournalRow.astro`) is shared by the listing and the "next"
-  block, so the two cannot drift. The whole row is the link. On hover the title
-  steps right 12px and takes the accent while an arrow fades into the space it
-  left: the arrow is positioned in that gap rather than inserted, so nothing
-  reflows. Under `prefers-reduced-motion` the colour changes and nothing moves.
-- **Cover images never appear in a row.** `journal-preview.ts` fades one in
-  beside the cursor instead, 280px wide over 200ms, and only where there is a
-  fine pointer and motion is welcome — a phone never builds the element. A post
-  without a cover simply has nothing to show, and a journal where no post has
-  one behaves as though the script were not there.
-- **The reading column is the most important setting on a post page**: 68
-  characters, measured, at every width from 768 up. Body text is a step up from
-  the site default at a 1.7 line height, and the paragraph gap is deliberately
-  close to one line, because these pieces use consecutive single-line
-  paragraphs and they have to breathe rather than stack.
-- **Reading progress** is a 2px accent line along the bottom edge of the
-  header, on nothing: it had the header's own accent hairline as a track until
-  that line was removed on 9 October 2026, and it draws on the page itself
-  now. It measures the
-  article, not the document, so it is full when the last line of the piece has
-  been read rather than when the footer has gone by. Hidden in the markup and
-  revealed only by the script, so reduced motion gets nothing to undo.
-- **SEO.** Per-post title and description from the excerpt, `og:type=article`,
-  the cover as the share image when there is one and the site card when not,
-  and Article structured data with headline, datePublished and author. **When
-  `substackUrl` is set the canonical points at Substack**, so the two copies
-  are not read as competing; `og:url` still names this page. The feed is at
-  `/journal/rss.xml`, written by hand in `src/pages/journal/rss.xml.ts` rather
-  than through a dependency.
-
-### Still to come
-
-The first post, `why-fashion-month-still-matters.md`, has its frontmatter and
-its six section headings in place but **no body text yet** — it is marked
-`TODO(client)` in the file. Its `substackUrl` and `image` are empty for the
-same reason.
+- **The collection** is `src/content.config.ts`: title, excerpt, date and
+  `substackUrl` are required, and the build stops on a post without a
+  Substack address. Reading time, the thumbnail (`image`, with
+  `imageCredit` and `imageCrop`), tags and `draft` are optional. `README.md`
+  is excluded from the glob, so the instructions are not a post.
+- **One list, two readers.** `publishedPosts()` in `src/lib/culture.ts` drops
+  drafts and sorts by date, newest first; the listing and the feed both read
+  from it.
+- **The row** (`src/components/CultureRow.astro`): thumbnail, then the date,
+  the title, up to two lines of excerpt and the reading time. The whole row
+  is the link, opening the piece on Substack in a new tab, with an arrow after
+  the title to say it leaves the site. The anchor is the title alone,
+  stretched over the row by a pseudo-element, so a screen reader hears a link
+  named by its title. On hover or keyboard focus the title steps right and
+  takes the accent and the thumbnail scales up slightly; under
+  `prefers-reduced-motion` the title only changes colour and the thumbnail
+  fades a little instead.
+- **The thumbnail** is 4:3, cut at build time by `astro:assets` from the
+  top of the picture unless `imageCrop` says otherwise, and served in four
+  widths. 11.25rem wide beside the text from 64em, 8.75rem from 48em, and
+  full width above the text on a phone. A post without one is a text-only
+  row: no empty column is kept for it.
+- **Twelve at a time.** The first twelve rows show and "Load more" reveals
+  the next twelve; with no script, every row shows.
+- **SEO.** The listing is the only Culture page, so there is nothing to
+  canonicalise to Substack any more: every page on the site is its own
+  canonical. The feed is at `/culture/rss.xml`, written by hand in
+  `src/pages/culture/rss.xml.ts`, and each item's link and guid are the
+  piece's Substack address.
 
 ---
 

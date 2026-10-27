@@ -30,7 +30,7 @@ These are the ones that are a problem the moment the site is live.
 | 7 | `src/pages/index.astro:33` | **"100+ partnerships delivered" is ahead of the brief**, which has 61 all-time. "1,000+" sits under its 1,100 creators sourced, so that one holds. Confirm the current counts before publishing either. |
 | 8 | `src/pages/index.astro:111` | The case study's **healthcare partner is unnamed** and its three figures are the client's own wording. Confirm the partner may be named and the figures may be published as they stand. |
 | 9 | `src/data/tiles.ts:39` | **Creator handle and consent for every collage tile.** `credit` stays empty and nothing shows under a tile until the creator's handle is supplied and both creator and client have signed off. |
-| 10 | `src/pages/culture/[...slug].astro:36` | **Real photographer or agency credit** for the two article pictures. One generic line currently covers both. |
+| 10 | `src/content/culture/why-fashion-month-still-matters.md:9` | **Real photographer or agency credit** for the Culture thumbnail. "Image: not owned by AMAVI Socials." stands in for it. |
 
 ## Email and contact
 
@@ -58,7 +58,7 @@ These are the ones that are a problem the moment the site is live.
 | 25 | `src/data/services.ts:137` | Sub-services for a second practice area, same as above. |
 | 26 | `src/data/services.ts:187` | **A measured outcome** for one service; currently "New routes to the audience, beyond social media." |
 | 27 | `src/components/CreatorForm.astro:35` | **Follower tier bands.** These are the live form's existing bands, left in place so the step works until the new ones arrive. |
-| 28 | `src/content/culture/README.md` | The real photographer credit for the article pictures (same as #10). |
+| 28 | `src/content/culture/README.md` | The real photographer credit for the fashion pictures (same as #10). |
 | 29 | `src/pages/about.astro:52` | A different photograph may be wanted for the About hero. If it changes, **re-measure the left edge** — `#222021` over the current one runs 1.87:1 on its darkest grain to 15.53:1 on the highlight, and the mask is what keeps the words readable. |
 
 ## Build-time warnings, not markers
@@ -80,12 +80,6 @@ Recorded so nobody goes looking for them:
 - **Team name-to-face matching** (`src/data/team.ts`) — you confirmed all four,
   and Elda and Venera's photographs were swapped to match.
 - **The contact photograph** — supplied, so the grey placeholder is gone.
-- **The Culture preview copy** — your five paragraphs are in, with both
-  pictures as the band above the title.
-
-## Not a TODO, but needs you
-
-- **The deployed Netlify site is still serving an old build.** None of this
-  session's work is live. Redeploying needs your login, so it has not been
-  touched.
-- **Nothing is committed.** All 43 changed files are working-tree only.
+- **The Culture article page** — removed on 28 October 2026, with its
+  preview copy, as asked. Each row on /culture opens the piece on Substack;
+  the front-row picture is its thumbnail, and the other is kept in the repo.

@@ -1,74 +1,113 @@
 ---
+import { Image } from 'astro:assets';
 import type { Post } from '../lib/culture';
-import { formatDate, isoDate, culturePath } from '../lib/culture';
+import { formatDate, isoDate } from '../lib/culture';
 
 /**
- * One post, as a row in an index. The listing is these, and so is the "next"
- * block at the foot of a post, so the two cannot drift apart.
+ * One AMAVI Culture piece, as a row in the listing at /culture/.
  *
- * **A tight index, not a stack of blocks.** Rewritten on 23 October 2026: the
- * rows were 88px at their shortest and clamped up to 3rem of padding on top of
- * that, which held four in a viewport. One weekly post each Friday would have
- * made the page endless. Now each row is a single horizontal line on desktop
- * — date, title with its excerpt under it, reading time — and six to eight fit
- * at 1280.
+ * **Every row leaves the site.** Rewritten on 28 October 2026, when the
+ * article pages came off: there is nothing to read here any more, so the row
+ * goes straight to the piece on Substack, in a new tab. The arrow after the
+ * title says so before anyone clicks.
  *
- * The excerpt is capped at **one line** and truncated, which is what keeps the
- * row height fixed no matter how long the copy is.
+ * **The whole row is the link, through the title.** The anchor holds the
+ * title alone and a pseudo-element on it is stretched over the row, so a
+ * click anywhere lands on it while a screen reader hears a link named by the
+ * title, not one that reads the date, the excerpt and the credit into its
+ * name. That stretch is why nothing between the row and the anchor may be
+ * positioned or transformed: either would become the box it stretches over.
+ * The title's hover shift is on a span inside the anchor for that reason.
  *
- * The whole row is the link, not the title inside it: the anchor wraps the
- * three parts and the heading is a span within it rather than a nested link.
- * On hover the title steps right and the arrow takes the space it left, so
- * nothing reflows — the arrow sits in that gap rather than in the flow. The
- * cursor-follow preview came off with this rewrite, along with its script.
+ * **The thumbnail**, when a post has one, is cut to 4:3 at build time, so
+ * every size served is the shape shown. Left of the text from 48em, 8.75rem
+ * wide and 11.25rem from 64em; above it, full width, on a phone. Its alt is
+ * empty: it illustrates the title, which names the link, and holds nothing
+ * of its own a listener needs. A post without one is a text-only row, with
+ * no empty column kept for it.
+ *
+ * The markup puts the text before the picture, so a screen reader meets the
+ * title before the credit, and the title before the date, so heading
+ * navigation lands on the title; the grid and `order` put both back in the
+ * order the eye reads them.
  */
 interface Props {
   post: Post;
-  /** Heading level, so the listing and the "next" block both keep a valid outline. */
-  level?: 2 | 3;
+  /** On a phone the first row's thumbnail is the largest thing on screen, so it is fetched first. */
+  priority?: boolean;
 }
-const { post, level = 2 } = Astro.props;
-const H = `h${level}` as 'h2' | 'h3';
-const { title, excerpt, date, readingTime } = post.data;
+const { post, priority = false } = Astro.props;
+const { title, excerpt, date, readingTime, substackUrl, image, imageCredit, imageCrop } = post.data;
+
+/* The last word travels with the arrow, so the arrow never starts a line on
+   its own. */
+const words = title.trim().split(/\s+/);
+const lastWord = words.pop();
+const leadWords = words.join(' ');
 ---
 
-<a class="crow" href={culturePath(post.id)}>
-  <time class="crow__date" datetime={isoDate(date)}>{formatDate(date)}</time>
-
+<div class:list={['crow', image && 'crow--media']}>
   <div class="crow__body">
-    <H class="crow__title">
-      <span class="crow__arrow" aria-hidden="true">
-        <svg viewBox="0 0 22 12" focusable="false">
-          <path d="M0 6h19M14.5 1L20 6l-5.5 5" fill="none" stroke="currentColor"
-                stroke-width="1.5" vector-effect="non-scaling-stroke" />
-        </svg>
-      </span>
-      <span class="crow__text">{title}</span>
-    </H>
+    <h2 class="crow__title">
+      <a class="crow__link" href={substackUrl} target="_blank" rel="noopener noreferrer">
+        <span class="crow__text">{leadWords && `${leadWords} `}<span class="crow__end">{lastWord}<svg
+          class="crow__out" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path
+          d="M2 10L10 2M4 2h6v6" fill="none" stroke="currentColor" stroke-width="1.5"
+          vector-effect="non-scaling-stroke" /></svg></span></span>
+        <span class="visually-hidden"> (on Substack, opens in a new tab)</span>
+      </a>
+    </h2>
+    <time class="crow__date" datetime={isoDate(date)}>{formatDate(date)}</time>
     <p class="crow__excerpt">{excerpt}</p>
+    {readingTime ? <p class="crow__time">{readingTime} min read</p> : null}
   </div>
 
-  <p class="crow__time">{readingTime ? `${readingTime} min` : ''}</p>
-</a>
+  {image && (
+    <div class="crow__media">
+      <div class="crow__frame">
+        <Image class="crow__img" src={image} alt="" width={720} height={540} fit="cover"
+               position={imageCrop} widths={[360, 540, 720, 1080]}
+               sizes="(min-width: 64em) 11.25rem, (min-width: 48em) 8.75rem, calc(100vw - 2.5rem)"
+               priority={priority} />
+      </div>
+      {imageCredit && <p class="crow__credit">{imageCredit}</p>}
+    </div>
+  )}
+</div>
 
 <style>
-  /* Stacked on a phone, one line from 48em. The date and the reading time take
-     fixed tracks so every row's title starts and ends on the same vertical,
-     which is what makes a column of these read as an index. */
+  /* Text only unless there is a picture, and then the picture takes a column
+     of its own from 48em and the top of the row below it. */
   .crow {
+    position: relative;
+    /* The stretched link's z-index stays inside the row, under the header. */
+    isolation: isolate;
     display: grid;
-    gap: 0.15rem var(--space-m);
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'body';
+    gap: var(--space-xs) var(--space-m);
+    align-items: start;
     padding-block: var(--space-s);
-    color: inherit;
-    text-decoration: none;
-    align-items: baseline;
   }
+  .crow--media { grid-template-areas: 'media' 'body'; }
   @media (min-width: 48em) {
-    .crow {
-      grid-template-columns: 7.5rem minmax(0, 1fr) 4rem;
-      padding-block: var(--space-s);
+    .crow--media {
+      grid-template-columns: 8.75rem minmax(0, 1fr);
+      grid-template-areas: 'media body';
     }
   }
+  @media (min-width: 64em) {
+    .crow--media { grid-template-columns: 11.25rem minmax(0, 1fr); }
+  }
+
+  .crow__body {
+    grid-area: body;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+  }
+  .crow__media { grid-area: media; }
 
   /* Small, uppercase, letter-spaced, and held off full black. 0.7 and not
      lower: 0.6 of #222021 misses AA at this size. */
@@ -81,18 +120,11 @@ const { title, excerpt, date, readingTime } = post.data;
     opacity: 0.7;
     white-space: nowrap;
   }
-  .crow__time { grid-column: 3; text-align: right; }
-  @media (max-width: 47.99em) {
-    /* No empty third column on a phone: the time joins the date on one line. */
-    .crow__time { grid-column: 1; text-align: left; }
-    .crow__time:empty { display: none; }
-  }
-
-  .crow__body { min-width: 0; }
+  .crow__date { order: -1; }
+  .crow__time { margin-top: 0.25rem; }
 
   /* A modest heading, not a display size: this is a list of links. */
   .crow__title {
-    position: relative;
     font-family: var(--font-display);
     font-stretch: var(--display-stretch);
     font-size: var(--display-sm);
@@ -100,48 +132,101 @@ const { title, excerpt, date, readingTime } = post.data;
     line-height: 1.25;
     letter-spacing: -0.005em;
     text-transform: uppercase;
-    transition: transform var(--dur) var(--ease), color var(--dur) var(--ease);
   }
 
-  /* One line, cut with an ellipsis. This is what fixes the row height. */
+  .crow__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  /* Stretched over the whole row, and above the picture: a scaled or faded
+     image is painted as a layer of its own and would otherwise take the
+     click. */
+  .crow__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  /* The ring goes round the row, which is what the link is. */
+  .crow__link:focus-visible { outline: none; }
+  .crow__link:focus-visible::after {
+    outline: var(--stroke-mark) solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  .crow__text {
+    display: inline-block; /* a transform needs a box */
+    transition: transform var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .crow__end { white-space: nowrap; }
+  .crow__out {
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    margin-left: 0.4em;
+    vertical-align: 0.05em;
+  }
+
+  /* Up to two lines, then cut. Lighter than the date: lighter weight and a
+     touch less ink, 0.65 being 4.8:1 on --bg, still AA. */
   .crow__excerpt {
     font-size: var(--text-sm);
     font-weight: var(--weight-secondary);
-    line-height: 1.4;
-    opacity: 0.7;
+    line-height: 1.45;
+    opacity: 0.65;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
-  /* Sitting in the space the title leaves when it steps right, so the row
-     does not reflow on hover. */
-  .crow__arrow {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 1.1rem;
-    height: 0.6rem;
-    translate: -1.6rem -50%;
-    opacity: 0;
-    transition: opacity var(--dur) var(--ease);
+  .crow__frame {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-media);
+    /* Holds the shape while the picture loads. */
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
   }
-  .crow__arrow svg { width: 100%; height: 100%; display: block; }
-
-  .crow:hover .crow__title,
-  .crow:focus-visible .crow__title {
-    transform: translateX(1.6rem);
-    color: var(--accent);
+  .crow__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform calc(var(--dur) * 2) var(--ease), opacity var(--dur) var(--ease);
   }
-  .crow:hover .crow__arrow,
-  .crow:focus-visible .crow__arrow { opacity: 1; }
 
-  .crow:focus-visible { outline-offset: 4px; }
+  /* The site's small print, balanced so it breaks evenly under a narrow
+     thumbnail. */
+  .crow__credit {
+    margin-top: 0.375rem;
+    font-size: var(--text-xs);
+    line-height: 1.45;
+    opacity: 0.7;
+    text-wrap: balance;
+  }
 
+  /* Hover and keyboard focus look the same: the title steps right and takes
+     the accent, and the picture comes forward a little. Hover only where
+     there is a pointer to hover with, so a tap does not leave it stuck on. */
+  @media (hover: hover) {
+    .crow:hover .crow__text { transform: translateX(0.5rem); color: var(--accent); }
+    .crow:hover .crow__img { transform: scale(1.04); }
+  }
+  .crow__link:focus-visible .crow__text { transform: translateX(0.5rem); color: var(--accent); }
+  /* Its own rule: a browser without :has() drops the whole rule it sits in. */
+  .crow:has(.crow__link:focus-visible) .crow__img { transform: scale(1.04); }
+
+  /* Without motion the title only changes colour and the picture fades a
+     little rather than growing. */
   @media (prefers-reduced-motion: reduce) {
-    .crow__title,
-    .crow__arrow { transition: none; }
-    .crow:hover .crow__title,
-    .crow:focus-visible .crow__title { transform: none; }
+    .crow__text,
+    .crow__img { transition: none; }
+    .crow__link:focus-visible .crow__text { transform: none; }
+    .crow:has(.crow__link:focus-visible) .crow__img { transform: none; opacity: 0.85; }
+  }
+  @media (prefers-reduced-motion: reduce) and (hover: hover) {
+    .crow:hover .crow__text { transform: none; }
+    .crow:hover .crow__img { transform: none; opacity: 0.85; }
   }
 </style>

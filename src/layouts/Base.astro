@@ -14,13 +14,11 @@ interface Props {
   standaloneTitle?: boolean;
   /** JSON-LD, serialised into a schema.org script tag. */
   schema?: Record<string, unknown>;
-  /** Overrides the canonical URL. The journal points posts at Substack. */
-  canonical?: string;
-  /** og:type. "article" for a journal post. */
+  /** og:type, "website" unless a page says otherwise. */
   ogType?: 'website' | 'article';
 }
 
-const { title, description, ogImage, standaloneTitle, schema, canonical, ogType } = Astro.props;
+const { title, description, ogImage, standaloneTitle, schema, ogType } = Astro.props;
 ---
 
 <!doctype html>
@@ -42,11 +40,10 @@ const { title, description, ogImage, standaloneTitle, schema, canonical, ogType 
       description={description}
       ogImage={ogImage}
       standaloneTitle={standaloneTitle}
-      canonical={canonical}
       ogType={ogType}
     />
 
-    {/* Anything a page needs in the head of its own: the journal's feed. */}
+    {/* Anything a page needs in the head of its own: AMAVI Culture's feed. */}
     <slot name="head" />
 
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}

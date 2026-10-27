@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { publishedPosts, culturePath } from '../../lib/culture';
+import { publishedPosts } from '../../lib/culture';
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from '../../consts';
 
 /**
@@ -9,8 +9,12 @@ import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from '../../consts';
  * fields, and the only thing that has to be right is the escaping, which is
  * below and covers the five characters XML reserves.
  *
- * It reads the same published list as the listing and the post pages, so a
- * draft is absent from all three or none.
+ * Each item points at the piece on Substack, as its link and its guid. Since
+ * 28 October 2026 that is where every piece is read: the site has no article
+ * pages of its own.
+ *
+ * It reads the same published list as the listing, so a draft is absent from
+ * both or neither.
  */
 const escape = (value: string) =>
   value
@@ -26,7 +30,7 @@ export const GET: APIRoute = async () => {
 
   const items = posts
     .map((post) => {
-      const link = new URL(culturePath(post.id), SITE_URL).href;
+      const link = post.data.substackUrl;
       return [
         '    <item>',
         `      <title>${escape(post.data.title)}</title>`,

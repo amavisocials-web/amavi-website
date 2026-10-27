@@ -9,6 +9,11 @@ import { SITE_NAME } from '../../consts';
  * AMAVI Culture, at /culture. Was /journal until 23 October 2026; the old
  * address redirects (astro.config.mjs).
  *
+ * **An index of pieces that live on Substack.** Since 28 October 2026 the
+ * site has no article pages: every row links straight out, in a new tab
+ * (src/components/CultureRow.astro), and the old post addresses return the
+ * 404 page.
+ *
  * The order is the point: masthead, then what there is to read, then the ask.
  * The subscribe block used to sit above the list and now sits below it, so
  * nobody is asked for an email before they have seen a headline.
@@ -50,7 +55,7 @@ const PER_PAGE = 12;
         <ul class="culture-list" role="list" data-culture-list data-per-page={PER_PAGE}>
           {posts.map((post, i) => (
             <li class="culture-list__item" hidden={i >= PER_PAGE || undefined}>
-              <CultureRow post={post} level={2} />
+              <CultureRow post={post} priority={i === 0} />
             </li>
           ))}
         </ul>
