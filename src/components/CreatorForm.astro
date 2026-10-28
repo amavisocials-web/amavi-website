@@ -454,7 +454,7 @@ const total = STEPS.length;
     right: 0;
     margin: 0;
     padding: 0.75rem 0.875rem;
-    font-size: var(--text-base);
+    font-size: var(--text-control);
     background: var(--bg);
     border: var(--stroke) solid var(--line);
   }
@@ -621,7 +621,7 @@ const total = STEPS.length;
     text-transform: uppercase;
   }
   .review :global(.review__edit) {
-    font-size: var(--text-sm);
+    font-size: var(--text-form);
     font-weight: var(--weight-strong);
     color: var(--accent);
     text-decoration: underline;
@@ -636,9 +636,9 @@ const total = STEPS.length;
   @media (min-width: 40em) {
     .review :global(.review__row) { grid-template-columns: minmax(0, 13rem) minmax(0, 1fr); gap: var(--space-s); }
   }
-  .review :global(.review__row dt) { font-size: var(--text-sm); font-weight: var(--weight-secondary); }
-  .review :global(.review__row dd) { font-size: var(--text-sm); font-weight: var(--weight-strong); overflow-wrap: anywhere; white-space: pre-line; }
-  .review :global(.review__empty) { font-size: var(--text-sm); font-weight: var(--weight-secondary); }
+  .review :global(.review__row dt) { font-size: var(--text-form); font-weight: var(--weight-secondary); }
+  .review :global(.review__row dd) { font-size: var(--text-form); font-weight: var(--weight-strong); overflow-wrap: anywhere; white-space: pre-line; }
+  .review :global(.review__empty) { font-size: var(--text-form); font-weight: var(--weight-secondary); }
 
   /* --- Success ---------------------------------------------------------------- */
   .apply__success { display: grid; gap: var(--space-s); padding: clamp(1.75rem, 1rem + 4vw, 3.5rem); font-size: var(--text-lead); }

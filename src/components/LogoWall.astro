@@ -140,8 +140,10 @@ const COPIES = 3;
        section of its own. */
     padding-bottom: var(--space-s);
   }
-  /* The label reads at the size of the hero's line, not as small print. */
-  .logo-wall__head .eyebrow { font-size: var(--text-lead); }
+  /* The label reads at the size of the hero's line, not as small print. A
+     heading, so held at the lead size it had when body text stepped down
+     (28 October 2026) rather than reading --text-lead. */
+  .logo-wall__head .eyebrow { font-size: clamp(0.875rem, 0.8rem + 0.4vw, 1.125rem); }
   /* The heading is display type; the line under it is small body text, so the
      two are never close in size. */
   .logo-wall__intro { font-size: var(--text-sm); font-weight: var(--weight-secondary); max-width: 46ch; }

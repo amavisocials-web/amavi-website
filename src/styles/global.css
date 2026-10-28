@@ -95,14 +95,33 @@
 
   /* 11px is the floor: two steps below the old 12px would not be readable.
      --text-xs is label furniture — the eyebrows and .label small capitals —
-     and sits with the headings, so it did NOT take the 23 October 2026 body
-     step. The three below it did: body text went up one step that day, and
-     the footer's addresses moved off --text-xs onto --text-sm so they would
-     come with it (src/components/Footer.astro). */
+     and sits with the headings, so it takes no part in body-text steps.
+
+     The three below it ARE body text, and move together. They went up one
+     step on 23 October 2026 (13, 14 and 14–18px) and came back down that
+     step on 28 October 2026, at AMAVI's request, to 12, 13 and 13–16px:
+     paragraphs, intros, standing lines, list and service text, stat
+     captions and the footer all read from them. Anything that borrowed them
+     but is not body text was moved onto the held sizes below first, so the
+     step moved body text and nothing else. */
   --text-xs:   0.6875rem;
-  --text-sm:   0.8125rem;
-  --text-base: 0.875rem;
-  --text-lead: clamp(0.875rem, 0.8rem + 0.4vw, 1.125rem);
+  --text-sm:   0.75rem;
+  --text-base: 0.8125rem;
+  --text-lead: clamp(0.8125rem, 0.75rem + 0.36vw, 1rem);
+
+  /* Held where they were when body text stepped down (28 October 2026), so
+     it could step down without them.
+     --text-ui:      small interface type: row labels, the menu's routes,
+                     accordion numbers, the skip link (13px).
+     --text-form:    everything a form asks you to read: labels, hints,
+                     errors, choices, consent, status lines. Kept at 13px,
+                     the step down would have taken it below AMAVI's 14px
+                     floor for forms; field text itself is 16px, set where
+                     the field is, or iOS zooms in on focus.
+     --text-control: pills, the country list, a status box's heading (14px). */
+  --text-ui:      0.8125rem;
+  --text-form:    0.8125rem;
+  --text-control: 0.875rem;
 
   --figure-sm: clamp(1.1875rem, 0.95rem + 0.95vw, 1.5625rem);
 
@@ -272,7 +291,7 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
    sub-services, the value grid: the eyebrow's capitals held at one size,
    whatever the row's width. */
 .row-label {
-  font-size: var(--text-sm);
+  font-size: var(--text-ui);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -480,7 +499,7 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
   color: var(--ink);
   border: var(--stroke) solid var(--line);
   padding: var(--space-2xs) var(--space-s);
-  font-size: var(--text-sm);
+  font-size: var(--text-ui);
   text-decoration: none;
   transition: top var(--dur) var(--ease);
 }
@@ -519,9 +538,9 @@ a:hover { text-decoration-thickness: var(--stroke-mark); }
 .form { display: grid; gap: var(--space-xl); }
 
 .field { display: grid; gap: var(--space-2xs); align-content: start; min-width: 0; }
-.field__label { font-size: var(--text-sm); font-weight: var(--weight-strong); line-height: 1.4; }
+.field__label { font-size: var(--text-form); font-weight: var(--weight-strong); line-height: 1.4; }
 .field__optional { font-weight: var(--weight-secondary); }
-.field__hint { font-size: var(--text-sm); font-weight: var(--weight-secondary); line-height: 1.45; }
+.field__hint { font-size: var(--text-form); font-weight: var(--weight-secondary); line-height: 1.45; }
 
 .field__control {
   width: 100%;
@@ -571,7 +590,7 @@ textarea.field__control { min-height: 7.5rem; resize: vertical; }
   display: flex;
   align-items: flex-start;
   gap: 0.5em;
-  font-size: var(--text-sm);
+  font-size: var(--text-form);
   font-weight: var(--weight-strong);
   line-height: 1.4;
   color: var(--accent);
@@ -621,7 +640,7 @@ textarea.field__control { min-height: 7.5rem; resize: vertical; }
   gap: 0.4em;
   min-height: 2.75rem;          /* 44px tap target */
   padding: 0.55rem 1rem;
-  font-size: var(--text-sm);
+  font-size: var(--text-form);
   font-weight: var(--weight-body);
   line-height: 1.25;
   color: var(--ink);
@@ -669,19 +688,19 @@ textarea.field__control { min-height: 7.5rem; resize: vertical; }
 .consent input:checked { border-color: var(--accent); }
 .consent input:checked::before { transform: rotate(-45deg) translate(1px, -1px) scale(1); }
 .consent input:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
-.consent__text { font-size: var(--text-sm); line-height: 1.55; }
+.consent__text { font-size: var(--text-form); line-height: 1.55; }
 
 /* Success and failure: a black outline and plain words, told apart by what
    they say rather than by colour. */
 .form-status {
   padding: var(--space-m);
-  font-size: var(--text-sm);
+  font-size: var(--text-form);
   line-height: 1.55;
   border: var(--stroke) solid var(--line);
   background: var(--bg);
 }
 .form-status[hidden] { display: none; }
-.form-status strong { display: block; font-size: var(--text-base); margin-bottom: 0.25em; }
+.form-status strong { display: block; font-size: var(--text-control); margin-bottom: 0.25em; }
 .form-status:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
 
 /* Netlify's spam honeypot: invisible to people, still in the DOM for bots. */
