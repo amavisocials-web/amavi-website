@@ -7,8 +7,9 @@ import { CONTACT_EMAIL } from '../consts';
  *
  * Stacked since 28 October 2026: the heading, the field under it, the button
  * under that, on the page's left edge and no wider than 25rem. The standing
- * line ("One piece a week…") and the placeholder came off the same day; the
- * field keeps a label for screen readers.
+ * line ("One piece a week…") came off the same day. The field reads "Your
+ * email" until something is typed, like the contact form's, and keeps a label
+ * for screen readers.
  *
  * It is a real form first. The markup posts to Netlify Forms on its own —
  * name, method, action and the hidden form-name input are what Netlify's
@@ -65,6 +66,7 @@ const H = `h${level}` as 'h2' | 'h3';
         required
         autocomplete="email"
         inputmode="email"
+        placeholder="Your email"
         aria-describedby="subscribe-email-error"
         data-subscribe-email
       />
@@ -137,6 +139,7 @@ const H = `h${level}` as 'h2' | 'h3';
   @supports (-webkit-touch-callout: none) {
     .subscribe__input { font-size: 1rem; }
   }
+  .subscribe__input::placeholder { color: var(--ink); font-weight: var(--weight-secondary); opacity: 0.7; }
   .subscribe__input:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
   .subscribe__input[aria-invalid='true'] { border-bottom-width: var(--stroke-mark); }
 
