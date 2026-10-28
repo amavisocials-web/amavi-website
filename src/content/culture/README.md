@@ -59,9 +59,11 @@ substackUrl: "https://amavisocials.substack.com/p/the-new-front-row"
 - A picture AMAVI does not own needs `imageCredit`.
 
 `front-row.jpg` is the thumbnail of "Why Fashion Month Still Matters".
-`show-arrival.jpg` is the other picture supplied with that piece; nothing
-uses it at the moment. To swap it in, change the post's `image` to
-`"./show-arrival.jpg"`.
+Two more pictures from that piece are kept here and used by nothing at the
+moment: `show-arrival.jpg` (supplied 23 October 2026) and
+`opera-mercedes.jpg`, a Mercedes in Paris Fashion Week livery outside the
+Palais Garnier (supplied 28 October 2026). To swap one in, change the post's
+`image`, e.g. to `"./opera-mercedes.jpg"`.
 
 **TODO(client): the real photographer or agency credit** for the fashion
 pictures, once it is known. It goes in `imageCredit` in
