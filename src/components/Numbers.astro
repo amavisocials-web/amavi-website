@@ -109,6 +109,17 @@ const linkTo = (tile: ContentTile, copy: number) =>
   <div class="container media-row numbers__grid">
     <div class="numbers__text">
       <slot />
+
+      {/* Whose work this is. A note on the collage, not a credit on each tile:
+          the handles are not cleared yet (TODO in src/data/tiles.ts), and a
+          caption under every tile would fight the loop. Last in the column,
+          under the link, since 28 October 2026; it sat under the collage
+          before. */}
+      <p class="collage__note">
+        Content created by the creators we work with and shared with permission.
+        All rights remain with the original creators. To request removal, email{' '}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+      </p>
     </div>
 
     {/* Decorative: the figures beside it are what the section says. */}
@@ -159,15 +170,6 @@ const linkTo = (tile: ContentTile, copy: number) =>
         </div>
       ))}
     </div>
-
-    {/* Whose work this is. A note on the collage, not a credit on each tile:
-        the handles are not cleared yet (TODO in src/data/tiles.ts), and a
-        caption under every tile would fight the loop. */}
-    <p class="collage__note">
-      Content created by the creators we work with and shared with permission.
-      All rights remain with the original creators. To request removal, email{' '}
-      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
-    </p>
   </div>
 </section>
 
@@ -193,9 +195,8 @@ const linkTo = (tile: ContentTile, copy: number) =>
     overflow: clip;
   }
   /* display, gap and the centring come from .media-row in global.css. Stacked,
-     the three items want less air between them than the shared --space-xl:
-     40px keeps the note attached to the collage it describes rather than
-     floating between the collage and the next section. */
+     the text and the collage want less air between them than the shared
+     --space-xl: 40px keeps the pictures with the figures they sit beside. */
   .numbers__grid { row-gap: var(--space-l); }
 
   @media (min-width: 64em) {
@@ -204,16 +205,11 @@ const linkTo = (tile: ContentTile, copy: number) =>
       column-gap: var(--space-xl);
       row-gap: 0;
     }
-    /* Placed rather than ordered. The collage and the text share row 1, so it
-       is the **collage** that centres against the text and not a wrapper that
-       also contains the note: the note used to sit inside that wrapper, which
-       made the wrapper 646px against the text's 433px and left the collage
-       itself reading 51px high. The note now has a row of its own under the
-       collage, where it takes no part in the centring. Text is first in the
-       markup, so a phone reads the figures before the pictures. */
+    /* Placed rather than ordered: the collage and the text share row 1, and
+       each centres against the other. Text is first in the markup, so a phone
+       reads the figures before the pictures. */
     .collage { grid-column: 1; grid-row: 1; }
     .numbers__text { grid-column: 2; grid-row: 1; }
-    .collage__note { grid-column: 1; grid-row: 2; margin-top: var(--space-l); }
   }
   @media (min-width: 80em) {
     .numbers__grid { grid-template-columns: minmax(0, 55fr) minmax(0, 45fr); }
@@ -221,14 +217,14 @@ const linkTo = (tile: ContentTile, copy: number) =>
 
   .numbers__text { display: grid; gap: var(--space-m); align-content: start; }
 
-  /* The site's small print: the culture CTA's line sets the same three
-     values. 0.7 and not lower — 0.6 of #222021 misses AA at this size. */
-  /* Wide enough that it reads as a note and not a caption clamped to the
-     tiles, and far narrower than the --section-y below it, so it still
-     belongs to the collage rather than to whatever comes next. */
+  /* A footnote, not body copy: --text-xs, a step under the 13px it was set
+     in until 28 October 2026 and two under the 14px body, in the same grey.
+     0.7 and not lower: 0.6 of #222021 misses AA. The regular weight rather
+     than the light one, which thins out at 11px. 40px clear of the link
+     above: the column's 24px gap and 16px more. */
   .collage__note {
-    font-size: var(--text-sm);
-    font-weight: var(--weight-secondary);
+    margin-top: var(--space-s);
+    font-size: var(--text-xs);
     line-height: 1.6;
     max-width: 56ch;
     opacity: 0.7;
