@@ -11,13 +11,16 @@
  * a timeout — puts the form back with a way to reach a human.
  *
  * The address is checked before anything is sent, so a typo costs nothing and
- * says so inline rather than through a round trip.
+ * says so inline rather than through a round trip: a short line right under
+ * the field (since 28 October 2026), one for an empty field and one for an
+ * address that is not one. A failed send is said under the button instead.
  */
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const TIMEOUT = 15000;
 
 const WORDS = {
-  invalid: 'That does not look like an email address. Check it and try again.',
+  empty: 'Please add your email address.',
+  invalid: 'That email address does not look right.',
   failed: `That didn't go through. Try again in a moment, or email ${'hello@amavisocials.com'}.`,
 };
 
@@ -27,13 +30,21 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-subscribe]')) {
   const button = root.querySelector<HTMLButtonElement>('[data-subscribe-button]');
   const label = root.querySelector<HTMLElement>('[data-subscribe-label]');
   const status = root.querySelector<HTMLElement>('[data-subscribe-status]');
+  const error = root.querySelector<HTMLElement>('[data-subscribe-error]');
   const done = root.querySelector<HTMLElement>('[data-subscribe-done]');
-  if (!form || !email || !button || !label || !status || !done) continue;
+  if (!form || !email || !button || !label || !status || !error || !done) continue;
 
   const idleLabel = label.textContent ?? 'Subscribe';
   let sending = false;
 
   const say = (message: string) => { status.textContent = message; };
+
+  /** The line under the field, and the field marked to match. */
+  const complain = (message: string) => {
+    error.textContent = message;
+    if (message) email.setAttribute('aria-invalid', 'true');
+    else email.removeAttribute('aria-invalid');
+  };
 
   const setState = (state: 'idle' | 'sending' | 'done' | 'error') => {
     root.dataset.state = state;
@@ -47,10 +58,10 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-subscribe]')) {
   // is in the page where a screen reader will read it.
   form.noValidate = true;
 
+  // Typing again clears the complaint rather than leaving it under an
+  // address that may already be right.
   email.addEventListener('input', () => {
-    if (email.getAttribute('aria-invalid') !== 'true') return;
-    email.removeAttribute('aria-invalid');
-    say('');
+    if (email.getAttribute('aria-invalid') === 'true') complain('');
   });
 
   form.addEventListener('submit', async (event) => {
@@ -61,12 +72,12 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-subscribe]')) {
 
     const address = email.value.trim();
     if (!EMAIL.test(address)) {
-      email.setAttribute('aria-invalid', 'true');
-      say(WORDS.invalid);
+      complain(address ? WORDS.invalid : WORDS.empty);
       email.focus();
       return;
     }
 
+    complain('');
     say('');
     setState('sending');
 

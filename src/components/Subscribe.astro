@@ -5,7 +5,10 @@ import { CONTACT_EMAIL } from '../consts';
  * The subscribe block: AMAVI Culture's one ask, at the foot of the /culture
  * index, below the list of pieces.
  *
- * One component, two placements, so the copy and the behaviour exist once.
+ * Stacked since 28 October 2026: the heading, the field under it, the button
+ * under that, on the page's left edge and no wider than 25rem. The standing
+ * line ("One piece a week…") and the placeholder came off the same day; the
+ * field keeps a label for screen readers.
  *
  * It is a real form first. The markup posts to Netlify Forms on its own —
  * name, method, action and the hidden form-name input are what Netlify's
@@ -36,13 +39,7 @@ const H = `h${level}` as 'h2' | 'h3';
 ---
 
 <div class="subscribe" data-subscribe data-state="idle" data-endpoint={ENDPOINT || undefined}>
-  <div class="subscribe__strip">
-  <div class="subscribe__words">
-    <H class="subscribe__heading">Get it in your inbox</H>
-    <p class="subscribe__line">
-      One piece a week on creator marketing, culture and the work. No pitches.
-    </p>
-  </div>
+  <H class="subscribe__heading">Get it in your inbox</H>
 
   <form
     class="subscribe__form"
@@ -68,23 +65,23 @@ const H = `h${level}` as 'h2' | 'h3';
         required
         autocomplete="email"
         inputmode="email"
-        placeholder="you@company.com"
-        aria-describedby="subscribe-status"
+        aria-describedby="subscribe-email-error"
         data-subscribe-email
       />
+      {/* Why the address was not sent, right under it. */}
+      <p class="field__error" id="subscribe-email-error" aria-live="polite" data-subscribe-error></p>
     </div>
 
     <button class="btn btn--primary subscribe__button" type="submit" data-subscribe-button>
       <span data-subscribe-label>Subscribe</span>
     </button>
   </form>
-  </div>
 
-  {/* The form is replaced by this on success, and it carries the error and the
-      validation message otherwise. Polite, so it is read without cutting in. */}
-  <p class="subscribe__status" id="subscribe-status" role="status" aria-live="polite" data-subscribe-status></p>
+  {/* A failed send, under the button. Polite, so it is read without cutting
+      in. The form is replaced by the line after it on success. */}
+  <p class="subscribe__status" role="status" aria-live="polite" data-subscribe-status></p>
 
-  <p class="subscribe__done" data-subscribe-done hidden>You&rsquo;re in. Look out for the next one.</p>
+  <p class="subscribe__done" data-subscribe-done tabindex="-1" hidden>You&rsquo;re in. Look out for the next one.</p>
 </div>
 
 <script>
@@ -92,31 +89,19 @@ const H = `h${level}` as 'h2' | 'h3';
 </script>
 
 <style>
-  .subscribe { display: grid; gap: var(--space-s); }
-
-  /* A strip, not a second hero. Rewritten on 23 October 2026: the heading was
-     display--md, the same step as the page title, the block was centred while
-     everything above it is left-aligned, and it sat in a section's worth of
-     air. Now it is one row — words on the left, field and button on the
-     right, centred against each other — on the same left edge as the masthead
-     and the index. Nothing here is centred horizontally. */
-  .subscribe__strip { display: grid; gap: var(--space-m); }
-  @media (min-width: 64em) {
-    .subscribe__strip {
-      grid-template-columns: minmax(0, 1fr) auto;
-      column-gap: var(--space-2xl);
-      align-items: center;
-    }
+  /* One column on the page's left edge, at most 25rem wide, so the field and
+     the button never run the width of the page. Nothing here is centred. */
+  .subscribe {
+    display: grid;
+    gap: var(--space-xs);
+    max-width: 25rem;
   }
-
-  .subscribe__words { display: grid; gap: var(--space-3xs, 0.25rem); }
 
   /* Three steps off the old display--md, down to --text-xs, which is exactly
      the site's small label (.eyebrow, .label). It has to sit clearly under the
      article titles in the index above, and those are --display-sm, which
      clamps to 13px on a phone: at --text-sm this heading matched them there
-     rather than sitting below them. 11px is under the 13px floor at every
-     width. */
+     rather than sitting below them. */
   .subscribe__heading {
     font-family: var(--font-body);
     font-size: var(--text-xs);
@@ -126,32 +111,21 @@ const H = `h${level}` as 'h2' | 'h3';
     line-height: 1.3;
   }
 
-  /* Capped so the break falls at the full stop after "the work." rather than
-     mid-sentence. */
-  .subscribe__line {
-    font-size: var(--text-base);
-    font-weight: var(--weight-secondary);
-    line-height: 1.5;
-    max-width: 54ch;
-    opacity: 0.7;
-    text-wrap: pretty;
-  }
-
-  /* The field and the button beside each other from 64em, stacked and full
-     width below it. */
-  .subscribe__form { display: grid; gap: var(--space-s); align-items: end; }
-  @media (min-width: 64em) {
-    .subscribe__form { grid-template-columns: 16rem auto; align-items: center; }
-  }
+  /* The field under the heading, the button under the field, at its own
+     width. */
+  .subscribe__form { display: grid; gap: var(--space-s); justify-items: start; }
+  .subscribe__field { display: grid; gap: var(--space-2xs); justify-self: stretch; }
 
   /* A rule under the words, not a box around them: the site's field, with
-     three of its four sides taken off. */
+     three of its four sides taken off. Two steps down on 28 October 2026,
+     from 16px to 13px. Except on iPhone and iPad: below 16px Safari zooms
+     the page in when the field is tapped, so there it stays at 16px. */
   .subscribe__input {
     width: 100%;
     min-height: 2.75rem;
     padding: 0.6rem 0;
     font: inherit;
-    font-size: 1rem;              /* ≥16px, or iOS zooms on focus */
+    font-size: var(--text-form);
     font-weight: 500;
     line-height: 1.4;
     color: var(--ink);
@@ -160,14 +134,25 @@ const H = `h${level}` as 'h2' | 'h3';
     border-bottom: var(--stroke) solid var(--line);
     border-radius: 0;
   }
-  .subscribe__input::placeholder { color: var(--ink); font-weight: var(--weight-secondary); opacity: 0.7; }
+  @supports (-webkit-touch-callout: none) {
+    .subscribe__input { font-size: 1rem; }
+  }
   .subscribe__input:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
   .subscribe__input[aria-invalid='true'] { border-bottom-width: var(--stroke-mark); }
 
-  /* Full width and a 44px target while it is stacked, which is every width
-     below 64em. */
-  .subscribe__button { justify-self: stretch; min-height: 2.75rem; }
-  @media (min-width: 64em) { .subscribe__button { justify-self: start; } }
+  /* Two steps smaller than the site's button (28 October 2026): 11px words
+     and tighter padding, at its natural width. It draws about 32px tall, so
+     an invisible band above and below keeps the target 44px for a thumb. */
+  .subscribe__button {
+    position: relative;
+    padding: 0.75em 1.5em;
+    font-size: var(--text-xs);
+  }
+  .subscribe__button::before {
+    content: '';
+    position: absolute;
+    inset: -0.375rem 0;
+  }
 
   /* In flight: plainly not available, and not pressable twice. */
   .subscribe__button[disabled] { opacity: 0.55; cursor: default; }
@@ -175,7 +160,6 @@ const H = `h${level}` as 'h2' | 'h3';
   .subscribe__status {
     font-size: var(--text-form);
     font-weight: var(--weight-secondary);
-    max-width: 52ch;
     text-wrap: pretty;
   }
   .subscribe__status:empty { display: none; }
@@ -183,8 +167,8 @@ const H = `h${level}` as 'h2' | 'h3';
   .subscribe__done {
     font-size: var(--text-lead);
     font-weight: var(--weight-secondary);
-    max-width: 44ch;
   }
+  .subscribe__done:focus { outline: none; }
   /* Only one of the two is ever present. */
   .subscribe[data-state='done'] .subscribe__form,
   .subscribe[data-state='done'] .subscribe__status { display: none; }
