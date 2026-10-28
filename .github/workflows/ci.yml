@@ -68,8 +68,7 @@ jobs:
             dist/about/index.html \
             dist/contact/index.html \
             dist/culture/index.html \
-            dist/become-a-creator/index.html \
-            dist/privacy/index.html \
+            dist/creator-network/index.html \
             dist/sitemap-index.xml \
             dist/culture/rss.xml
           do

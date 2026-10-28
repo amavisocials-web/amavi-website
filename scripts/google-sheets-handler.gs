@@ -3,7 +3,7 @@
  * brand enquiries → email
  * ===========================================================
  *
- * A Google Apps Script web app. The /become-a-creator form POSTs each
+ * A Google Apps Script web app. The /creator-network form POSTs each
  * application here; this:
  *
  *   1. appends one row to the creators database (a timestamp in column A,

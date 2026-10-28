@@ -115,8 +115,10 @@ export const BRAND_ENQUIRY_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURI
 )}`;
 
 /**
- * The creator application, on this site. Nav, hero, footer and contact paths
- * all point here, and /creators redirects here (astro.config.mjs).
+ * The creator application, on this site: the Creator Network page. Nav, hero,
+ * footer and contact paths all point here, and /creators and the page's old
+ * address, /become-a-creator (until 28 October 2026), redirect here
+ * (astro.config.mjs).
  *
  * TODO(client): the previous form (the Vercel app at www.amavisocials.co)
  * saved applications through its own /api/submit. New applications arrive in
@@ -124,7 +126,7 @@ export const BRAND_ENQUIRY_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURI
  * old form collected before DNS moves, or those records stay behind with the
  * old app.
  */
-export const CREATOR_PATH = '/become-a-creator/';
+export const CREATOR_PATH = '/creator-network/';
 
 /** Both supplied by the client on 24 September 2026. */
 export const SOCIALS = [
@@ -158,7 +160,7 @@ export const NAV_LINKS: NavLink[] = [
   { label: 'About', href: '/about/' },
   { label: 'AMAVI Culture', href: '/culture/' },
   // Services, temporarily off the site (5 October 2026): see src/pages/_services.astro.
-  { label: 'Become a Creator', href: CREATOR_PATH },
+  { label: 'Creator Network', href: CREATOR_PATH },
 ];
 
 export const CONTACT_PATH = '/contact/';

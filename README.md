@@ -99,11 +99,12 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 | `/` | Full-screen video hero ("Content that connects"), copy centred, with "Brands \| Creators" under the headline and the two buttons under that; the "Trusted by" logo marquee; what AMAVI is, in three paragraphs; the three figures beside a drifting collage of creator work; the case study; the six services, as an accordion |
 | `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting and optimisation), the philosophy over a photograph in black, and the closing invitation |
 | `/culture` | AMAVI Culture: every published piece as a row, newest first, each opening on Substack in a new tab. No article pages; see AMAVI Culture below |
-| `/become-a-creator` | The intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
+| `/creator-network` | Creator Network: the intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
 | `/contact` | Two columns: the heading and one line of instruction on the left; Brand? and Creator?, opening in place onto a card each, on the right |
 | `/privacy` | Privacy policy. **Temporarily off the site**, see below |
 
-`/creators` redirects to `/become-a-creator` and `/journal` to `/culture`.
+`/creators` and `/become-a-creator` (the page's address until 28 October 2026)
+redirect to `/creator-network`, and `/journal` to `/culture`.
 **`/services` and `/privacy` are
 temporarily off the site** — see below.
 
@@ -446,7 +447,7 @@ real face may set wider; the display sizes are the `--display-*` tokens.
 
 ## The creator application
 
-`/become-a-creator` is a six-step form in a single card, one step on screen at
+`/creator-network` is a six-step form in a single card, one step on screen at
 a time:
 
 1. **About you** — name, email, country (a select of every country, each with
@@ -655,7 +656,7 @@ contents with nothing in the gap. That was taken out on 5 October 2026.
   the same blur, so the white wordmark and links hold.
 - **Hero** (`Hero.astro`). Full screen, and **centred on both axes**: the
   headline and, under it, the two ways in — **Brands** to `/contact` and
-  **Creators** to `/become-a-creator` — share a column down the middle of the
+  **Creators** to `/creator-network` — share a column down the middle of the
   frame. The inner box takes the header's height as padding at the top *and*
   the bottom, so centring in it centres on the frame rather than 40px below it.
 
@@ -1044,7 +1045,7 @@ Netlify, connected to this repo. `netlify.toml` holds the build config.
 - **Node version:** 22 (set in `netlify.toml`)
 
 Brands are sent to email (`CONTACT_EMAIL`, with the subject and a short prompt
-pre-filled). Creators go to `/become-a-creator`. Both live in `src/consts.ts`.
+pre-filled). Creators go to `/creator-network`. Both live in `src/consts.ts`.
 
 **One environment variable:** `PUBLIC_SHEETS_ENDPOINT`, the Google Apps Script
 URL — see "Creator applications → Google Sheets".

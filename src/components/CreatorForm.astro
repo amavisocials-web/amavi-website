@@ -15,7 +15,7 @@
  * row and emails AMAVI) with Netlify Forms as the backup capture.
  */
 import FormStep from './FormStep.astro';
-import { APPLICATIONS_EMAIL } from '../consts';
+import { APPLICATIONS_EMAIL, CREATOR_PATH } from '../consts';
 import { COUNTRIES } from '../data/countries';
 import { SHEETS_ENDPOINT } from '../lib/sheets';
 
@@ -73,7 +73,7 @@ const total = STEPS.length;
     class="apply__card creator-form"
     name={FORM_NAME}
     method="POST"
-    action="/become-a-creator/"
+    action={CREATOR_PATH}
     data-netlify="true"
     netlify-honeypot="company_website"
     data-creator-form

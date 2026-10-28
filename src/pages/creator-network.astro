@@ -4,15 +4,18 @@ import CreatorForm from '../components/CreatorForm.astro';
 import { CONTACT_EMAIL } from '../consts';
 ---
 
+{/* /creator-network since 28 October 2026, when "Become a Creator" became
+    "Creator Network" across the site; /become-a-creator redirects here
+    (astro.config.mjs). The heading stays an instruction, not the nav label. */}
 <Base
-  title="Become a Creator"
-  description="Apply to join the AMAVI Socials creator network. One application puts you in front of every brand we work with across Europe."
+  title="Creator Network"
+  description="Apply to join the AMAVI Socials Creator Network. One application puts you in front of every brand we work with across Europe."
 >
   {/* Kept short: this is mostly filled in on a phone, and every line above the
       form pushes the first field further down the screen. */}
   <section class="section page-head">
     <div class="container container--narrow">
-      <h1 class="display display--lg">Become a creator</h1>
+      <h1 class="display display--lg">Join the creator network</h1>
       <p class="lead page-head__lead">
         One application puts you in front of every brand we work with. We come to you when a
         brief fits.

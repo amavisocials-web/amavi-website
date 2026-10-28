@@ -1,7 +1,7 @@
 # Creator applications → Google Sheet + email, brand enquiries → email
 
 `google-sheets-handler.gs` is a Google Apps Script web app. The
-**Become a Creator** form POSTs each application to it; it appends one row to
+**Creator Network** form POSTs each application to it; it appends one row to
 your creators database and emails a copy to **partnerships@amavisocials.com**.
 Since 23 October 2026 the **contact form** POSTs each brand enquiry to it too;
 those are emailed to the same address and not written to the sheet (see
@@ -129,7 +129,7 @@ execution log prints `{"success":true}`. Delete the test row afterwards.
 
 **Then end to end:**
 
-1. Open `/become-a-creator/` on the deployed site and send a dummy
+1. Open `/creator-network/` on the deployed site and send a dummy
    application. Use a real email address you can check.
 2. The **Applications** tab gets a row: timestamp in column A, the answers in
    the fixed order below, and "Yes — <date time>" in **Consent given**.

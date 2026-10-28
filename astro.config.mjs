@@ -8,7 +8,7 @@ import { CREATOR_PATH, CONTACT_PATH } from './src/consts.ts';
 // subdomain until DNS access is granted — never hardcode that subdomain in
 // links; all internal links are relative.
 /** The paths above, for the sitemap filter: a redirect is not a page. */
-const REDIRECTED = ['/creators', '/services', '/journal'];
+const REDIRECTED = ['/creators', '/services', '/journal', '/become-a-creator'];
 
 export default defineConfig({
   site: 'https://www.amavisocials.com',
@@ -30,8 +30,8 @@ export default defineConfig({
     build: { cssTarget: ['safari15', 'ios15', 'chrome100', 'edge100', 'firefox100'] },
   },
 
-  // Addresses that no longer have a page of their own. /creators was the
-  // creator page's earlier one; /services is off the site for now
+  // Addresses that no longer have a page of their own. /creators and
+  // /become-a-creator were the creator page's earlier ones; /services is off the site for now
   // (src/pages/_services.astro), and anyone arriving on an old link or an old
   // search result is sent to Get in touch rather than shown a 404.
   redirects: {
@@ -42,5 +42,9 @@ export default defineConfig({
        one by one: only the one piece existed, and it is in the sitemap at its
        new address. */
     '/journal': '/culture/',
+    /* "Become a Creator" became "Creator Network" on 28 October 2026, and
+       the page moved with it. Links to the old address, in bios and old
+       posts, still land. */
+    '/become-a-creator': CREATOR_PATH,
   },
 });
