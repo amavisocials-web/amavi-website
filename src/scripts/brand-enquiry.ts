@@ -5,8 +5,11 @@
  * Steps (27 October 2026): step 1 asks who you are, step 2 what the brief
  * is. "Get started" checks step 1 and swaps in step 2; Back swaps step 1 back
  * with everything still filled in. Each step is checked before it is left,
- * with a message under any field that stops it. Both steps are one form, so
- * the send at the end carries every field from both.
+ * with a message under any field that stops it; step 2 has no required
+ * fields since 28 October 2026, so its check always passes and it can be
+ * sent empty. Both steps are one form, so the send at the end carries every
+ * field from both, and the step 2 ones are sent blank rather than left out
+ * when nothing was chosen, so every enquiry has the same fields.
  *
  * Four states, held on the wrapper as `data-state`: idle, sending, done,
  * error. The stylesheet reads it, so the states are not described twice.
@@ -92,18 +95,24 @@ if (root && form && button && label && back && count && status && done) {
     return problems;
   };
 
-  /** Step 2 and the company as one readable message, for the email. */
+  /** The step 2 fields, sent blank when nothing was chosen or typed. */
+  const BRIEF = ['needs[]', 'budget', 'start', 'brand'];
+
+  /**
+   * Step 2 and the company as one readable message, for the email. The
+   * company is required, so the message is never empty, which the script's
+   * enquiry_ insists on; anything on step 2 left blank is simply left out.
+   */
   const summary = (data: FormData) => {
     const line = (name: string, value: string) => (value ? `${name}: ${value}` : '');
-    const needs = data.getAll('needs[]').map(String).join(', ');
+    const needs = data.getAll('needs[]').map(String).filter(Boolean).join(', ');
+    const brand = String(data.get('brand') ?? '').trim();
     return [
       line('Company', String(data.get('company') ?? '')),
       line('Needs help with', needs),
       line('Budget', String(data.get('budget') ?? '')),
       line('Wants to start', String(data.get('start') ?? '')),
-      '',
-      'About the brand:',
-      String(data.get('brand') ?? ''),
+      ...(brand ? ['', 'About the brand:', brand] : []),
     ]
       .filter((text, i, all) => text !== '' || (i > 0 && all[i - 1] !== ''))
       .join('\n')
@@ -137,6 +146,7 @@ if (root && form && button && label && back && count && status && done) {
     const data = new FormData(form);
     const body = new URLSearchParams();
     for (const [key, value] of data) body.append(key, String(value));
+    for (const key of BRIEF) if (!body.has(key)) body.append(key, '');
     body.set('message', summary(data));
 
     try {

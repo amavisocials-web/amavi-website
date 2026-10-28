@@ -12,7 +12,9 @@ import { SHEETS_ENDPOINT } from '../lib/sheets';
  * place, which is the only reason the four states exist.
  *
  * Two steps since 27 October 2026, in place: who you are (name, company,
- * email), then the brief (what you need, budget, timing, and the brand). Both
+ * email), then the brief (what you need, budget, timing, and the brand). Step
+ * 1 is required; since 28 October 2026 nothing on step 2 is, so it can be
+ * sent exactly as it comes up. Both
  * are in the markup as one form, so a single submission at the end carries
  * every field, and without JavaScript the two simply show one after the
  * other. An inline script hides step 2 before first paint; if the step script
@@ -43,7 +45,7 @@ const FIELDS = [
   { name: 'email', label: 'Email', type: 'email', placeholder: 'you@company.com', autocomplete: 'email', error: 'Please add your email address.' },
 ] as const;
 
-/** Step 2: what the brief is. Only the brand description is required. */
+/** Step 2: what the brief is. All of it optional (28 October 2026). */
 const NEEDS = [
   'Creator campaigns',
   'Always-on creator programme',
@@ -161,18 +163,20 @@ const STARTS = ['As soon as possible', 'Within a month', 'Within three months', 
           name="brand"
           rows="4"
           placeholder="What you sell, who you are trying to reach, and what you have tried so far."
-          required
-          aria-describedby="enquiry-brand-error"
-          data-error="Please tell us about the brand."
         ></textarea>
-        <p class="field__error" id="enquiry-brand-error" aria-live="polite"></p>
       </div>
     </fieldset>
 
     <div class="enquiry__actions">
-      <button class="enquiry__back" type="button" data-enquiry-back hidden>Back</button>
       <button class="btn btn--primary enquiry__button" type="submit" data-enquiry-button>
         <span data-enquiry-label>Get started</span>
+      </button>
+      <button class="enquiry__back" type="button" data-enquiry-back hidden>
+        <svg class="enquiry__back-arrow" viewBox="0 0 22 12" aria-hidden="true" focusable="false">
+          <path d="M22 6H3M7.5 1L2 6l5.5 5" fill="none" stroke="currentColor"
+                stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        </svg>
+        Back
       </button>
     </div>
   </form>
@@ -261,27 +265,54 @@ const STARTS = ['As soon as possible', 'Within a month', 'Within three months', 
   }
   .enquiry__segment.is-on { background: var(--accent); border-color: var(--accent); }
 
-  /* Back is a link in look, a button in kind: it changes the step, it does
-     not go anywhere. Beside the main button on step 2. */
-  .enquiry__actions { display: flex; align-items: center; gap: var(--space-m); }
+  /* The button across the column, and on step 2 Back centred beneath it
+     (28 October 2026: beside it, it pulled the row off balance). Back is a
+     link in look, a button in kind: it changes the step, it does not go
+     anywhere. The site's secondary-link type, small capitals in grey, with
+     the arrow before it. Its box is 44px tall for a thumb, so the gap above
+     it is 8px: about 24px from the button to the word. */
+  .enquiry__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
   .enquiry__back {
-    flex: none;
-    padding: 0.5rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: 2.75rem;
+    padding: 0 var(--space-s);
     font: inherit;
     font-size: var(--text-xs);
     font-weight: var(--weight-strong);
     letter-spacing: var(--tracking-caps);
     text-transform: uppercase;
     color: var(--ink);
+    opacity: 0.7; /* 0.7 and not lower: 0.6 of #222021 misses AA. */
     background: none;
     border: 0;
-    border-bottom: var(--stroke) solid currentColor;
     cursor: pointer;
+    transition: color 200ms ease-out, opacity 200ms ease-out;
   }
-  .enquiry__back:hover { color: var(--accent); }
+  .enquiry__back-arrow {
+    flex: none;
+    width: 1.1rem;
+    height: 0.6rem;
+    transition: transform 200ms ease-out;
+  }
+  .enquiry__back:hover,
+  .enquiry__back:focus-visible { color: var(--accent); opacity: 1; }
+  .enquiry__back:hover .enquiry__back-arrow,
+  .enquiry__back:focus-visible .enquiry__back-arrow { transform: translateX(-0.25rem); }
   .enquiry__back:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
   .enquiry__back[hidden] { display: none; }
-  .enquiry__actions .enquiry__button { flex: 1 1 auto; }
+  @media (prefers-reduced-motion: reduce) {
+    .enquiry__back,
+    .enquiry__back-arrow { transition: none; }
+    .enquiry__back:hover .enquiry__back-arrow,
+    .enquiry__back:focus-visible .enquiry__back-arrow { transform: none; }
+  }
 
   /* Full width of the column, accent fill, white text. */
   .enquiry__button { width: 100%; justify-content: center; }
