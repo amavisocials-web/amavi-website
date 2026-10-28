@@ -113,8 +113,16 @@ const schema = {
       may be named, and whether the figures can be published as they stand. */}
   <Feature labelledby="case-heading" textOnlyOnPhone>
     <p class="eyebrow">Case study</p>
-    <h2 id="case-heading" class="display display--lg">
-      Building an always-on creator strategy for our healthcare partner
+    {/* Two lines on a wide screen, broken where the sense breaks; the <br>
+        is only displayed from 75em (see .case__title below). The space
+        before it is written out because the build drops the line break
+        after it, and without one "strategy" and "for" would run together
+        wherever the <br> is hidden. The kept phrases stop a narrower wrap
+        from leaving one word on a line of its own, as "creator" was at 768,
+        or splitting "always-on" at its hyphen. */}
+    <h2 id="case-heading" class="display display--lg case__title">
+      Building an <span class="case__keep">always-on</span> <span class="case__keep">creator strategy</span>{' '}<br class="case__break" />
+      <span class="case__pair">for our</span> <span class="case__keep">healthcare partner</span>
     </h2>
     <p class="feature__body">
       Starting with no established influencer marketing strategy, we built a creator programme
@@ -194,6 +202,32 @@ const schema = {
      40px of air above the words, and 32 on a phone. */
   .numbers__more { margin-top: var(--space-s); }
   @media (max-width: 47.99em) { .numbers__more { margin-top: var(--space-2xs); } }
+
+  /* ---- Case study: the heading on two lines ----
+     "Building an always-on creator strategy / for our healthcare partner".
+     The first line is 29.8em of this face, wider than the 38rem text column
+     at the shared heading size, so from 75em the heading is let out to its
+     own width, into the room before the photograph, and set one step down
+     (28px over 1.2: 23.3px). That keeps it 41–68px clear of the photograph
+     from 1200px to the widest screen. Below 75em the <br> is not displayed
+     and the heading wraps on its own: at 1024 the first line would need
+     638px even a step down, and there are 587px before the photograph, so
+     holding the break there would only split the first line instead. */
+  .case__break { display: none; }
+  .case__keep { white-space: nowrap; }
+  /* Where "our healthcare partner" does not fit on one line (phones under
+     360px, and the side-by-side layout from 48em to 57em), "for our" goes
+     down as a pair rather than leaving "our" on a line by itself. */
+  @media (max-width: 22.5em), (min-width: 48em) and (max-width: 57em) {
+    .case__pair { white-space: nowrap; }
+  }
+  @media (min-width: 75em) {
+    .case__title {
+      width: max-content;
+      font-size: calc(var(--display-lg) / 1.2);
+    }
+    .case__break { display: inline; }
+  }
 
   /* ---- Services: the heading on one side, the ways on the other ---- */
   .ways__grid { display: grid; gap: var(--space-xl); }

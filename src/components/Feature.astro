@@ -28,8 +28,17 @@ const { reverse = false, ruled = false, textOnlyOnPhone = false, labelledby } = 
 </section>
 
 <style>
-  /* display, gap and the centring come from .media-row in global.css. */
-  .feature__text { display: grid; gap: var(--space-m); align-content: start; max-width: 38rem; }
+  /* display, gap and the centring come from .media-row in global.css. One
+     track exactly the column's width: a heading let out wider than the column
+     (the case study's, from 75em) runs past it instead of widening the track,
+     which would stretch the paragraphs with it. */
+  .feature__text {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m);
+    align-content: start;
+    max-width: 38rem;
+  }
   .feature__media { width: min(100%, 16rem); }
 
   @media (min-width: 48em) {
