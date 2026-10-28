@@ -18,7 +18,16 @@
  *
  * The drag offset is kept modulo one run's width. Without that it wanders off
  * with every swipe and the row eventually drags out of its own box.
+ *
+ * - **Leaving the page lets go, and coming back looks again** (28 October
+ *   2026). A tap opens a tile's post; whatever held the row at that moment —
+ *   a press, the focus the tap left on the link — used to still hold it on the
+ *   way back, so it came back frozen. Now only keyboard focus holds it, a
+ *   press is dropped when the page is put away, and on return the row checks
+ *   again whether it is on screen (src/scripts/lib/page-life.ts).
  */
+import { onLeave, onReturn, shownShare, keyboardFocusIn } from './lib/page-life';
+
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 /** How far a press may move, in CSS pixels, and still count as a tap. */
@@ -38,9 +47,11 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   let startX = 0;
   let offset = 0;
 
-  /** Paused unless it is on screen, nobody has hold of it and no tile has focus. */
+  /** Paused unless it is on screen, nobody has hold of it and no tile has
+      keyboard focus. Not any focus: the one a tap leaves on a link outlasts
+      the visit to Instagram. */
   const sync = () => {
-    const held = pressed || row.matches(':focus-within');
+    const held = pressed || keyboardFocusIn(row);
     track.style.animationPlayState = onScreen && !held ? 'running' : 'paused';
   };
 
@@ -119,9 +130,22 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
     { capture: true },
   );
 
-  /* A tile with keyboard focus holds the row still, as the columns do. */
+  /* A tile with keyboard focus holds the row still, as the columns do. Checked
+     once focus has landed wherever it went next. */
   row.addEventListener('focusin', sync);
-  row.addEventListener('focusout', () => requestAnimationFrame(sync));
+  row.addEventListener('focusout', () => setTimeout(sync));
+
+  /* Put away mid-press, the release never arrives: drop the press. Back
+     again, the observer's last word may be from before, so look. */
+  onLeave(() => {
+    pressed = dragging = swiped = false;
+    sync();
+  }, { blur: true });
+  onReturn(() => {
+    pressed = dragging = swiped = false;
+    onScreen = shownShare(row) > 0;
+    sync();
+  });
 
   /* Following the setting while the page is open, rather than only at load. */
   still.addEventListener('change', () => {
@@ -285,4 +309,19 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   videos.forEach((video) => onScreen.observe(video));
 
   still.addEventListener('change', follow);
+
+  /* Put away: stop. Back again: work out afresh which tiles the row shows,
+     since the browser paused the videos on the way out and the observer's
+     list is from before, then play the nearest two. */
+  onLeave(() => {
+    window.clearInterval(rerank);
+    videos.forEach(stop);
+  });
+  onReturn(() => {
+    visible.clear();
+    videos.forEach((video) => {
+      if (shownShare(video, row) > 0) visible.add(video);
+    });
+    follow();
+  });
 }

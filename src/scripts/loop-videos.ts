@@ -15,8 +15,14 @@
  *   anything but its poster, for a frame that is shown at every width but
  *   should only play at some of them. It follows the query while the page is
  *   open, so widening the window starts it.
+ * - Leaving the page pauses them; coming back — another tab, another app, or
+ *   the back button restoring the page from the back/forward cache — looks
+ *   again at which are on screen and plays those (28 October 2026). The
+ *   browser pauses them on the way out and nothing used to restart them,
+ *   because the observers had nothing new to say.
  */
 import { reduceMotion as still } from './lib/motion';
+import { onLeave, onReturn, shownShare } from './lib/page-life';
 
 /* Managed videos are driven by their own script — the collage's phone row,
    which caps how many play at once — and this one must not also start them. */
@@ -102,6 +108,16 @@ for (const query of new Set(videos.map((v) => v.dataset.loopFrom).filter(Boolean
 still.addEventListener('change', () => {
   for (const video of videos) {
     if (video.getAttribute('poster')) attachSources(video);
+    sync(video);
+  }
+});
+
+onLeave(() => videos.forEach((video) => video.pause()));
+onReturn(() => {
+  for (const video of videos) {
+    // The same quarter-on-screen rule as the observer.
+    if (shownShare(video) >= 0.25) visible.add(video);
+    else visible.delete(video);
     sync(video);
   }
 });

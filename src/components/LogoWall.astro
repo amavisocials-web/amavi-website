@@ -60,7 +60,7 @@ const COPIES = 3;
   )}
 
   {marquee ? (
-    <div class="marquee" tabindex="0" role="region" aria-label={heading ? `${heading.replace(/\n/g, ' ')}: logos` : 'Client logos'}>
+    <div class="marquee" data-hold tabindex="0" role="region" aria-label={heading ? `${heading.replace(/\n/g, ' ')}: logos` : 'Client logos'}>
       <div class="marquee__track">
         {Array.from({ length: COPIES }, (_, copy) => (
           <ul class="marquee__set logo-wall__list" role="list" aria-hidden={copy > 0 ? 'true' : undefined}>
@@ -114,6 +114,10 @@ const COPIES = 3;
     </ul>
   )}
 </div>
+
+<script>
+  import '../scripts/marquee-hold';
+</script>
 
 <style>
   .logo-wall {
@@ -219,8 +223,11 @@ const COPIES = 3;
     to { transform: translateX(-100%); }
   }
 
-  .marquee:hover .marquee__set,
-  .marquee:focus-within .marquee__set { animation-play-state: paused; }
+  /* Held while a mouse moves over it or it has keyboard focus, and let go on
+     leaving the page or coming back (src/scripts/marquee-hold.ts). Not :hover
+     and :focus-within: a click on a logo left both set while the reader was
+     on the client's site, and the strip came back frozen. */
+  .marquee[data-held] .marquee__set { animation-play-state: paused; }
 
   /* Reduced motion: no animation, one copy, wrapped and centred, and the
      logos hold still on hover too. */

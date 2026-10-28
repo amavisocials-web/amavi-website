@@ -149,7 +149,7 @@ const linkTo = (tile: ContentTile, copy: number) =>
       </div>
     </div>
 
-    <div class="collage">
+    <div class="collage" data-hold>
       {columns.map((column, i) => (
         <div class:list={['collage__column', i % 2 === 0 ? 'collage__column--up' : 'collage__column--down']}
              data-column={i + 1}>
@@ -175,6 +175,7 @@ const linkTo = (tile: ContentTile, copy: number) =>
 
 <script>
   import '../scripts/collage-marquee';
+  import '../scripts/marquee-hold';
 </script>
 
 <style>
@@ -400,8 +401,11 @@ const linkTo = (tile: ContentTile, copy: number) =>
     to { transform: translateY(0); }
   }
 
-  .collage:hover .collage__set,
-  .collage:focus-within .collage__set { animation-play-state: paused; }
+  /* Held while a mouse moves over it or a tile has keyboard focus, and let
+     go on leaving the page or coming back to it (src/scripts/marquee-hold.ts).
+     Not :hover and :focus-within, which a click on a tile left set while the
+     reader was on Instagram, so the collage came back frozen. */
+  .collage[data-held] .collage__set { animation-play-state: paused; }
 
   /* --- Tiles that link to their post ---------------------------------------
      The anchor is the tile itself, inside the moving set, so the link travels
