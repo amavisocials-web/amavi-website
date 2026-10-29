@@ -15,7 +15,8 @@
  * the field (since 28 October 2026), one for an empty field and one for an
  * address that is not one. A failed send is said under the button instead.
  */
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+import { isEmail } from './lib/validate';
+
 const TIMEOUT = 15000;
 
 const WORDS = {
@@ -71,7 +72,7 @@ for (const root of document.querySelectorAll<HTMLElement>('[data-subscribe]')) {
     if (sending) return;
 
     const address = email.value.trim();
-    if (!EMAIL.test(address)) {
+    if (!isEmail(address)) {
       complain(address ? WORDS.invalid : WORDS.empty);
       email.focus();
       return;

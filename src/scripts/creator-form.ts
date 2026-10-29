@@ -31,6 +31,7 @@ type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 import { prefersReducedMotion as reducedMotion } from './lib/motion';
 import { deliver } from './lib/send';
+import { isAmount, isEmail, isHandle } from './lib/validate';
 
 /* --- Field errors ------------------------------------------------------------ */
 
@@ -87,10 +88,15 @@ function isLink(value: string): boolean {
 }
 
 function describe(control: Control): string {
-  if (control.type === 'email' && control.validity.typeMismatch) {
+  if (control.type === 'email' && control.value.trim()) {
     return 'Please enter a valid email address, like name@example.com.';
   }
   return control.dataset.error ?? 'This field is required.';
+}
+
+/** YouTube takes an @handle or a link to the channel. */
+function isChannel(value: string): boolean {
+  return /^@?[A-Za-z0-9._-]{3,30}$/.test(value) || isLink(toLink(value));
 }
 
 function reasonFor(error: unknown): string {
@@ -111,7 +117,12 @@ function validate(scope: HTMLElement): HTMLElement[] {
   );
   for (const control of simple) {
     clearError(control);
-    if (!control.checkValidity()) {
+    // Nothing but spaces is nothing.
+    if (!(control instanceof HTMLSelectElement) && control.value.trim() === '') control.value = '';
+    // The browser's email check lets "name@company" through; this one wants
+    // the whole address (src/scripts/lib/validate.ts).
+    const badEmail = control.type === 'email' && control.value !== '' && !isEmail(control.value);
+    if (!control.checkValidity() || badEmail) {
       setError(control, describe(control));
       problems.push(control);
     }
@@ -144,6 +155,24 @@ function validate(scope: HTMLElement): HTMLElement[] {
     }
   }
 
+  // Instagram and TikTok: cut back to the bare handle, as leaving the field
+  // does, then held to what the platforms allow.
+  for (const input of scope.querySelectorAll<HTMLInputElement>('[data-handle]')) {
+    if (!input.value.trim()) continue;
+    input.value = toHandle(input.value);
+    if (!isHandle(input.value)) {
+      setError(input, 'That doesn’t look like a handle: letters, numbers, dots and underscores only.');
+      problems.push(input);
+    }
+  }
+
+  // YouTube: an @handle or a link, nothing else.
+  const youtube = scope.querySelector<HTMLInputElement>('input[name="youtube"]');
+  if (youtube?.value.trim() && !isChannel(youtube.value.trim())) {
+    setError(youtube, 'That doesn’t look like a channel: add your @handle or a link to it.');
+    problems.push(youtube);
+  }
+
   // At least one channel, so a brand has something to look at.
   const channelSet = scope.querySelector<HTMLElement>('[data-channels]');
   if (channelSet) {
@@ -162,9 +191,16 @@ function validate(scope: HTMLElement): HTMLElement[] {
   if (rateGroup && ratesShown) {
     clearError(rateGroup);
     const rates = [...rateGroup.querySelectorAll<HTMLInputElement>('[data-rate]')];
+    rates.forEach((rate) => rate.removeAttribute('aria-invalid'));
+    // Numbers only: the currency has a field of its own.
+    const wrong = rates.filter((rate) => rate.value.trim() && !isAmount(rate.value));
     if (!rates.some((rate) => rate.value.trim()) && rates[0]) {
       setError(rateGroup, 'Add at least one rate, or choose Gifted above.');
       problems.push(rates[0]);
+    } else if (wrong.length) {
+      setError(rateGroup, 'Rates are numbers only, like 250 or 1,200. The currency goes below.');
+      wrong.forEach((rate) => rate.setAttribute('aria-invalid', 'true'));
+      problems.push(wrong[0]);
     }
   }
 
@@ -306,10 +342,26 @@ function enhance(form: HTMLFormElement) {
       return;
     }
     if (target.getAttribute('aria-invalid') === 'true') {
+      const value = target.value.trim();
       const fixed = target.hasAttribute('data-link')
-        ? !target.value.trim() || isLink(toLink(target.value, (target as HTMLInputElement).dataset.handleBase))
-        : target.checkValidity();
+        ? !value || isLink(toLink(target.value, (target as HTMLInputElement).dataset.handleBase))
+        : target.hasAttribute('data-handle')
+          ? !value || isHandle(toHandle(value))
+          : target.name === 'youtube'
+            ? !value || isChannel(value)
+            : target.type === 'email'
+              ? isEmail(value)
+              : target.checkValidity();
       if (fixed) clearError(target);
+    }
+    // A rate fixed: the group's message goes once every rate given is a number.
+    if (target.hasAttribute('data-rate')) {
+      const group = target.closest<HTMLElement>('[data-rate-group]');
+      const all = group ? [...group.querySelectorAll<HTMLInputElement>('[data-rate]')] : [];
+      if (group && all.some((rate) => rate.value.trim()) && all.every((rate) => !rate.value.trim() || isAmount(rate.value))) {
+        all.forEach((rate) => rate.removeAttribute('aria-invalid'));
+        clearError(group);
+      }
     }
     const channelSet = target.closest<HTMLElement>('[data-channels]');
     if (channelSet && target.value.trim()) clearError(channelSet);

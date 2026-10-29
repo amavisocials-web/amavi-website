@@ -39,11 +39,12 @@ import { SHEETS_ENDPOINT } from '../lib/sheets';
  */
 const FORM_NAME = 'brand-enquiry';
 
-/** Step 1. `error` is the message under a field left empty. */
+/** Step 1. `error` is the message under a field left empty; `max` the most
+    it takes, well inside the 5,000 characters the Apps Script keeps. */
 const FIELDS = [
-  { name: 'name', label: 'Name', type: 'text', placeholder: 'Your name', autocomplete: 'name', error: 'Please add your name.' },
-  { name: 'company', label: 'Company', type: 'text', placeholder: 'Your company', autocomplete: 'organization', error: 'Please add your company.' },
-  { name: 'email', label: 'Email', type: 'email', placeholder: 'Your email', autocomplete: 'email', error: 'Please add your email address.' },
+  { name: 'name', label: 'Name', type: 'text', placeholder: 'Your name', autocomplete: 'name', max: 100, error: 'Please add your name.' },
+  { name: 'company', label: 'Company', type: 'text', placeholder: 'Your company', autocomplete: 'organization', max: 120, error: 'Please add your company.' },
+  { name: 'email', label: 'Email', type: 'email', placeholder: 'Your email', autocomplete: 'email', max: 254, error: 'Please add your email address.' },
 ] as const;
 
 /** Step 2: what the brief is. All of it optional (28 October 2026). */
@@ -108,6 +109,7 @@ const STARTS = ['As soon as possible', 'Within a month', 'Within three months', 
             type={field.type}
             placeholder={field.placeholder}
             autocomplete={field.autocomplete}
+            maxlength={field.max}
             required
             aria-describedby={`enquiry-${field.name}-error`}
             data-error={field.error}
@@ -165,6 +167,7 @@ const STARTS = ['As soon as possible', 'Within a month', 'Within three months', 
           id="enquiry-brand"
           name="brand"
           rows="4"
+          maxlength="2000"
           placeholder="What you sell, who you are trying to reach, and what you have tried so far."
         ></textarea>
       </div>

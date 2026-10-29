@@ -29,6 +29,7 @@
  * cleared until success.
  */
 import { deliver } from './lib/send';
+import { isEmail } from './lib/validate';
 
 type Control = HTMLInputElement | HTMLTextAreaElement;
 
@@ -74,13 +75,18 @@ if (root && form && button && label && back && count && status && done) {
   const errorFor = (field: Control) =>
     document.getElementById(field.getAttribute('aria-describedby') ?? '');
 
-  /** Every required field on one step that fails, each told why under it. */
+  /**
+   * Every required field on one step that fails, each told why under it. A
+   * field of nothing but spaces counts as empty, and an email has to be a
+   * whole address (src/scripts/lib/validate.ts): the browser's own check
+   * lets "name@company" through.
+   */
   const check = (step: HTMLElement) => {
     const problems: Control[] = [];
     step.querySelectorAll<Control>('input[required], textarea[required]').forEach((field) => {
       const slot = errorFor(field);
       field.value = field.value.trim() === '' ? '' : field.value;
-      if (field.checkValidity()) {
+      if (field.checkValidity() && (field.type !== 'email' || isEmail(field.value))) {
         field.removeAttribute('aria-invalid');
         if (slot) slot.textContent = '';
         return;

@@ -112,7 +112,7 @@ const total = STEPS.length;
         <FormStep index={0} total={total} {...STEPS[0]}>
           <div class="field">
             <label class="field__label" for="cf-name">Full name</label>
-            <input class="field__control" id="cf-name" name="name" type="text" required
+            <input class="field__control" id="cf-name" name="name" type="text" maxlength="100" required
                    autocomplete="name" aria-describedby="cf-name-error"
                    data-error="Please add your name." />
             <p class="field__error" id="cf-name-error" aria-live="polite"></p>
@@ -120,7 +120,7 @@ const total = STEPS.length;
 
           <div class="field">
             <label class="field__label" for="cf-email">Email</label>
-            <input class="field__control" id="cf-email" name="email" type="email" required
+            <input class="field__control" id="cf-email" name="email" type="email" maxlength="254" required
                    autocomplete="email" inputmode="email" aria-describedby="cf-email-error"
                    data-error="Please add your email address." />
             <p class="field__error" id="cf-email-error" aria-live="polite"></p>
@@ -174,7 +174,7 @@ const total = STEPS.length;
                   <label class="field__label" for={`cf-${c.name}`}>{c.label}</label>
                   <span class:list={['handle', { 'handle--at': c.handle }]}>
                     {c.handle && <span class="handle__at" aria-hidden="true">@</span>}
-                    <input class="field__control" id={`cf-${c.name}`} name={c.name} type="text"
+                    <input class="field__control" id={`cf-${c.name}`} name={c.name} type="text" maxlength={c.handle ? 100 : 200}
                            inputmode={c.handle ? 'text' : 'url'} autocapitalize="off" autocorrect="off"
                            spellcheck="false" placeholder={c.ph} data-handle={c.handle ? '' : undefined}
                            aria-describedby={`cf-${c.name}-error`} />
@@ -221,7 +221,7 @@ const total = STEPS.length;
             <label class="field__label" for="cf-insights">
               Audience insights <span class="field__optional">(optional)</span>
             </label>
-            <textarea class="field__control" id="cf-insights" name="audience_insights" rows="4"
+            <textarea class="field__control" id="cf-insights" name="audience_insights" maxlength="2000" rows="4"
                       placeholder="E.g. 70% women, mostly 25–34, mainly Ireland and the UK"></textarea>
           </div>
         </FormStep>
@@ -287,7 +287,7 @@ const total = STEPS.length;
                 {rates.map((r) => (
                   <div class="field">
                     <label class="field__label field__label--sub" for={`cf-${r.name}`}>{r.label}</label>
-                    <input class="field__control" id={`cf-${r.name}`} name={r.name} type="text"
+                    <input class="field__control" id={`cf-${r.name}`} name={r.name} type="text" maxlength="12"
                            inputmode="decimal" placeholder="e.g. 250" data-rate />
                   </div>
                 ))}
@@ -309,7 +309,7 @@ const total = STEPS.length;
             <label class="field__label" for="cf-rate-notes">
               Rate notes <span class="field__optional">(optional)</span>
             </label>
-            <textarea class="field__control" id="cf-rate-notes" name="rate_notes" rows="3"
+            <textarea class="field__control" id="cf-rate-notes" name="rate_notes" maxlength="2000" rows="3"
                       placeholder="Bundles, usage rights, exclusivity: anything we should know"></textarea>
           </div>
 
@@ -317,7 +317,7 @@ const total = STEPS.length;
             <label class="field__label" for="cf-past">
               Past brand collaborations <span class="field__optional">(optional)</span>
             </label>
-            <textarea class="field__control" id="cf-past" name="past_collaborations" rows="3"
+            <textarea class="field__control" id="cf-past" name="past_collaborations" maxlength="2000" rows="3"
                       placeholder="Brands you've worked with before"></textarea>
           </div>
 
@@ -325,7 +325,7 @@ const total = STEPS.length;
             <label class="field__label" for="cf-mediakit">
               Media kit link <span class="field__optional">(optional)</span>
             </label>
-            <input class="field__control" id="cf-mediakit" name="media_kit" type="text"
+            <input class="field__control" id="cf-mediakit" name="media_kit" type="text" maxlength="500"
                    inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false"
                    placeholder="PDF, Google Drive or portfolio link" data-link
                    aria-describedby="cf-mediakit-error" />
@@ -342,7 +342,7 @@ const total = STEPS.length;
             <label class="field__label" for="cf-else">
               Anything else <span class="field__optional">(optional)</span>
             </label>
-            <textarea class="field__control" id="cf-else" name="anything_else" rows="3"
+            <textarea class="field__control" id="cf-else" name="anything_else" maxlength="2000" rows="3"
                       placeholder="Availability, upcoming launches, brands you'd love to work with"></textarea>
           </div>
 
