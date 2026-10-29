@@ -96,7 +96,7 @@ if (root && form && button && label && back && count && status && done) {
   };
 
   /** The step 2 fields, sent blank when nothing was chosen or typed. */
-  const BRIEF = ['needs[]', 'budget', 'start', 'brand'];
+  const BRIEF = ['needs[]', 'creators_per_month', 'start', 'brand'];
 
   /**
    * Step 2 and the company as one readable message, for the email. The
@@ -110,7 +110,7 @@ if (root && form && button && label && back && count && status && done) {
     return [
       line('Company', String(data.get('company') ?? '')),
       line('Needs help with', needs),
-      line('Budget', String(data.get('budget') ?? '')),
+      line('Creators per month', String(data.get('creators_per_month') ?? '')),
       line('Wants to start', String(data.get('start') ?? '')),
       ...(brand ? ['', 'About the brand:', brand] : []),
     ]

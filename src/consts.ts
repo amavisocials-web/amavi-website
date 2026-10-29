@@ -106,12 +106,14 @@ export const APPLICATIONS_EMAIL = 'partnerships@amavisocials.com';
 
 /**
  * Brands are sent to email rather than a form. The subject and a short
- * prompt are pre-filled so enquiries arrive with the basics in them.
+ * prompt are pre-filled so enquiries arrive with the basics in them. The
+ * prompts mirror the contact form's, budget included: it asked for one until
+ * 29 October 2026 and now asks how many creators a month instead.
  */
 export const BRAND_ENQUIRY_MAILTO = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
   'Brand enquiry',
 )}&body=${encodeURIComponent(
-  'Hi AMAVI team,\n\nCompany:\nWhat we sell:\nWho we want to reach:\nRough budget, if known:\n\n',
+  'Hi AMAVI team,\n\nCompany:\nWhat we sell:\nWho we want to reach:\nCreators a month, if known:\n\n',
 )}`;
 
 /**

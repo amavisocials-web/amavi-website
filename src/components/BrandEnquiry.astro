@@ -12,7 +12,8 @@ import { SHEETS_ENDPOINT } from '../lib/sheets';
  * place, which is the only reason the four states exist.
  *
  * Two steps since 27 October 2026, in place: who you are (name, company,
- * email), then the brief (what you need, budget, timing, and the brand). Step
+ * email), then the brief (what you need, how many creators a month, timing,
+ * and the brand). Step
  * 1 is required; since 28 October 2026 nothing on step 2 is, so it can be
  * sent exactly as it comes up. Both
  * are in the markup as one form, so a single submission at the end carries
@@ -55,7 +56,9 @@ const NEEDS = [
   'Organic social content',
   'Not sure yet',
 ];
-const BUDGETS = ['Under 5k', '5k to 15k', '15k to 50k', '50k+', 'Not decided yet'];
+/* In place of the budget question since 29 October 2026: no fees or money
+   anywhere on this form. Sent as `creators_per_month`. */
+const CREATORS_PER_MONTH = ['1 to 5', '6 to 20', '21 to 50', '50+'];
 const STARTS = ['As soon as possible', 'Within a month', 'Within three months', 'Just exploring'];
 ---
 
@@ -131,13 +134,13 @@ const STARTS = ['As soon as possible', 'Within a month', 'Within three months', 
         </div>
       </div>
 
-      <div class="field" role="radiogroup" aria-labelledby="enquiry-budget-label">
-        <span class="field__label" id="enquiry-budget-label">What is the budget</span>
+      <div class="field" role="radiogroup" aria-labelledby="enquiry-creators-label">
+        <span class="field__label" id="enquiry-creators-label">How many creators are you looking to engage per month?</span>
         <div class="chips">
-          {BUDGETS.map((budget) => (
+          {CREATORS_PER_MONTH.map((band) => (
             <label class="chip">
-              <input type="radio" name="budget" value={budget} />
-              <span class="chip__label">{budget}</span>
+              <input type="radio" name="creators_per_month" value={band} />
+              <span class="chip__label">{band}</span>
             </label>
           ))}
         </div>

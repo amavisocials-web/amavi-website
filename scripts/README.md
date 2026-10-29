@@ -32,7 +32,8 @@ partnerships@amavisocials.com as *New brand enquiry — <name>*, with Reply-To
 set to the enquirer, so answering is just Reply. Nothing goes in the sheet.
 
 Since 27 October 2026 the form has two steps (name, company, email; then what
-they need, budget, when, and the brand). The script prints a name, an email
+they need, how many creators a month, when, and the brand; the budget question
+it had until 29 October is gone). The script prints a name, an email
 and a message, so the page writes the company and every step 2 answer into
 `message` before sending; the email shows them as lines under *Message*, and
 no change to the deployed script was needed. Netlify Forms stores each answer
