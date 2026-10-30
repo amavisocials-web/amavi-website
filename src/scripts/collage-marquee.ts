@@ -27,6 +27,7 @@
  *   again whether it is on screen (src/scripts/lib/page-life.ts).
  */
 import { onLeave, onReturn, shownShare, keyboardFocusIn } from './lib/page-life';
+import { attachPoster, attachSources, onUnlock, tryPlay } from './lib/playback';
 
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -219,8 +220,10 @@ for (const frame of document.querySelectorAll<HTMLElement>('.collage__column, [d
  *   tile: the row's overflow: hidden clips a tile outside it to nothing, so no
  *   observer margin sees one coming. Five files between the two runs, ~200KB.
  * - A video has its poster before it is asked to play, so if the browser
- *   refuses (iOS Low Power Mode does), the refusal is caught and the picture
- *   stays rather than a black box.
+ *   refuses (Low Power Mode, Safari set to Never Auto-Play), the picture
+ *   stays rather than a black box, the video is not asked again, and a play
+ *   button over the row starts every video on the page
+ *   (src/scripts/lib/playback.ts, 30 October 2026).
  * - Under reduced motion nothing plays and no video file is fetched.
  * - At 64em and up this row is display: none, so none of it intersects and
  *   none of it runs: desktop keeps the columns and their own behaviour.
@@ -234,25 +237,13 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   const videos = [...row.querySelectorAll<HTMLVideoElement>('video[data-loop-managed]')];
   if (!videos.length) continue;
 
-  const attachPoster = (video: HTMLVideoElement) => {
-    if (video.dataset.poster && !video.getAttribute('poster')) video.poster = video.dataset.poster;
-  };
-  const attachSources = (video: HTMLVideoElement) => {
-    if (video.dataset.sources === 'on') return;
-    video.dataset.sources = 'on';
-    video.querySelectorAll<HTMLSourceElement>('source[data-src]').forEach((source) => {
-      source.src = source.dataset.src!;
-    });
-    video.load();
-  };
   const start = (video: HTMLVideoElement) => {
     // The poster first, so a refused play() still leaves a picture.
     attachPoster(video);
     attachSources(video);
     if (!video.paused) return;
-    video.play().catch(() => {
-      /* Refused: Low Power Mode, data saver, a strict browser. The poster stays. */
-    });
+    // Refused: marked, not asked again, and the row gets a play button.
+    tryPlay(video);
   };
   const stop = (video: HTMLVideoElement) => {
     if (!video.paused) video.pause();
@@ -317,11 +308,16 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
     window.clearInterval(rerank);
     videos.forEach(stop);
   });
-  onReturn(() => {
+  /** Which tiles the row shows, read from the page, then the nearest two play. */
+  const settle = () => {
     visible.clear();
     videos.forEach((video) => {
       if (shownShare(video, row) > 0) visible.add(video);
     });
     follow();
-  });
+  };
+  onReturn(settle);
+  onUnlock(settle);
+  // On setup too, rather than only on the observer's first report.
+  settle();
 }

@@ -82,7 +82,10 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
   data-desktop={desktop.playable ? 'video' : 'frame'}
   data-mobile={mobile.playable ? 'video' : 'frame'}
 >
-  <div class="hero__inner">
+  {/* data-play-host: where the play button goes if the browser refuses to
+      play the footage (src/scripts/lib/playback.ts). Here and not in
+      .hero__media, which is hidden from assistive tech. */}
+  <div class="hero__inner" data-play-host="hero">
     {/* Silent, captionless footage: decoration, hidden from assistive tech. */}
     {(desktop.playable || mobile.playable) && (
       <div class="hero__media" aria-hidden="true">

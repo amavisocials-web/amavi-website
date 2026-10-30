@@ -127,7 +127,7 @@ const linkTo = (tile: ContentTile, copy: number) =>
     {/* Below 64em: one row drifting right to left, for ever. The clips are
         laid out twice and the track travels exactly one run's width, so the
         join cannot be seen. Everything that moves it is a transform. */}
-    <div class="collage-row" data-marquee>
+    <div class="collage-row" data-marquee data-play-host>
       <div class="collage-row__drag" data-marquee-drag>
         <div class="collage-row__track" data-marquee-track>
           {[0, 1].map((copy) => (
@@ -149,7 +149,7 @@ const linkTo = (tile: ContentTile, copy: number) =>
       </div>
     </div>
 
-    <div class="collage" data-hold>
+    <div class="collage" data-hold data-play-host>
       {columns.map((column, i) => (
         <div class:list={['collage__column', i % 2 === 0 ? 'collage__column--up' : 'collage__column--down']}
              data-column={i + 1}>
@@ -252,6 +252,8 @@ const linkTo = (tile: ContentTile, copy: number) =>
      The negative margin reaches the edges of the screen; `--space-s` of
      padding keeps the first tile off the edge. */
   .collage-row {
+    /* For the play button, if the browser refuses the videos. */
+    position: relative;
     overflow: hidden;
     margin-inline: calc(var(--gutter) * -1);
     padding-block: var(--space-2xs);
@@ -331,6 +333,8 @@ const linkTo = (tile: ContentTile, copy: number) =>
 
   @media (min-width: 64em) {
     .collage {
+      /* For the play button, if the browser refuses the videos. */
+      position: relative;
       display: grid;
       /* 16px between the columns, matching the 16px between tiles inside one,
          so the grid reads evenly. It was lost when the mobile marquee replaced

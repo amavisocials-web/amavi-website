@@ -20,38 +20,26 @@
  *   again at which are on screen and plays those (28 October 2026). The
  *   browser pauses them on the way out and nothing used to restart them,
  *   because the observers had nothing new to say.
+ * - A video the browser refuses to play (Low Power Mode, Safari set to Never
+ *   Auto-Play) is not asked again; it keeps its poster and gets a play button
+ *   that starts every video on the page (src/scripts/lib/playback.ts, 30
+ *   October 2026).
+ * - The first decision is made on setup, from where everything is, rather
+ *   than left to the observers' first report.
  */
 import { reduceMotion as still } from './lib/motion';
 import { onLeave, onReturn, shownShare } from './lib/page-life';
+import { attachPoster, attachSources, onUnlock, tryPlay } from './lib/playback';
 
 /* Managed videos are driven by their own script — the collage's phone row,
    which caps how many play at once — and this one must not also start them. */
 const videos = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]:not([data-loop-managed])')];
 const visible = new Set<HTMLVideoElement>();
 
-function attachPoster(video: HTMLVideoElement) {
-  if (video.dataset.poster && !video.getAttribute('poster')) video.poster = video.dataset.poster;
-}
-
-/** Whether this video's width gate, if it has one, is open. */
-function gateOpen(video: HTMLVideoElement) {
-  const query = video.dataset.loopFrom;
-  return !query || window.matchMedia(query).matches;
-}
-
-function attachSources(video: HTMLVideoElement) {
-  if (still.matches || !gateOpen(video) || video.dataset.sources === 'on') return;
-  video.dataset.sources = 'on';
-  video.querySelectorAll<HTMLSourceElement>('source[data-src]').forEach((source) => {
-    source.src = source.dataset.src!;
-  });
-  video.load();
-}
-
 function sync(video: HTMLVideoElement) {
   if (visible.has(video) && !still.matches && video.dataset.sources === 'on') {
-    // Refused (Low Power Mode, a strict setting): the poster stays up.
-    video.play().catch(() => {});
+    // Refused (Low Power Mode, a strict setting): blocked, poster and button.
+    tryPlay(video);
   } else {
     /* Even when already paused: a video carrying the autoplay attribute
        whose sources were just attached would otherwise start by itself as
@@ -112,12 +100,25 @@ still.addEventListener('change', () => {
   }
 });
 
-onLeave(() => videos.forEach((video) => video.pause()));
-onReturn(() => {
+/** Where everything is now, decided afresh: the same rules as the observers,
+    read from the page rather than from their last report. */
+function settle() {
   for (const video of videos) {
-    // The same quarter-on-screen rule as the observer.
+    const box = video.getBoundingClientRect();
+    // Within a screen's height, as the `near` observer's margin.
+    if (box.width && box.bottom > -innerHeight && box.top < innerHeight * 2) {
+      attachPoster(video);
+      attachSources(video);
+    }
+    // The same quarter-on-screen rule as `onScreen`.
     if (shownShare(video) >= 0.25) visible.add(video);
     else visible.delete(video);
     sync(video);
   }
-});
+}
+
+onLeave(() => videos.forEach((video) => video.pause()));
+onReturn(settle);
+onUnlock(settle);
+// On setup, rather than waiting on a first report that some setups never get.
+settle();
