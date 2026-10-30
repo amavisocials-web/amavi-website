@@ -36,6 +36,11 @@ export interface TeamMember {
   photo: ImageMetadata | null;
   /** Describes the person for anyone who can't see the picture. */
   alt?: string;
+  /**
+   * Their LinkedIn profile, in full. Set, the portrait links to it in a new
+   * tab; left out, the card is a picture and two lines of text, as before.
+   */
+  linkedin?: string;
 }
 
 export const TEAM: TeamMember[] = [
@@ -44,18 +49,21 @@ export const TEAM: TeamMember[] = [
     role: 'Founder and CEO',
     photo: rinaBulliqi,
     alt: 'Rina Bulliqi, arms folded, in front of the studio blinds',
+    linkedin: 'https://www.linkedin.com/in/rinabulliqi/',
   },
   {
     name: 'Lirika Bulliqi',
-    role: 'Partnerships Coordinator',
+    role: 'Partnerships Manager',
     photo: lirikaBulliqi,
     alt: 'Lirika Bulliqi in a dark blazer, in front of the studio blinds',
+    linkedin: 'https://www.linkedin.com/in/lirikabulliqi/',
   },
   {
     name: 'Elda Ajvazi',
-    role: 'Content Direction',
+    role: 'Content Marketing Coordinator',
     photo: eldaAjvazi,
     alt: 'Elda Ajvazi in a black blazer over a white top, in front of the studio blinds',
+    linkedin: 'https://www.linkedin.com/in/eldaajvazi/',
   },
   {
     name: 'Venera Bulliqi',

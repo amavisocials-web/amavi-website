@@ -130,7 +130,17 @@ const approach = [
       <ul class="team" role="list">
         {TEAM.map((person) => (
           <li class="team__card">
-            {person.photo ? (
+            {/* With a LinkedIn profile the portrait is the link to it, named
+                for the person; the name and role under it stay plain text.
+                Without one the card is exactly as it was. */}
+            {person.photo && person.linkedin ? (
+              <a class="team__link" href={person.linkedin} target="_blank" rel="noopener noreferrer"
+                 aria-label={`${person.name} on LinkedIn (opens in a new tab)`}>
+                <Image class="team__photo" src={person.photo} alt={person.alt ?? ''}
+                       widths={[280, 420, 560]} sizes="(min-width: 64em) 22vw, 44vw"
+                       loading="lazy" decoding="async" />
+              </a>
+            ) : person.photo ? (
               <Image class="team__photo" src={person.photo} alt={person.alt ?? ''}
                      widths={[280, 420, 560]} sizes="(min-width: 64em) 22vw, 44vw"
                      loading="lazy" decoding="async" />
@@ -540,6 +550,31 @@ const approach = [
   /* A flat tint off the ink, so it sits on the page rather than on top of it.
      No outline and no label: it is a gap, not a control. */
   .team__photo--empty { background: color-mix(in srgb, var(--ink) 9%, var(--bg)); }
+
+  /* A portrait that links to LinkedIn (30 October 2026). Quiet, as the
+     Culture thumbnails are: on hover or keyboard focus the picture comes
+     forward a little inside its own rounded frame, 250ms ease-out, and
+     without motion it brightens instead. The frame clips the zoom, so the
+     card never changes size. The ring is the site's. */
+  .team__link {
+    display: block;
+    border-radius: 1rem;
+    overflow: hidden;
+    isolation: isolate; /* keeps WebKit's rounded clip round a scaled image */
+  }
+  .team__link .team__photo {
+    display: block;
+    transition: transform 250ms ease-out, filter 250ms ease-out;
+  }
+  @media (hover: hover) {
+    .team__link:hover .team__photo { transform: scale(1.03); }
+  }
+  .team__link:focus-visible { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
+  .team__link:focus-visible .team__photo { transform: scale(1.03); }
+  @media (prefers-reduced-motion: reduce) {
+    .team__link:hover .team__photo,
+    .team__link:focus-visible .team__photo { transform: none; filter: brightness(1.08); }
+  }
 
   .team__name {
     font-family: var(--font-display);
