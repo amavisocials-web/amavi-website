@@ -21,14 +21,14 @@
  *   browser pauses them on the way out and nothing used to restart them,
  *   because the observers had nothing new to say.
  * - A video the browser refuses to play (Low Power Mode, Safari set to Never
- *   Auto-Play) is not asked again; it keeps its poster and gets a play button
- *   that starts every video on the page (src/scripts/lib/playback.ts, 30
- *   October 2026).
+ *   Auto-Play) is not asked again; it keeps its poster and gets a play
+ *   control, and the visitor's first click, tap or key press anywhere on the
+ *   page starts every video (src/scripts/lib/playback.ts, 30 October 2026).
  * - The first decision is made on setup, from where everything is, rather
  *   than left to the observers' first report.
  */
 import { reduceMotion as still } from './lib/motion';
-import { onLeave, onReturn, shownShare } from './lib/page-life';
+import { clipsOf, onLeave, onReturn, shownShare } from './lib/page-life';
 import { attachPoster, attachSources, onUnlock, tryPlay } from './lib/playback';
 
 /* Managed videos are driven by their own script — the collage's phone row,
@@ -111,8 +111,8 @@ function resume() {
       attachPoster(video);
       attachSources(video);
     }
-    // The same quarter-on-screen rule as `onScreen`.
-    if (shownShare(video) >= 0.25) visible.add(video);
+    // The same quarter-on-screen rule as `onScreen`, clips and all.
+    if (shownShare(video, clipsOf(video)) >= 0.25) visible.add(video);
     else visible.delete(video);
     sync(video);
   }

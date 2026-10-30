@@ -223,9 +223,10 @@ for (const frame of document.querySelectorAll<HTMLElement>('.collage__column, [d
  *   observer margin sees one coming. Five files between the two runs, ~200KB.
  * - A video has its poster before it is asked to play, so if the browser
  *   refuses (Low Power Mode, Safari set to Never Auto-Play), the picture
- *   stays rather than a black box, the video is not asked again, and a play
- *   button over the row starts every video on the page
- *   (src/scripts/lib/playback.ts, 30 October 2026).
+ *   stays rather than a black box, the video is not asked again, its tile
+ *   shows a play mark, and the visitor's first click, tap or key press
+ *   anywhere starts every video on the page (src/scripts/lib/playback.ts,
+ *   30 October 2026).
  * - Under reduced motion nothing plays and no video file is fetched.
  * - At 64em and up this row is display: none, so none of it intersects and
  *   none of it runs: desktop keeps the columns and their own behaviour.
@@ -244,7 +245,7 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
     attachPoster(video);
     attachSources(video);
     if (!video.paused) return;
-    // Refused: marked, not asked again, and the row gets a play button.
+    // Refused: marked, not asked again, and the tile shows a play mark.
     tryPlay(video);
   };
   const stop = (video: HTMLVideoElement) => {

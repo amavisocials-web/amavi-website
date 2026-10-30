@@ -42,19 +42,19 @@ export function onReturn(fn: () => void) {
 }
 
 /**
- * How much of an element the window shows, from 0 to 1, optionally inside a
- * clipping box. For re-checking on return, when an IntersectionObserver's
- * last word may be from before the page was put away.
+ * How much of an element the window shows, from 0 to 1, optionally inside
+ * one clipping box or several. For re-checking on return, when an
+ * IntersectionObserver's last word may be from before the page was put away.
  */
-export function shownShare(element: Element, clip?: Element | null): number {
+export function shownShare(element: Element, clip?: Element | Element[] | null): number {
   const box = element.getBoundingClientRect();
   if (!box.width || !box.height) return 0; // not displayed
   let left = Math.max(box.left, 0);
   let top = Math.max(box.top, 0);
   let right = Math.min(box.right, window.innerWidth);
   let bottom = Math.min(box.bottom, window.innerHeight);
-  if (clip) {
-    const c = clip.getBoundingClientRect();
+  for (const each of [clip ?? []].flat()) {
+    const c = each.getBoundingClientRect();
     left = Math.max(left, c.left);
     top = Math.max(top, c.top);
     right = Math.min(right, c.right);
@@ -62,6 +62,22 @@ export function shownShare(element: Element, clip?: Element | null): number {
   }
   if (right <= left || bottom <= top) return 0;
   return ((right - left) * (bottom - top)) / (box.width * box.height);
+}
+
+/**
+ * Every ancestor that cuts off what overflows it: a tile's rounded frame,
+ * a collage column, the section. IntersectionObserver counts all of them, a
+ * bounding box none, so a re-check meant to agree with an observer passes
+ * these to shownShare. Without them a tile slid out of its column read as on
+ * screen, and played out of sight (30 October 2026).
+ */
+export function clipsOf(element: Element): Element[] {
+  const clips: Element[] = [];
+  for (let node = element.parentElement; node && node !== document.body; node = node.parentElement) {
+    const { overflowX, overflowY } = getComputedStyle(node);
+    if (overflowX !== 'visible' || overflowY !== 'visible') clips.push(node);
+  }
+  return clips;
 }
 
 /** Keyboard focus, as opposed to the focus a mouse click leaves on a link. */

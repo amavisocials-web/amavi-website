@@ -18,16 +18,19 @@
  *   button inside a link is invalid and its click would follow the link, so
  *   there the tile itself becomes the control while its video is refused:
  *   the circle is drawn over it, the link is labelled "Play video", and a
- *   click plays instead of opening Instagram. (Revised 31 October 2026; the
+ *   click plays instead of opening Instagram. (Revised the same day; the
  *   first version put one button over the whole collage.)
  * - **Each control goes once its video plays.**
- * - **One press plays them all.** A browser that refuses on its own allows a
- *   play() made during the visitor's tap, video by video, so the press asks
- *   every video on the page at once — the refused ones and the ones not yet
- *   scrolled to, which would otherwise be refused in their turn — and then
- *   hands back to the scripts that decide which should be running
- *   (`onUnlock`), so the ones off screen pause again, still allowed to play
- *   later.
+ * - **Any press plays them all**, on a control or anywhere else on the page:
+ *   the visitor's first click, tap or key press (also 30 October 2026; until
+ *   then only a control would do). A browser that refuses on its own allows
+ *   a play() made while the visitor is doing something, video by video, so
+ *   the press asks every video on the page at once — the refused ones and
+ *   the ones not yet scrolled to, which would otherwise be refused in their
+ *   turn — and then hands back to the scripts that decide which should be
+ *   running (`onUnlock`), so the ones off screen pause again, still allowed
+ *   to play later. Scrolling is not listened for, and a press the browser
+ *   does not count is refused like any other: nothing on screen changes.
  *
  * The sources are attached here too (they are in the markup as `data-src`,
  * so a video costs nothing until it is near), since the press has to attach
@@ -63,6 +66,11 @@ export function attachSources(video: HTMLVideoElement) {
   video.load();
 }
 
+/** Turned down until the visitor does something, as against interrupted. */
+function refused(error: unknown): boolean {
+  return error instanceof DOMException && error.name === 'NotAllowedError';
+}
+
 /**
  * play(), with its answer heard. Refused: marked blocked and given a
  * control. Interrupted by a pause() or a reload (AbortError): nothing, that
@@ -72,7 +80,7 @@ export function attachSources(video: HTMLVideoElement) {
 export function tryPlay(video: HTMLVideoElement) {
   if (blocked.has(video)) return;
   video.play()?.catch((error: unknown) => {
-    if (error instanceof DOMException && error.name === 'NotAllowedError') block(video);
+    if (refused(error)) block(video);
   });
 }
 
@@ -128,41 +136,58 @@ function unblock(video: HTMLVideoElement) {
   }
 }
 
+/** No handler of its own: a press anywhere plays, this one included. */
 function button(): HTMLButtonElement {
   const control = document.createElement('button');
   control.type = 'button';
   control.className = 'video-play';
   control.setAttribute('aria-label', 'Play video');
   control.innerHTML = PLAY_ICON;
-  control.addEventListener('click', playAll);
   return control;
 }
 
-/* A click on a tile standing in as a play control plays, rather than
-   following the link. Heard as it bubbles up, so a swipe along the phone
-   row, which the row stops on the way down, never counts as a press. */
-document.addEventListener('click', (event) => {
-  const link = (event.target as Element | null)?.closest?.('a[data-play-label]');
-  if (!link) return;
-  event.preventDefault();
+/* The visitor's press, wherever it lands: a click (a mouse, or a key on a
+   link or button), a tap (touchend, which an iPhone sends for a tap on any
+   part of the page, where it sends a click only for links and buttons), or
+   a key. Heard on the way down, before anything on the page can stop it.
+   Once nothing is refused, a press costs a lookup.
+
+   A tile standing in as a play control plays rather than opening its post,
+   so its click is cancelled. A tap on one is left to that click: by the
+   time the click arrives the video may be running, its link restored, and
+   the click would open Instagram after all. */
+function press(event: Event) {
+  const tile = (event.target as Element | null)?.closest?.('a[data-play-label]');
+  if (tile) {
+    if (event.type === 'touchend') return;
+    if (event.type === 'click') event.preventDefault();
+  } else if (!blocked.size) return;
   playAll();
-});
+}
+document.addEventListener('click', press, { capture: true });
+document.addEventListener('keydown', press, { capture: true });
+document.addEventListener('touchend', press, { capture: true, passive: true });
 
 /**
- * Every video the page is showing, played inside the press — the refused
- * ones and the ones not yet asked — so each has the permission the browser
- * wants. The controls go at once; a video refused even now gets its control
- * back, to be pressed again, never retried on its own.
+ * Every video the page is showing, played inside the press, so each has the
+ * permission the browser wants. Nothing is taken down before the browser has
+ * answered: a control goes when its video plays (see block()), or when its
+ * video was allowed but paused again at once for being off screen. A video
+ * refused even now keeps its control, or gets one, to be pressed again —
+ * never retried on its own.
  */
 function playAll() {
   const shown = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]')].filter(
     (video) => video.getClientRects().length > 0,
   );
-  [...blocked].forEach(unblock);
   for (const video of shown) {
     attachPoster(video);
     attachSources(video);
-    if (video.dataset.sources === 'on') tryPlay(video);
+    if (video.dataset.sources !== 'on') continue;
+    video.play()?.catch((error: unknown) => {
+      if (refused(error)) block(video);
+      else unblock(video); // allowed, and paused below for being off screen
+    });
   }
   // Inside the same press: the ones off screen pause again, already allowed.
   unlockers.forEach((settle) => settle());

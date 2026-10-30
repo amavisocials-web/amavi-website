@@ -710,7 +710,8 @@ textarea.field__control { min-height: 7.5rem; resize: vertical; }
    frame, quiet: the header's frosted black over footage, a thin white ring,
    the accent on hover. A button in the hero; on a collage tile, which is a
    link, only the circle is drawn (--mark) and the tile itself is the
-   control. One press plays every video on the page. */
+   control. The first press anywhere on the page, on a control or not,
+   plays every video. */
 .video-play {
   position: absolute;
   z-index: 2;
