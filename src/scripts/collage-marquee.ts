@@ -142,11 +142,13 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
     pressed = dragging = swiped = false;
     sync();
   }, { blur: true });
-  onReturn(() => {
+  /** Back on the page: no press left over, and on screen or not as it is now. */
+  const resume = () => {
     pressed = dragging = swiped = false;
     onScreen = shownShare(row) > 0;
     sync();
-  });
+  };
+  onReturn(resume);
 
   /* Following the setting while the page is open, rather than only at load. */
   still.addEventListener('change', () => {
@@ -308,16 +310,17 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
     window.clearInterval(rerank);
     videos.forEach(stop);
   });
-  /** Which tiles the row shows, read from the page, then the nearest two play. */
-  const settle = () => {
+  /** Which tiles the row shows, read from the page, then the nearest two
+      play: on return, after a play press, and on setup. */
+  const resume = () => {
     visible.clear();
     videos.forEach((video) => {
       if (shownShare(video, row) > 0) visible.add(video);
     });
     follow();
   };
-  onReturn(settle);
-  onUnlock(settle);
+  onReturn(resume);
+  onUnlock(resume);
   // On setup too, rather than only on the observer's first report.
-  settle();
+  resume();
 }

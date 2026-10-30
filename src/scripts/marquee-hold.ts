@@ -32,6 +32,17 @@ for (const strip of document.querySelectorAll<HTMLElement>('[data-hold]')) {
     hovering = false;
     sync();
   };
+  /**
+   * Back on the page — restored by the back button, its tab shown again, or
+   * the window focused — the strip runs: nothing from before holds it. There
+   * is no animation loop to cancel or restart and no timestamp to reset: the
+   * movement is a CSS animation, which keeps its own time, so it cannot jump
+   * or run twice. Only the hold could outlive the visit, and this drops it.
+   */
+  const resume = () => {
+    hovering = false;
+    sync();
+  };
 
   strip.addEventListener('pointermove', (event) => {
     if (event.pointerType !== 'mouse' || hovering) return;
@@ -46,5 +57,5 @@ for (const strip of document.querySelectorAll<HTMLElement>('[data-hold]')) {
   strip.addEventListener('focusout', () => setTimeout(sync));
 
   onLeave(letGo, { blur: true });
-  onReturn(letGo);
+  onReturn(resume);
 }

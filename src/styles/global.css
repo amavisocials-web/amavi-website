@@ -703,12 +703,14 @@ textarea.field__control { min-height: 7.5rem; resize: vertical; }
 .form-status strong { display: block; font-size: var(--text-control); margin-bottom: 0.25em; }
 .form-status:focus { outline: var(--stroke-mark) solid var(--accent); outline-offset: 3px; }
 
-/* --- Play button over refused videos --------------------------------------
+/* --- Play control over refused videos -------------------------------------
    Put there by src/scripts/lib/playback.ts when the browser will not play a
    video by itself (Low Power Mode, Safari set to Never Auto-Play), over the
-   poster that stays up. Centred on its frame, quiet: the header's frosted
-   black over footage, a thin white ring, the accent on hover. One press
-   plays every video on the page. */
+   poster that stays up, and taken away once that video plays. Centred on its
+   frame, quiet: the header's frosted black over footage, a thin white ring,
+   the accent on hover. A button in the hero; on a collage tile, which is a
+   link, only the circle is drawn (--mark) and the tile itself is the
+   control. One press plays every video on the page. */
 .video-play {
   position: absolute;
   z-index: 2;
@@ -730,7 +732,9 @@ textarea.field__control { min-height: 7.5rem; resize: vertical; }
   transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
 .video-play svg { width: 1.1rem; height: 1.1rem; margin-left: 0.15rem; }
-.video-play:hover { background: var(--accent); border-color: var(--accent); }
+.video-play:hover,
+a:hover > * > .video-play--mark { background: var(--accent); border-color: var(--accent); }
+.video-play--mark { pointer-events: none; }
 .video-play:focus-visible { outline: var(--stroke-mark) solid var(--on-dark); outline-offset: 3px; }
 /* In the hero the middle holds the headline, so the button sits low and
    centred, clear of it. */

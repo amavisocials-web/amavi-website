@@ -101,8 +101,9 @@ still.addEventListener('change', () => {
 });
 
 /** Where everything is now, decided afresh: the same rules as the observers,
-    read from the page rather than from their last report. */
-function settle() {
+    read from the page rather than from their last report. On return, after a
+    play press, and on setup. */
+function resume() {
   for (const video of videos) {
     const box = video.getBoundingClientRect();
     // Within a screen's height, as the `near` observer's margin.
@@ -118,7 +119,7 @@ function settle() {
 }
 
 onLeave(() => videos.forEach((video) => video.pause()));
-onReturn(settle);
-onUnlock(settle);
+onReturn(resume);
+onUnlock(resume);
 // On setup, rather than waiting on a first report that some setups never get.
-settle();
+resume();
