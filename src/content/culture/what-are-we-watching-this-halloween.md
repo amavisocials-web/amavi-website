@@ -5,6 +5,7 @@ excerpt: "The trailer, the billboard, the TikTok you couldn't stop thinking abou
 date: 2026-10-30
 readingTime: 5
 image: "./what-are-we-watching-this-halloween.jpg"
+imageCredit: "Image: not owned by AMAVI Socials."
 substackUrl: "https://amavisocials.substack.com/p/what-are-we-watching-this-halloween"
 draft: false
 ---
