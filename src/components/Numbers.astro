@@ -7,8 +7,11 @@ import { CONTACT_EMAIL } from '../consts';
  * The figures, beside a collage of creator content.
  *
  * Two columns from 64em up — the collage on the left, the text on the right —
- * and stacked below that, text first, so the numbers are read before the
- * pictures on a phone.
+ * and stacked below that with the pictures first (2 November 2026; the figures
+ * led until then). The collage comes first in the markup too, so a screen
+ * reader and the tab key follow the same order as the eye; from 64em each is
+ * placed in its column by name, so that layout does not depend on source
+ * order.
  *
  * The collage is a slow vertical loop: the same idea as the band above the
  * footer, turned on its side. Two sub-columns from 64em, each holding its own
@@ -114,21 +117,6 @@ const linkTo = (tile: ContentTile, copy: number) =>
 
 <section class="section numbers" aria-labelledby={labelledby}>
   <div class="container media-row numbers__grid">
-    <div class="numbers__text">
-      <slot />
-
-      {/* Whose work this is. A note on the collage, not a credit on each tile:
-          the handles are not cleared yet (TODO in src/data/tiles.ts), and a
-          caption under every tile would fight the loop. Last in the column,
-          under the link, since 28 October 2026; it sat under the collage
-          before. */}
-      <p class="collage__note">
-        Content created by the creators we work with and shared with permission.
-        All rights remain with the original creators. To request removal, email{' '}
-        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
-      </p>
-    </div>
-
     {/* Decorative: the figures beside it are what the section says. */}
 
     {/* Below 64em: one row drifting right to left, for ever. The clips are
@@ -178,6 +166,21 @@ const linkTo = (tile: ContentTile, copy: number) =>
         </div>
       ))}
     </div>
+
+    <div class="numbers__text">
+      <slot />
+
+      {/* Whose work this is. A note on the collage, not a credit on each tile:
+          the handles are not cleared yet (TODO in src/data/tiles.ts), and a
+          caption under every tile would fight the loop. Last in the column,
+          under the link, since 28 October 2026; it sat under the collage
+          before. */}
+      <p class="collage__note">
+        Content created by the creators we work with and shared with permission.
+        All rights remain with the original creators. To request removal, email{' '}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+      </p>
+    </div>
   </div>
 </section>
 
@@ -214,9 +217,9 @@ const linkTo = (tile: ContentTile, copy: number) =>
       column-gap: var(--space-xl);
       row-gap: 0;
     }
-    /* Placed rather than ordered: the collage and the text share row 1, and
-       each centres against the other. Text is first in the markup, so a phone
-       reads the figures before the pictures. */
+    /* Placed rather than left to source order: the collage and the text share
+       row 1, and each centres against the other. The collage is first in the
+       markup, so a phone shows the pictures before the figures. */
     .collage { grid-column: 1; grid-row: 1; }
     .numbers__text { grid-column: 2; grid-row: 1; }
   }
