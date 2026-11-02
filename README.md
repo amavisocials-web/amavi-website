@@ -96,7 +96,7 @@ The site runs at **http://localhost:4321**. Edits reload automatically.
 
 | Path | What it is |
 |---|---|
-| `/` | Full-screen video hero ("Content that connects"), copy centred, with "Brands \| Creators" under the headline and the two buttons under that; the "Trusted by" logo marquee; what AMAVI is, in three paragraphs; the three figures beside a drifting collage of creator work; the case study; the six services, as an accordion |
+| `/` | Full-screen video hero ("Content that connects"), copy centred, with "Brands \| Creators" under the headline and the two buttons under that; the "Trusted by" logo marquee; what AMAVI is, in three paragraphs; the three figures beside a collage of creator work; the case study; the six services, as an accordion |
 | `/about` | Who AMAVI is: the intro, the approach (strategy, creator selection, content, reporting and optimisation), the philosophy over a photograph in black, and the closing invitation |
 | `/culture` | AMAVI Culture: every published piece as a row, newest first, each opening on Substack in a new tab. No article pages; see AMAVI Culture below |
 | `/creator-network` | Creator Network: the intro, what happens next, then the creator application: six steps, to Google Sheets and Netlify Forms |
@@ -693,31 +693,24 @@ contents with nothing in the gap. That was taken out on 5 October 2026.
   capitals with a chevron — linking to Services.
 - **The figures** (`Numbers.astro`). A split: a collage of creator work on one
   side, the figures on the other, each written as a sentence with its number
-  leading the line and a rule between. The collage is a slow vertical loop, in
-  CSS alone: **two sub-columns from 48em and three from 80em**, alternately
-  climbing and falling, each holding its five tiles twice and travelling
-  exactly one set's height, so the join can't be seen (measured at 0px on
-  every column). Each runs at its own speed — 47s, 59s, 67s, no one a multiple
-  of another — and starts part-way through, so no two tiles share a baseline.
-  Top and bottom are a hard edge, not a fade. It pauses on hover and on focus.
-  Under `prefers-reduced-motion` nothing moves.
+  leading the line and a rule between.
 
-  **Below 64em there are no columns at all** — the tiles are one row that is
-  swiped: snapping, 60% of the screen each (capped at 17rem) so part of the
-  next always shows, 16px between them and 16px before the first and after
-  the last. It scrolls inside its own box and the section is `overflow: clip`,
-  so the page never scrolls sideways at any width — measured at 0 from 320px
-  up. Every video stays on its poster until 64em (`loopFrom`, below), so a
-  phone decodes nothing. The columns were tried from 48em and a tablet got two
-  342px towers under the figures; they start at 64em now, the same width the
-  text and the collage go side by side at.
+  **From 64em the collage stands still** (2 November 2026): four tiles of one
+  shape, 3:4, in two columns that end level, with the row taking its height from
+  them and nothing clipped. It was a slow vertical loop through a 544px window
+  until then, with tiles of two shapes, so a tile was always being cut by the
+  window's edge. Five tiles of one shape can't make two level columns, so tile 8
+  (the Audrey Hepburn magazine) shows only in the phone row. Each tile is 281px
+  wide at 1280.
 
-  **Why three columns and not four.** The split caps the collage at 578px at
-  1280 and it does not widen past that — 572px at 1440 — so four across leaves
-  each tile 132px, at which the faces are slivers and burned-in captions are
-  mush. Three gives 187px. For the same reason the third column waits for
-  80em: at 64em the collage is 438px, and three across that is 141px, so
-  64em–80em stays on two columns at 211–241px.
+  **Below 64em there are no columns at all** — the tiles are one row, all five,
+  9:16, drifting sideways, 58% of the screen each (capped at 15rem) so part of
+  the next always shows, and draggable. It clips inside its own box, so the page
+  never scrolls sideways at any width. It repeats its tiles once for the loop:
+  the repeat is the poster as an image, and two of the first run play at a time.
+  Below 64em the row comes before the figures, in the markup as well as on
+  screen; from 64em the collage and the text are placed by column.
+
 - **The services** (`ServiceList.astro`). The same numbered accordion the
   services page uses, 01 to 06 with a hairline between the rows, opening on
   each service's paragraph alone. See "The areas are an accordion" below. It
@@ -911,15 +904,11 @@ flagged in `src/data/media.ts`, to be replaced first.
   not to a number. `scripts/encode-video.swift` does the cutting; see "Making
   the video files". Remove a cut and that orientation shows the "Add video"
   frame, with black text.
-- **Stat tiles** — all six tiles of `src/data/tiles.ts`
+- **Stat tiles** — the five tiles of `src/data/tiles.ts`
   (`public/media/tiles/`), creator videos from AMAVI's campaigns, beside the
-  figures. **The collage wants more footage:** three columns of five is
-  fifteen slots for six clips, so each appears two or three times. Nothing
-  repeats inside a column or sits beside itself across columns, but a careful
-  viewer will see repeats — nine more clips would fill it cleanly. Portrait
-  9:16, please. Tiles 1 and 3 were replaced on 17 October 2026 and deleted;
-  tile 5 came back in at the same time, burned-in captions and all, because
-  there was no longer enough footage to leave it out.
+  figures: four in the grid on a wide screen, all five in the row on a phone. A
+  sixth clip would let the grid run two columns of three with none left out,
+  though taller. Portrait 9:16, please. Tile 5 has burned-in captions.
 - **The case study image** (home, 2:3) — `src/assets/media/home-case-study.jpg`,
   the studio wall with the printed sign and a laptop of content. Supplied 17
   October 2026 and **shipped already cropped to 2:3**, so the frame crops
@@ -950,7 +939,7 @@ the poster is all there is.
 with all four taken waits on its poster; the next free slot goes to the one
 nearest the middle of the screen, and the hero always gets one while it is in
 view. A video out of sight for two seconds lets its files go. The repeated
-copies in the collage's loops are the poster as an image, not videos. On a
+copies in the phone row's loop are the poster as an image, not videos. On a
 weak device (Data Saver on, four cores or fewer, 4GB of memory or less) the
 collage's tiles stay on their posters and only the hero plays.
 

@@ -1,7 +1,7 @@
 /**
  * Holding a moving strip still while someone is using it, and never after
- * they have gone: the collage's columns (src/components/Numbers.astro) and
- * the client logos (src/components/LogoWall.astro), each marked `data-hold`.
+ * they have gone: the client logos (src/components/LogoWall.astro), marked
+ * `data-hold`.
  *
  * The movement is CSS. This only sets `data-held`, which the stylesheet reads
  * as `animation-play-state: paused`, so nothing here ever starts a second

@@ -92,9 +92,7 @@ still.addEventListener('change', () => {
 
 /** Where everything is now, decided afresh: the same rules as the observers,
     read from the page rather than from their last report. On return, after a
-    play press, on setup, and once a second, since a browser may run no
-    observers while all that moves is a tile under a CSS animation
-    (src/scripts/lib/playback.ts). */
+    play press, on setup, and once a second (src/scripts/lib/playback.ts). */
 function resume() {
   for (const video of videos) {
     const box = video.getBoundingClientRect();

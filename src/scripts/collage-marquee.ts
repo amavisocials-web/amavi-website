@@ -167,8 +167,8 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
  *
  * The tiles are links (27 October 2026). With keyboard focus on one, CSS parks
  * the loop at its start (Numbers.astro); this then brings the tile into view
- * inside its clipped column or row, and puts the scroll back when focus
- * leaves. Without it, a tab could land on a tile outside the window.
+ * inside the clipped row, and puts the scroll back when focus leaves. Without
+ * it, a tab could land on a tile outside the row.
  */
 /** A focused tile, inside its clipped frame and on the page clear of the
     sticky header. Two steps rather than scrollIntoView, which knows nothing
@@ -188,7 +188,7 @@ const reveal = (tile: HTMLElement, frame: HTMLElement) => {
   if (by) window.scrollTo(0, window.scrollY + by);
 };
 
-for (const frame of document.querySelectorAll<HTMLElement>('.collage__column, [data-marquee]')) {
+for (const frame of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   frame.addEventListener('focusin', (event) => {
     const tile = event.target as HTMLElement;
     if (!tile.matches('a:focus-visible')) return;
@@ -230,7 +230,7 @@ for (const frame of document.querySelectorAll<HTMLElement>('.collage__column, [d
  *   30 October 2026).
  * - Under reduced motion nothing plays and no video file is fetched.
  * - At 64em and up this row is display: none, so none of it intersects and
- *   none of it runs: desktop keeps the columns and their own behaviour.
+ *   none of it runs: desktop has its still grid (Numbers.astro).
  * - Only the first run is videos, and the second their posters as images
  *   (src/components/Numbers.astro, 2 November 2026). Over this row's own two
  *   sits the page's limit of four live videos, which also lets a tile's files
@@ -296,22 +296,4 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   onSettle(choose);
   // On setup too, rather than only on the observer's first report.
   choose();
-}
-
-/* The columns' posters and still copies, all together as the collage comes
-   within a screen's height (2 November 2026). As with the row, not tile by
-   tile: a column's overflow: hidden clips a tile outside it to nothing, so no
-   observer margin sees one coming, and it would drift in blank. Below 64em the
-   collage is display: none, so this waits, and a phone fetches none of it. */
-for (const collage of document.querySelectorAll<HTMLElement>('.collage')) {
-  const near = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      collage.querySelectorAll<HTMLVideoElement>('video[data-loop]').forEach(attachPoster);
-      collage.querySelectorAll<HTMLImageElement>('img[data-src]').forEach(attachStill);
-      near.disconnect();
-    },
-    { rootMargin: '100% 0px' },
-  );
-  near.observe(collage);
 }

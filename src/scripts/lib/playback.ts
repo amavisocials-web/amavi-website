@@ -48,7 +48,7 @@
  *   from the tile farthest from the middle if it must.
  * - **Out of sight for two seconds, its files go.** Pausing does not free a
  *   decoder; letting the files go does. More than half a screen away, or
- *   wholly outside its column or row, for two seconds: the files are let go
+ *   wholly outside the row it drifts in, for two seconds: the files are let go
  *   and the poster — the video's first frame — shows, so nothing on screen
  *   changes. Back within reach, it takes them again if a slot is free, so it
  *   is ready before it is seen.
@@ -60,7 +60,7 @@
  *   stay true, so a tick reads those and has the scripts decide again.
  * - **A weak device keeps the collage still.** Data Saver on, four cores or
  *   fewer, or 4GB of memory or less: the tiles (`data-loop-optional`) never
- *   load, their posters stand in, the marquees keep moving, and the hero
+ *   load, their posters stand in, the phone row keeps moving, and the hero
  *   still plays. Only Chrome reports memory and Data Saver; WebKit reports 4
  *   cores for anything under 8, which includes every iPhone.
  */
@@ -172,7 +172,7 @@ function distance(video: HTMLVideoElement): number {
 }
 
 /** Within half a screen of view, and inside whatever clips it: a tile wholly
-    outside its column is out of reach wherever the column is. */
+    outside its row is out of reach wherever the row is. */
 function inReach(video: HTMLVideoElement): boolean {
   return shownShare(video, clipsOf(video), innerHeight / 2) > 0;
 }

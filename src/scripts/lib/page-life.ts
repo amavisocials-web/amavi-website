@@ -68,10 +68,10 @@ export function shownShare(element: Element, clip?: Element | Element[] | null, 
 
 /**
  * Every ancestor that cuts off what overflows it: a tile's rounded frame,
- * a collage column, the section. IntersectionObserver counts all of them, a
+ * the row a tile drifts in. IntersectionObserver counts all of them, a
  * bounding box none, so a re-check meant to agree with an observer passes
- * these to shownShare. Without them a tile slid out of its column read as on
- * screen, and played out of sight (30 October 2026).
+ * these to shownShare. Without them a tile slid out of its clipping box read
+ * as on screen, and played out of sight (30 October 2026).
  */
 export function clipsOf(element: Element): Element[] {
   const clips: Element[] = [];

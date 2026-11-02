@@ -1,7 +1,8 @@
 /**
  * Creator content from AMAVI's own campaigns, self-hosted in
- * public/media/tiles/. Every tile here drifts beside the figures on the home
- * page (src/components/Numbers.astro), which deals out the order.
+ * public/media/tiles/. These stand beside the figures on the home page
+ * (src/components/Numbers.astro), which deals out the order: four in a grid on
+ * a wide screen, all five in a drifting row on a phone.
  *
  * Changed on 17 October 2026: the two that led the collage, tiles 1 and 3,
  * were replaced by new footage and their files deleted. Tiles 6, 7 and 8 are
@@ -14,12 +15,11 @@
  * carries the Pearls Collective watermark, so the two were one clip. **Five
  * are left.**
  *
- * TODO(client): **the collage wants five more clips.** Two columns of five is
- * ten slots against these five, so the collage runs three tiles in one column
- * and two in the other, each clip appearing exactly once — no repeats, but
- * short of the five-a-column the brief asks for. Five more would fill both
- * columns with nothing seen twice. Portrait 9:16, please: tile 7 arrived
- * landscape and had to be cropped to a third of its frame.
+ * TODO(client): **the collage could use one more clip.** The wide grid is two
+ * columns of equal length, so five clips show as four, and tile 8's sits out.
+ * A sixth would let it run two columns of three with nothing left out, though
+ * taller. Portrait 9:16, please: tile 7 arrived landscape and had to be cropped
+ * to a third of its frame.
  *
  * Each tile links to its original Instagram post (`href`), opening in a new
  * tab, since 27 October 2026. A tile without one renders unlinked.

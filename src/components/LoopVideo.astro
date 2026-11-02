@@ -57,7 +57,8 @@ interface Props {
   /**
    * A video the page can do without: on a device too weak for it, it stays
    * on its poster (src/scripts/lib/playback.ts). The collage's tiles; never
-   * the hero.
+   * the hero. The two shapes they come in are the caller's: 3:4 in the grid
+   * from 64em, 9:16 in the phone row.
    */
   optional?: boolean;
   class?: string;
