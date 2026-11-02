@@ -27,7 +27,7 @@
  *   again whether it is on screen (src/scripts/lib/page-life.ts).
  */
 import { onLeave, onReturn, shownShare, keyboardFocusIn } from './lib/page-life';
-import { attachPoster, attachSources, onUnlock, tryPlay } from './lib/playback';
+import { attachPoster, attachStill, onSettle, stopPlay, tryPlay } from './lib/playback';
 
 const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -214,9 +214,10 @@ for (const frame of document.querySelectorAll<HTMLElement>('.collage__column, [d
  * - Any tile the screen shows part of is a candidate, and of those only the
  *   two nearest the centre of the screen play. The rest keep their poster.
  * - The row drifts, so the nearest two change as it goes. IntersectionObserver
- *   only speaks when a tile crosses the row's edge, so the choice is also
- *   re-ranked once a second while any tile is on screen. With the section off
- *   screen no tile is, so everything is paused and nothing is re-ranked.
+ *   only speaks when a tile crosses the row's edge, and in Safari not even
+ *   then while the page is idle, so the choice is made again once a second,
+ *   from where the tiles are (src/scripts/lib/playback.ts). With the section
+ *   off screen no tile shows, so everything is paused.
  * - Posters go on every tile once the row is within a screen's height, as the
  *   generic loop script does, so a tile drifting in is never blank. Not tile by
  *   tile: the row's overflow: hidden clips a tile outside it to nothing, so no
@@ -230,6 +231,10 @@ for (const frame of document.querySelectorAll<HTMLElement>('.collage__column, [d
  * - Under reduced motion nothing plays and no video file is fetched.
  * - At 64em and up this row is display: none, so none of it intersects and
  *   none of it runs: desktop keeps the columns and their own behaviour.
+ * - Only the first run is videos, and the second their posters as images
+ *   (src/components/Numbers.astro, 2 November 2026). Over this row's own two
+ *   sits the page's limit of four live videos, which also lets a tile's files
+ *   go once it has been gone two seconds (src/scripts/lib/playback.ts).
  *
  * Cost: the two runs share their five files, so watching a full cycle fetches
  * each clip about once, ~9MB, and never more than two are decoding at once.
@@ -243,24 +248,17 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
   const start = (video: HTMLVideoElement) => {
     // The poster first, so a refused play() still leaves a picture.
     attachPoster(video);
-    attachSources(video);
-    if (!video.paused) return;
     // Refused: marked, not asked again, and the tile shows a play mark.
     tryPlay(video);
   };
-  const stop = (video: HTMLVideoElement) => {
-    if (!video.paused) video.pause();
-  };
 
-  const visible = new Set<HTMLVideoElement>();
-
+  /** Which tiles the row shows, read from the page, then the nearest two
+      play. The row's overflow: hidden clips the tiles, so a tile slid out of
+      the box counts as gone even while it is still inside the window. */
   const choose = () => {
-    if (still.matches || !visible.size) {
-      videos.forEach(stop);
-      return;
-    }
+    const shown = still.matches ? [] : videos.filter((video) => shownShare(video, row) > 0);
     const middle = window.innerWidth / 2;
-    const nearest = [...visible]
+    const nearest = shown
       .map((video) => {
         const box = video.getBoundingClientRect();
         return { video, distance: Math.abs(box.left + box.width / 2 - middle) };
@@ -269,59 +267,51 @@ for (const row of document.querySelectorAll<HTMLElement>('[data-marquee]')) {
       .slice(0, MAX_PLAYING)
       .map(({ video }) => video);
     const keep = new Set(nearest);
-    videos.forEach((video) => (keep.has(video) ? start(video) : stop(video)));
-  };
-
-  let rerank = 0;
-  const follow = () => {
-    window.clearInterval(rerank);
-    if (visible.size && !still.matches) rerank = window.setInterval(choose, 1000);
-    choose();
+    videos.forEach((video) => (keep.has(video) ? start(video) : stopPlay(video)));
   };
 
   const near = new IntersectionObserver(
     (entries) => {
       if (!entries.some((entry) => entry.isIntersecting)) return;
       videos.forEach(attachPoster);
+      row.querySelectorAll<HTMLImageElement>('img[data-src]').forEach(attachStill);
       near.disconnect();
     },
     { rootMargin: '100% 0px' },
   );
   near.observe(row);
 
-  // The row's overflow: hidden clips the tiles, and IntersectionObserver
-  // honours that, so a tile slid out of the box counts as gone even while it
-  // is still inside the window.
-  const onScreen = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      const video = entry.target as HTMLVideoElement;
-      if (entry.isIntersecting) visible.add(video);
-      else visible.delete(video);
-    }
-    follow();
-  });
+  // A tile crossing the row's edge in a swipe or a scroll: decided at once.
+  const onScreen = new IntersectionObserver(choose);
   videos.forEach((video) => onScreen.observe(video));
 
-  still.addEventListener('change', follow);
+  still.addEventListener('change', choose);
 
   /* Put away: stop. Back again: work out afresh which tiles the row shows,
-     since the browser paused the videos on the way out and the observer's
-     list is from before, then play the nearest two. */
-  onLeave(() => {
-    window.clearInterval(rerank);
-    videos.forEach(stop);
-  });
-  /** Which tiles the row shows, read from the page, then the nearest two
-      play: on return, after a play press, and on setup. */
-  const resume = () => {
-    visible.clear();
-    videos.forEach((video) => {
-      if (shownShare(video, row) > 0) visible.add(video);
-    });
-    follow();
-  };
-  onReturn(resume);
-  onUnlock(resume);
+     since the browser paused the videos on the way out, then play the nearest
+     two. */
+  onLeave(() => videos.forEach((video) => stopPlay(video)));
+  onReturn(choose);
+  // After a play press, and once a second, since the row drifts.
+  onSettle(choose);
   // On setup too, rather than only on the observer's first report.
-  resume();
+  choose();
+}
+
+/* The columns' posters and still copies, all together as the collage comes
+   within a screen's height (2 November 2026). As with the row, not tile by
+   tile: a column's overflow: hidden clips a tile outside it to nothing, so no
+   observer margin sees one coming, and it would drift in blank. Below 64em the
+   collage is display: none, so this waits, and a phone fetches none of it. */
+for (const collage of document.querySelectorAll<HTMLElement>('.collage')) {
+  const near = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      collage.querySelectorAll<HTMLVideoElement>('video[data-loop]').forEach(attachPoster);
+      collage.querySelectorAll<HTMLImageElement>('img[data-src]').forEach(attachStill);
+      near.disconnect();
+    },
+    { rootMargin: '100% 0px' },
+  );
+  near.observe(collage);
 }

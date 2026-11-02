@@ -7,6 +7,9 @@
 //   --size WxH      output size (required)
 //   --crop X,Y,W,H  source area to keep, from the top-left; default the whole frame
 //   --bitrate BPS   average bits per second; default 1000000
+//   --profile NAME  H.264 profile, main or high; default high. The hero is main
+//                   (2 November 2026: the brief asked for it, and it is the
+//                   lighter decode)
 //   --max SECONDS   keep only the first SECONDS of the source
 //   --gray          black and white: the source's own BT.709 luma, so it matches
 //                   the colour version's lightness exactly
@@ -31,11 +34,13 @@ while let arg = args.next() {
   else { positional.append(arg) }
 }
 guard positional.count == 3, let size = opts["size"]?.split(separator: "x").compactMap({ Int($0) }), size.count == 2 else {
-  fatalError("usage: encode-video.swift <in> <out.mp4> <poster.png> --size WxH [--crop X,Y,W,H] [--bitrate BPS] [--max SECONDS] [--gray] [--fade FRAMES]")
+  fatalError("usage: encode-video.swift <in> <out.mp4> <poster.png> --size WxH [--crop X,Y,W,H] [--bitrate BPS] [--profile main|high] [--max SECONDS] [--gray] [--fade FRAMES]")
 }
 let inURL = URL(fileURLWithPath: positional[0]), outURL = URL(fileURLWithPath: positional[1]), posterURL = URL(fileURLWithPath: positional[2])
 let outW = size[0], outH = size[1]
 let bitrate = Int(opts["bitrate"] ?? "1000000")!
+let profile = opts["profile"] ?? "high"
+guard profile == "main" || profile == "high" else { fatalError("--profile is main or high") }
 let fade = Int(opts["fade"] ?? "0")!
 let gray = opts["gray"] != nil
 
@@ -68,7 +73,7 @@ let wIn = AVAssetWriterInput(mediaType: .video, outputSettings: [
   ],
   AVVideoCompressionPropertiesKey: [
     AVVideoAverageBitRateKey: bitrate,
-    AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+    AVVideoProfileLevelKey: profile == "main" ? AVVideoProfileLevelH264MainAutoLevel : AVVideoProfileLevelH264HighAutoLevel,
     AVVideoH264EntropyModeKey: AVVideoH264EntropyModeCABAC,
     AVVideoAllowFrameReorderingKey: true,
     AVVideoMaxKeyFrameIntervalKey: Int(fps) * 4,

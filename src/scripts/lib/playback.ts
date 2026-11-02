@@ -1,5 +1,6 @@
 /**
- * Playing the site's videos, and what happens when the browser will not.
+ * Playing the site's videos: how many at once, and what happens when the
+ * browser will not.
  *
  * Added on 30 October 2026. Every video here is muted, inline and looping,
  * with those attributes in the markup, which is what browsers let play
@@ -32,18 +33,72 @@
  *   to play later. Scrolling is not listened for, and a press the browser
  *   does not count is refused like any other: nothing on screen changes.
  *
- * The sources are attached here too (they are in the markup as `data-src`,
- * so a video costs nothing until it is near), since the press has to attach
- * them for videos that have not loaded yet.
+ * **How many at once** (2 November 2026). On a MacBook Air in Chrome
+ * the videos froze: too many were decoding together, not too much was
+ * downloading. The scripts that decide which videos should be playing
+ * (src/scripts/loop-videos.ts, src/scripts/collage-marquee.ts) say so
+ * through tryPlay() and stopPlay(); this decides which actually may.
+ *
+ * - **Four live at most, page-wide.** A video is live while its files are
+ *   attached — playing, or ready to — and each holds a decoder. A video
+ *   wanted with all four taken stays on its poster until one frees up; the
+ *   freed slot goes to the waiting video nearest the middle of the screen.
+ *   A slot held by a video nobody wants (paused, or out of sight) is taken
+ *   for one that is wanted. The hero always gets one while it is in view,
+ *   from the tile farthest from the middle if it must.
+ * - **Out of sight for two seconds, its files go.** Pausing does not free a
+ *   decoder; letting the files go does. More than half a screen away, or
+ *   wholly outside its column or row, for two seconds: the files are let go
+ *   and the poster — the video's first frame — shows, so nothing on screen
+ *   changes. Back within reach, it takes them again if a slot is free, so it
+ *   is ready before it is seen.
+ * - **All of this looks once a second, at where things are.** The tiles drift
+ *   under a CSS animation, and with nothing else happening Safari does not
+ *   run IntersectionObservers at all: measured over 30 idle seconds, it had
+ *   one report for tiles that had moved 600px, with tiles out of sight still
+ *   playing and one 84% on screen still paused. Positions read from the page
+ *   stay true, so a tick reads those and has the scripts decide again.
+ * - **A weak device keeps the collage still.** Data Saver on, four cores or
+ *   fewer, or 4GB of memory or less: the tiles (`data-loop-optional`) never
+ *   load, their posters stand in, the marquees keep moving, and the hero
+ *   still plays. Only Chrome reports memory and Data Saver; WebKit reports 4
+ *   cores for anything under 8, which includes every iPhone.
  */
+import { clipsOf, shownShare } from './page-life';
 import { reduceMotion } from './motion';
 
 const blocked = new Set<HTMLVideoElement>();
-const unlockers = new Set<() => void>();
+const settlers = new Set<() => void>();
 
-/** Run after a press has played everything, to settle who should be playing. */
-export function onUnlock(fn: () => void) {
-  unlockers.add(fn);
+/** Videos with their files attached, playing or ready to. */
+const LIVE_LIMIT = 4;
+const live = new Set<HTMLVideoElement>();
+/** Videos a script wants playing now, whether they have a slot or wait. */
+const wanted = new Set<HTMLVideoElement>();
+/** Since when each live video nobody wants has been out of reach. */
+const gone = new Map<HTMLVideoElement, number>();
+const RELEASE_AFTER = 2000;
+/** Set while a press is playing everything, which may ask a refused video. */
+let pressing = false;
+
+/**
+ * The brief's three signs of a device the collage's videos are too much for
+ * (2 November 2026). Each is only read where the browser offers it.
+ */
+const weakDevice = (() => {
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
+  const cores = nav.hardwareConcurrency;
+  return (
+    nav.connection?.saveData === true ||
+    (cores > 0 && cores <= 4) ||
+    (nav.deviceMemory !== undefined && nav.deviceMemory <= 4)
+  );
+})();
+
+/** Run to settle who should be playing: after a press has played everything,
+    and on each tick. */
+export function onSettle(fn: () => void) {
+  settlers.add(fn);
 }
 
 /** Whether a video's width gate (`data-loop-from`), if it has one, is open. */
@@ -52,18 +107,100 @@ export function gateOpen(video: HTMLVideoElement): boolean {
   return !query || window.matchMedia(query).matches;
 }
 
-export function attachPoster(video: HTMLVideoElement) {
-  if (video.dataset.poster && !video.getAttribute('poster')) video.poster = video.dataset.poster;
+/**
+ * Whether a video may load and play here at all: never under reduced motion,
+ * never with its width gate shut, and a video the page can do without never
+ * on a weak device.
+ */
+export function mayPlay(video: HTMLVideoElement): boolean {
+  return (
+    !reduceMotion.matches && gateOpen(video) && !(weakDevice && video.hasAttribute('data-loop-optional'))
+  );
 }
 
-/** The real source URLs, once: never under reduced motion or a shut gate. */
-export function attachSources(video: HTMLVideoElement) {
-  if (reduceMotion.matches || !gateOpen(video) || video.dataset.sources === 'on') return;
+/**
+ * The poster, and the same picture behind the video, cropped as the video is.
+ * A video emptied by load() is transparent in Safari, which does not draw its
+ * poster again (measured: a tile coming back into view was the frame's black
+ * until it played), so the poster alone cannot be relied on to stay up.
+ */
+export function attachPoster(video: HTMLVideoElement) {
+  const poster = video.dataset.poster;
+  if (!poster || video.getAttribute('poster')) return;
+  video.poster = poster;
+  video.style.background = `url("${poster}") ${getComputedStyle(video).objectPosition} / cover no-repeat`;
+}
+
+/** A still copy's image (LoopVideo `still`), attached as a poster is. */
+export function attachStill(image: HTMLImageElement) {
+  if (image.dataset.src && !image.getAttribute('src')) image.src = image.dataset.src;
+}
+
+/** The real source URLs. Only through claim(), which keeps the count. */
+function attachSources(video: HTMLVideoElement) {
+  if (video.dataset.sources === 'on') return;
   video.dataset.sources = 'on';
   video.querySelectorAll<HTMLSourceElement>('source[data-src]').forEach((source) => {
     source.src = source.dataset.src!;
   });
   video.load();
+}
+
+/**
+ * The files let go, which frees the decoder as a pause does not. The sources
+ * are `<source>` elements, so it is their addresses that go, then load()
+ * empties the element; the picture stays up (see attachPoster), so nothing on
+ * screen changes.
+ */
+function release(video: HTMLVideoElement) {
+  live.delete(video);
+  gone.delete(video);
+  if (video.dataset.sources !== 'on') return;
+  delete video.dataset.sources;
+  video.querySelectorAll<HTMLSourceElement>('source[src]').forEach((source) => source.removeAttribute('src'));
+  video.load();
+}
+
+function isHero(video: HTMLVideoElement): boolean {
+  return Boolean(video.closest('[data-play-host="hero"]'));
+}
+
+/** From the middle of the screen to the middle of the video, in pixels. */
+function distance(video: HTMLVideoElement): number {
+  const box = video.getBoundingClientRect();
+  return Math.hypot(box.left + box.width / 2 - innerWidth / 2, box.top + box.height / 2 - innerHeight / 2);
+}
+
+/** Within half a screen of view, and inside whatever clips it: a tile wholly
+    outside its column is out of reach wherever the column is. */
+function inReach(video: HTMLVideoElement): boolean {
+  return shownShare(video, clipsOf(video), innerHeight / 2) > 0;
+}
+
+/**
+ * A live slot for this video, with its files attached: free, or taken from a
+ * video that can spare it — one nobody wants, out of reach first, then the
+ * farthest from the middle — or, for the hero, from the farthest tile. False
+ * if there is none, and the video waits on its poster.
+ */
+function claim(video: HTMLVideoElement): boolean {
+  if (!live.has(video)) {
+    if (live.size >= LIVE_LIMIT) {
+      const spare = [...live]
+        .filter((v) => !wanted.has(v))
+        .sort((a, b) => Number(inReach(a)) - Number(inReach(b)) || distance(b) - distance(a));
+      let victim = spare[0];
+      if (!victim && isHero(video)) {
+        victim = [...live].filter((v) => !isHero(v)).sort((a, b) => distance(b) - distance(a))[0];
+      }
+      if (!victim) return false;
+      victim.pause();
+      release(victim);
+    }
+    live.add(video);
+  }
+  attachSources(video);
+  return true;
 }
 
 /** Turned down until the visitor does something, as against interrupted. */
@@ -72,22 +209,101 @@ function refused(error: unknown): boolean {
 }
 
 /**
- * play(), with its answer heard. Refused: marked blocked and given a
- * control. Interrupted by a pause() or a reload (AbortError): nothing, that
- * is the scripts changing their minds. No playable source: nothing either;
- * the poster stays, and a control could not help.
+ * A script wants this video playing. It plays if it has a slot or can get
+ * one; otherwise it waits on its poster, and the next slot to free up may be
+ * its. play()'s answer is heard: refused, the video is marked blocked and
+ * given a control; interrupted by a pause() or a reload (AbortError),
+ * nothing, that is the scripts changing their minds; no playable source,
+ * nothing either, since a control could not help.
  */
 export function tryPlay(video: HTMLVideoElement) {
-  if (blocked.has(video)) return;
+  if ((blocked.has(video) && !pressing) || !mayPlay(video)) return;
+  wanted.add(video);
+  const wasLive = live.has(video);
+  if (!claim(video)) {
+    video.pause();
+    return;
+  }
+  if (wasLive && !video.paused) return;
   video.play()?.catch((error: unknown) => {
     if (refused(error)) block(video);
   });
 }
 
+/**
+ * A script no longer wants this video playing: paused, and its slot can go
+ * to a waiting video. pause() even when it is paused already: a video with
+ * the autoplay attribute whose files were just attached would otherwise
+ * start by itself. Its files stay for now, in case it is wanted again at
+ * once; a video that may not play at all (reduced motion switched on, its
+ * gate shut) lets them go straight away.
+ */
+export function stopPlay(video: HTMLVideoElement) {
+  wanted.delete(video);
+  video.pause();
+  if (!mayPlay(video)) release(video);
+  promote();
+}
+
+/** Waiting videos take whatever slots can be had, the hero first, then the
+    nearest the middle. */
+function promote() {
+  const waiting = [...wanted].filter((v) => !live.has(v) && !blocked.has(v));
+  if (!waiting.length) return;
+  waiting.sort((a, b) => Number(isHero(b)) - Number(isHero(a)) || distance(a) - distance(b));
+  for (const video of waiting) tryPlay(video);
+}
+
+/**
+ * Once a second: the scripts decide who should be playing, from where things
+ * are now. Then, for the videos they do not want, within reach means files
+ * if a slot is free, never at another's expense, holding still until wanted;
+ * out of reach for two seconds means the files go.
+ */
+const videos = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]')];
+function tick() {
+  if (document.hidden || reduceMotion.matches) return;
+  settlers.forEach((settle) => settle());
+  const now = performance.now();
+  for (const video of videos) {
+    if (wanted.has(video) || inReach(video)) gone.delete(video);
+    if (wanted.has(video)) continue;
+    if (inReach(video)) {
+      if (!live.has(video) && live.size < LIVE_LIMIT && !blocked.has(video) && mayPlay(video)) {
+        claim(video);
+        video.pause();
+      }
+    } else if (live.has(video)) {
+      if (!gone.has(video)) gone.set(video, now);
+      if (now - gone.get(video)! >= RELEASE_AFTER) {
+        video.pause();
+        release(video);
+      }
+    }
+  }
+  promote();
+}
+if (videos.length) window.setInterval(tick, 1000);
+
+/* Only a wanted video plays. Attaching files re-arms the autoplay attribute,
+   and in Safari a pause() straight after does not disarm it, so a video made
+   ready ahead of time ran by itself until the next tick. */
+document.addEventListener(
+  'play',
+  (event) => {
+    const video = event.target as HTMLVideoElement;
+    if (videos.includes(video) && !wanted.has(video)) video.pause();
+  },
+  { capture: true },
+);
+
 const PLAY_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>';
 
 function block(video: HTMLVideoElement) {
+  // Refused, it shows its poster and control and needs no slot or files.
+  release(video);
+  promote();
   if (blocked.has(video)) return;
   blocked.add(video);
   video.dataset.blocked = '';
@@ -169,26 +385,25 @@ document.addEventListener('keydown', press, { capture: true });
 document.addEventListener('touchend', press, { capture: true, passive: true });
 
 /**
- * Every video the page is showing, played inside the press, so each has the
- * permission the browser wants. Nothing is taken down before the browser has
- * answered: a control goes when its video plays (see block()), or when its
- * video was allowed but paused again at once for being off screen. A video
- * refused even now keeps its control, or gets one, to be pressed again —
- * never retried on its own.
+ * Every video the page is showing gets a play() inside the press, which is
+ * what a refusing browser asks for, video by video — with its files or
+ * without, so the press costs no more than four live. Then the scripts
+ * decide, still inside the press, which play, and tryPlay() lets a refused
+ * video try again this once. Nothing is taken down before the browser has
+ * answered: a control goes when its video plays (see block()), or when the
+ * press was allowed and the scripts paused it again. A video refused even
+ * now keeps its control, to be pressed again — never retried on its own.
  */
 function playAll() {
-  const shown = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]')].filter(
-    (video) => video.getClientRects().length > 0,
-  );
-  for (const video of shown) {
+  pressing = true;
+  for (const video of videos) {
+    if (!video.getClientRects().length || !mayPlay(video)) continue;
     attachPoster(video);
-    attachSources(video);
-    if (video.dataset.sources !== 'on') continue;
     video.play()?.catch((error: unknown) => {
       if (refused(error)) block(video);
-      else unblock(video); // allowed, and paused below for being off screen
+      else unblock(video); // allowed, and paused or reloaded below
     });
   }
-  // Inside the same press: the ones off screen pause again, already allowed.
-  unlockers.forEach((settle) => settle());
+  settlers.forEach((settle) => settle());
+  pressing = false;
 }

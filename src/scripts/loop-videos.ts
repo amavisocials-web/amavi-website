@@ -3,10 +3,12 @@
  * visible-only.
  *
  * - Lazy: the markup carries no poster and no source URLs, only data-poster
- *   and data-src. They're attached as the video comes within a screen's
- *   height of view, so a video far down the page costs nothing until then.
- * - Visible-only: it plays while at least a quarter of it is on screen, and
- *   pauses as soon as it isn't — saving battery and data on phones.
+ *   and data-src. The poster is attached as the video comes within a
+ *   screen's height of view; the files only when it may play, and four at
+ *   most on the page (src/scripts/lib/playback.ts, 2 November 2026), so a
+ *   video far down the page costs nothing until then.
+ * - Visible-only: it is wanted while at least a quarter of it is on screen,
+ *   and stopped as soon as it isn't — saving battery and data on phones.
  * - Reduced motion: the poster is attached, the sources never are, and
  *   nothing plays. If the setting changes while the page is open, it follows.
  * - A video that isn't displayed (the hero's desktop cut on a phone, and the
@@ -29,23 +31,19 @@
  */
 import { reduceMotion as still } from './lib/motion';
 import { clipsOf, onLeave, onReturn, shownShare } from './lib/page-life';
-import { attachPoster, attachSources, onUnlock, tryPlay } from './lib/playback';
+import { attachPoster, mayPlay, onSettle, stopPlay, tryPlay } from './lib/playback';
 
 /* Managed videos are driven by their own script — the collage's phone row,
    which caps how many play at once — and this one must not also start them. */
 const videos = [...document.querySelectorAll<HTMLVideoElement>('video[data-loop]:not([data-loop-managed])')];
 const visible = new Set<HTMLVideoElement>();
 
+/** Wanted while on screen and allowed to play; stopped otherwise. Whether a
+    wanted video actually plays, and when its files go, is playback.ts's. */
 function sync(video: HTMLVideoElement) {
-  if (visible.has(video) && !still.matches && video.dataset.sources === 'on') {
-    // Refused (Low Power Mode, a strict setting): blocked, poster and button.
-    tryPlay(video);
-  } else {
-    /* Even when already paused: a video carrying the autoplay attribute
-       whose sources were just attached would otherwise start by itself as
-       soon as it could, on screen or not. pause() also cancels that. */
-    video.pause();
-  }
+  // Refused (Low Power Mode, a strict setting): blocked, poster and button.
+  if (visible.has(video) && mayPlay(video)) tryPlay(video);
+  else stopPlay(video);
 }
 
 const near = new IntersectionObserver(
@@ -54,8 +52,6 @@ const near = new IntersectionObserver(
       if (!entry.isIntersecting) continue;
       const video = entry.target as HTMLVideoElement;
       attachPoster(video);
-      attachSources(video);
-      sync(video);
       near.unobserve(video);
     }
   },
@@ -81,36 +77,29 @@ for (const video of videos) {
   onScreen.observe(video);
 }
 
-/* Crossing a gate's width. The `near` observer let go of these the first time
-   they came close, so without this nothing would ever attach them. */
+/* Crossing a gate's width: decided again, since nothing else would ask. */
 for (const query of new Set(videos.map((v) => v.dataset.loopFrom).filter(Boolean) as string[])) {
   window.matchMedia(query).addEventListener('change', () => {
     for (const video of videos) {
-      if (video.dataset.loopFrom !== query) continue;
-      if (video.getAttribute('poster')) attachSources(video);
-      sync(video);
+      if (video.dataset.loopFrom === query) sync(video);
     }
   });
 }
 
 still.addEventListener('change', () => {
-  for (const video of videos) {
-    if (video.getAttribute('poster')) attachSources(video);
-    sync(video);
-  }
+  for (const video of videos) sync(video);
 });
 
 /** Where everything is now, decided afresh: the same rules as the observers,
     read from the page rather than from their last report. On return, after a
-    play press, and on setup. */
+    play press, on setup, and once a second, since a browser may run no
+    observers while all that moves is a tile under a CSS animation
+    (src/scripts/lib/playback.ts). */
 function resume() {
   for (const video of videos) {
     const box = video.getBoundingClientRect();
     // Within a screen's height, as the `near` observer's margin.
-    if (box.width && box.bottom > -innerHeight && box.top < innerHeight * 2) {
-      attachPoster(video);
-      attachSources(video);
-    }
+    if (box.width && box.bottom > -innerHeight && box.top < innerHeight * 2) attachPoster(video);
     // The same quarter-on-screen rule as `onScreen`, clips and all.
     if (shownShare(video, clipsOf(video)) >= 0.25) visible.add(video);
     else visible.delete(video);
@@ -118,8 +107,8 @@ function resume() {
   }
 }
 
-onLeave(() => videos.forEach((video) => video.pause()));
+onLeave(() => videos.forEach(stopPlay));
 onReturn(resume);
-onUnlock(resume);
+onSettle(resume);
 // On setup, rather than waiting on a first report that some setups never get.
 resume();

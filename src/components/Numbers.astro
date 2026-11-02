@@ -27,13 +27,20 @@ import { CONTACT_EMAIL } from '../consts';
  *
  * It stops while anyone hovers it or tabs into it.
  *
- * **Below 64em there are no columns at all.** The tiles become one row that
- * is swiped: snapping, about 60% of the screen each so part of the next one
- * always shows, scrolling inside its own box so the page never moves
- * sideways, and showing stills alone — `loopFrom` keeps every video on its
- * poster until 64em, so a phone decodes nothing. Under
- * prefers-reduced-motion nothing moves anywhere and no video ever loads: the
- * posters are all there is (src/scripts/loop-videos.ts).
+ * **Below 64em there are no columns at all.** The tiles become one row
+ * drifting sideways, about 60% of the screen each so part of the next one
+ * always shows, which can be dragged, and which plays two of its videos at a
+ * time (src/scripts/collage-marquee.ts). Under prefers-reduced-motion nothing
+ * moves anywhere and no video ever loads: the posters are all there is
+ * (src/scripts/loop-videos.ts).
+ *
+ * **Only the first copy of each tile is a video** (2 November 2026). Both
+ * loops repeat their tiles once so the join cannot be seen, and each copy
+ * used to be a video of its own: 20 in the collage, decoding side by side,
+ * which froze them on a MacBook Air in Chrome. The repeat is now the tile's
+ * poster as an image, in an identical frame. The originals count towards
+ * the page's four live videos (src/scripts/lib/playback.ts), and on a weak
+ * device (`optional`) they keep their posters too.
  *
  * Everything in the text column comes from the page, through the default
  * slot: this file owns the split and the collage, not the words.
@@ -136,9 +143,10 @@ const linkTo = (tile: ContentTile, copy: number) =>
                 const Tile = tile.href ? 'a' : 'div';
                 return (
                   <Tile class="collage-row__tile" {...linkTo(tile, copy)}>
-                    {/* Played by src/scripts/collage-marquee.ts, two at most. */}
+                    {/* Played by src/scripts/collage-marquee.ts, two at most;
+                        the repeat is the poster alone. */}
                     <LoopVideo src={tile.src} poster={tile.poster} ratio="9/16"
-                               managed autoplay preload="metadata"
+                               still={copy > 0} optional managed autoplay preload="metadata"
                                class="collage-row__media" />
                   </Tile>
                 );
@@ -160,7 +168,7 @@ const linkTo = (tile: ContentTile, copy: number) =>
                 return (
                   <Tile class="collage__tile" {...linkTo(tile, copy)}>
                     <LoopVideo src={tile.src} poster={tile.poster} ratio={tile.ratio}
-                       autoplay preload="metadata"
+                       still={copy > 0} optional autoplay preload="metadata"
                        loopFrom="(min-width: 64em)" class="collage__media" />
                   </Tile>
                 );

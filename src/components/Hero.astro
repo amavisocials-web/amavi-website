@@ -34,6 +34,8 @@
  *
  * The videos load and play only while on screen, never under reduced motion
  * (src/scripts/loop-videos.ts), and a cut that isn't displayed never loads.
+ * The desktop cut is 1280×720 since 2 November 2026 (it was 1080p), to leave
+ * more decoding headroom on a low-powered Mac; the poster stays 1920×1080.
  */
 import Lines from './Lines.astro';
 import { videoFiles } from '../lib/media';
@@ -91,9 +93,10 @@ for (const [name, cut, size] of [['desktop', desktop, '1920×1080'], ['mobile', 
       <div class="hero__media" aria-hidden="true">
         {/* muted, playsinline, autoplay, loop and preload are all in the markup,
             where Safari reads them. None of them can start a download on its
-            own: the sources are only attached by loop-videos.ts as the hero
-            comes into view, and never under reduced motion. MP4 (H.264) first,
-            which every browser plays; WebM, if one is ever added, after it. */}
+            own: the sources are only attached by src/scripts/lib/playback.ts
+            as the hero comes into view, and never under reduced motion. MP4
+            (H.264) first, which every browser plays; WebM, if one is ever
+            added, after it. */}
         {desktop.playable && (
           <video class="hero__video hero__video--desktop" muted loop playsinline autoplay preload="metadata"
                  disablepictureinpicture data-loop data-poster={desktop.poster}>

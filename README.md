@@ -939,11 +939,20 @@ flagged in `src/data/media.ts`, to be replaced first.
   supplied suits Tech & Startups without repeating a picture already on the
   page, so that slot shows "Add image".
 
-**Every video** is lazy and visible-only (`src/scripts/loop-videos.ts`): no
-preload; the poster and sources are attached only as it nears the screen; it
-plays while at least a quarter is visible and pauses as it scrolls away; a cut
-that isn't displayed never loads; and under reduced motion it never plays —
+**Every video** is lazy and visible-only (`src/scripts/loop-videos.ts`): the
+poster is attached as it nears the screen and the files only when it may play;
+it plays while at least a quarter is visible and pauses as it scrolls away; a
+cut that isn't displayed never loads; and under reduced motion it never plays —
 the poster is all there is.
+
+**At most four videos are live on a page** (`src/scripts/lib/playback.ts`,
+2 November 2026), hero included, because each holds a decoder. A video wanted
+with all four taken waits on its poster; the next free slot goes to the one
+nearest the middle of the screen, and the hero always gets one while it is in
+view. A video out of sight for two seconds lets its files go. The repeated
+copies in the collage's loops are the poster as an image, not videos. On a
+weak device (Data Saver on, four cores or fewer, 4GB of memory or less) the
+collage's tiles stay on their posters and only the hero plays.
 
 Get sign-off from the creator and the client before publishing any creator's
 content.
@@ -954,13 +963,13 @@ There's no ffmpeg on the machine this was built on, so the video files come
 from `scripts/encode-video.swift`, which uses macOS's own AVFoundation: H.264
 MP4, no audio track, and no WebM (a WebM dropped in beside an MP4 is picked
 up automatically). Its header lists the options. For the hero, encode each
-cut to its size (`--size 1920x1080`, and `--size 1080x1920` for the mobile
-cut; `--fade 30` makes the loop seamless). The tile files were made with:
+cut to its size (`--size 1280x720`, and `--size 1080x1920` for the mobile
+cut; `--fade 30` makes the loop seamless). The files were made with:
 
 | Output | Source | Options |
 |---|---|---|
-| `hero.mp4` | `2.mp4` (the logo sting) | `--size 1920x1080 --bitrate 3000000 --fade 24` |
-| `hero-portrait.mp4` | the same | `--size 1080x1920 --crop 400,0,1215,2160 --bitrate 1500000 --fade 24` |
+| `hero.mp4` | the previous 1920×1080 `hero.mp4`, which keeps its trim and seamless loop | `--size 1280x720 --bitrate 1600000 --profile main` |
+| `hero-portrait.mp4` | the footage of 13 October 2026; its options weren't recorded | 1080×1920, 7s, High profile |
 | `features/creators.mp4` | `16521739_1440_2560_60fps.mp4` | `--size 720x1080 --crop 0,200,1440,2160 --bitrate 1500000 --fade 45` |
 | `features/studio.mp4` | `15636407_1080_1920_30fps.mp4` | `--size 720x1080 --crop 0,150,1080,1620 --bitrate 1200000 --max 12 --fade 30` |
 | `tiles/tile-2.mp4` | `Video-43037.mp4` | `--size 540x960 --bitrate 1100000 --max 12` |

@@ -45,14 +45,16 @@ export function onReturn(fn: () => void) {
  * How much of an element the window shows, from 0 to 1, optionally inside
  * one clipping box or several. For re-checking on return, when an
  * IntersectionObserver's last word may be from before the page was put away.
+ * With `reach`, the window counts as that many pixels taller above and below,
+ * for what is about to come into view.
  */
-export function shownShare(element: Element, clip?: Element | Element[] | null): number {
+export function shownShare(element: Element, clip?: Element | Element[] | null, reach = 0): number {
   const box = element.getBoundingClientRect();
   if (!box.width || !box.height) return 0; // not displayed
   let left = Math.max(box.left, 0);
-  let top = Math.max(box.top, 0);
+  let top = Math.max(box.top, -reach);
   let right = Math.min(box.right, window.innerWidth);
-  let bottom = Math.min(box.bottom, window.innerHeight);
+  let bottom = Math.min(box.bottom, window.innerHeight + reach);
   for (const each of [clip ?? []].flat()) {
     const c = each.getBoundingClientRect();
     left = Math.max(left, c.left);

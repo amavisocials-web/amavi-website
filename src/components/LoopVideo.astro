@@ -46,9 +46,26 @@ interface Props {
   autoplay?: boolean;
   /** 'none' by default. 'metadata' only where the brief asks for it. */
   preload?: 'none' | 'metadata';
+  /**
+   * The poster alone, as an image, in the same frame: for the copies a
+   * marquee repeats so its loop has no seam (2 November 2026). A copy was a
+   * video of its own, decoding beside the one it repeats; now only the
+   * original is a video. The image's address is attached by the marquee's
+   * script as the marquee nears the screen, as a poster is.
+   */
+  still?: boolean;
+  /**
+   * A video the page can do without: on a device too weak for it, it stays
+   * on its poster (src/scripts/lib/playback.ts). The collage's tiles; never
+   * the hero.
+   */
+  optional?: boolean;
   class?: string;
 }
-const { src, poster, ratio = '2/3', note, loopFrom, managed = false, autoplay = false, preload = 'none', class: className } = Astro.props;
+const {
+  src, poster, ratio = '2/3', note, loopFrom, managed = false, autoplay = false, preload = 'none',
+  still = false, optional = false, class: className,
+} = Astro.props;
 const files = videoFiles(src, poster);
 if (!files.playable) {
   console.warn(`[LoopVideo] TODO(client): video needed — no ${src}.mp4 or ${src}.webm in public/; showing "Add video".`);
@@ -57,17 +74,22 @@ if (!files.playable) {
 
 {files.playable ? (
   <div class:list={['loop-video', className]} style={`aspect-ratio:${ratio}`}>
-    {/* `muted` is in the markup and not only set from script: Safari will not
-        autoplay a video that was muted after the fact. */}
-    <video muted loop playsinline preload={preload} autoplay={autoplay || undefined}
-           disablepictureinpicture aria-hidden="true"
-           data-loop data-loop-managed={managed ? 'true' : undefined}
-           data-poster={files.poster} data-loop-from={loopFrom}>
-      {/* MP4 (H.264) first: every browser plays it. WebM, if one is ever
-          added, only after it, as an optimisation. */}
-      {files.mp4 && <source data-src={files.mp4} type="video/mp4" />}
-      {files.webm && <source data-src={files.webm} type="video/webm" />}
-    </video>
+    {still ? (
+      files.poster && <img data-src={files.poster} alt="" draggable="false" />
+    ) : (
+      /* `muted` is in the markup and not only set from script: Safari will not
+         autoplay a video that was muted after the fact. */
+      <video muted loop playsinline preload={preload} autoplay={autoplay || undefined}
+             disablepictureinpicture aria-hidden="true"
+             data-loop data-loop-managed={managed ? 'true' : undefined}
+             data-loop-optional={optional ? '' : undefined}
+             data-poster={files.poster} data-loop-from={loopFrom}>
+        {/* MP4 (H.264) first: every browser plays it. WebM, if one is ever
+            added, only after it, as an optimisation. */}
+        {files.mp4 && <source data-src={files.mp4} type="video/mp4" />}
+        {files.webm && <source data-src={files.webm} type="video/webm" />}
+      </video>
+    )}
   </div>
 ) : (
   <Placeholder kind="video" ratio={ratio} note={note} class={className} />
@@ -84,7 +106,10 @@ if (!files.playable) {
     border-radius: var(--radius-frame);
     background: var(--surface-dark);
   }
-  .loop-video video {
+  /* The still copy sits exactly where the video would, cropped the same way,
+     so the two cannot be told apart while the video is on its poster. */
+  .loop-video video,
+  .loop-video img {
     position: absolute;
     inset: 0;
     width: 100%;
